@@ -437,14 +437,17 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Enviado a Coordinador".');
         }
 
-        // Usar el helper central para cambiar de estado y mantener historial correcto
-        $this->changeStatus($submittedStatus, $user, 'Trabajo enviado para revisión por el coordinador de extensión.');
+        // Hacer la transición y el marcado de envío de manera atómica
+        DB::transaction(function () use ($submittedStatus, $user) {
+            // Cambiar estado (actualiza current_status_id y crea WorkStatusHistory)
+            $this->changeStatus($submittedStatus, $user, 'Trabajo enviado para revisión por el coordinador de extensión.');
 
-        // Marcar como enviado y timestamp
-        $this->update([
-            'is_draft' => '0',
-            'submitted_at' => now(),
-        ]);
+            // Marcar como enviado y timestamp
+            $this->update([
+                'is_draft' => '0',
+                'submitted_at' => now(),
+            ]);
+        });
 
         // Disparar evento para notificar al coordinador
         \App\Events\WorkSubmitted::dispatch($this, $user);
@@ -507,7 +510,7 @@ class WorkOfExtension extends Model implements HasMedia {
 
         $reviewStatus = WorkStatus::where('name', 'En Revisión Coordinador')->firstOrFail();
 
-        $this->changeStatus($reviewStatus, $coordinator, 'Coordinador inici f3 la revisi f3n.');
+        $this->changeStatus($reviewStatus, $coordinator, 'Coordinador inició la revisión.');
     }
 
     /**
