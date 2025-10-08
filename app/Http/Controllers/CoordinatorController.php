@@ -340,14 +340,16 @@ class CoordinatorController extends Controller {
      * Verificar si el trabajo puede ser aprobado
      */
     private function canApproveWork($work): bool {
-        return $work->currentStatus->name === 'En Revisión Coordinador';
+        $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
+        return in_array($work->currentStatus->name, $validStatuses);
     }
 
     /**
      * Verificar si se pueden solicitar cambios al trabajo
      */
     private function canRequestChanges($work): bool {
-        return $work->currentStatus->name === 'En Revisión Coordinador';
+        $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
+        return in_array($work->currentStatus->name, $validStatuses);
     }
 
     /**
