@@ -42,9 +42,27 @@ class WorkOfExtensionPolicy {
      * Determine whether the user can update the model.
      */
     public function update(User $user, WorkOfExtension $workOfExtension): bool {
-        // Permitir edición basada en roles
-        // TODO: Implementar validación de propiedad y estado
-        return $user->hasAnyRole(['profesor', 'super_admin']);
+        // Super admin puede editar cualquier trabajo
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo profesores pueden editar
+        if (!$user->hasRole('profesor')) {
+            return false;
+        }
+
+        // Verificar propiedad del trabajo
+        if ($workOfExtension->getAttribute('primary_responsible_user_id') !== $user->getKey()) {
+            return false;
+        }
+
+        // Verificar que esté en borrador
+        if (!$workOfExtension->isInDraft()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
