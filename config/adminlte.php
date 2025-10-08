@@ -135,7 +135,7 @@ return [
 
     'usermenu_enabled' => true,
     'usermenu_header' => false,
-    'usermenu_header_class' => 'bg-primary',
+    'usermenu_header_class' => 'bg-success',
     'usermenu_image' => false,
     'usermenu_desc' => false,
     'usermenu_profile_url' => false,
@@ -171,12 +171,12 @@ return [
     |
     */
 
-    'classes_auth_card' => 'card-outline card-primary',
+    'classes_auth_card' => 'card-outline card-success',
     'classes_auth_header' => '',
     'classes_auth_body' => '',
     'classes_auth_footer' => '',
     'classes_auth_icon' => '',
-    'classes_auth_btn' => 'btn-flat btn-primary',
+    'classes_auth_btn' => 'btn-flat btn-success',
 
     /*
     |--------------------------------------------------------------------------
@@ -196,7 +196,7 @@ return [
     'classes_content_wrapper' => '',
     'classes_content_header' => '',
     'classes_content' => '',
-    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
+    'classes_sidebar' => 'sidebar-dark-success elevation-4',
     'classes_sidebar_nav' => '',
     'classes_topnav' => 'navbar-white navbar-light',
     'classes_topnav_nav' => 'navbar-expand',
@@ -325,7 +325,7 @@ return [
         ],
 
         // SECCIÓN TRABAJOS DE EXTENSIÓN
-        ['header' => 'TRABAJOS DE EXTENSIÓN'],
+        ['header' => 'TRABAJOS DE EXTENSIÓN', 'can' => 'works.view.own'],
 
         // Para Profesores (Todos los usuarios autenticados)
         [
@@ -335,11 +335,13 @@ return [
                 [
                     'text' => 'Ver Todos',
                     'route' => 'works.index',
+                    'can' => 'works.view.own',
                     'icon' => 'fas fa-list',
                 ],
                 [
                     'text' => 'Crear Nuevo',
                     'route' => 'works.create',
+                    'can' => 'works.create',
                     'icon' => 'fas fa-plus',
                 ],
                 [
@@ -356,7 +358,7 @@ return [
         ],
 
         // SECCIÓN COORDINACIÓN DE EXTENSIÓN
-        ['header' => 'COORDINACIÓN DE EXTENSIÓN'],
+        ['header' => 'COORDINACIÓN DE EXTENSIÓN', 'can' => 'works.coordinate'],
 
         // Para Coordinadores de Extensión
         [
@@ -368,7 +370,7 @@ return [
         ],
 
         // SECCIÓN DECANATO/DIRECCIÓN
-        ['header' => 'DECANATO/DIRECCIÓN'],
+        ['header' => 'DECANATO/DIRECCIÓN', 'can' => 'works.manage.dean'],
 
         // Para Decanos/Directores
         [
@@ -380,7 +382,7 @@ return [
         ],
 
         // SECCIÓN VIEX ADMIN
-        ['header' => 'VICERRECTORÍA DE EXTENSIÓN'],
+        ['header' => 'VICERRECTORÍA DE EXTENSIÓN', 'can' => 'works.manage.viex'],
 
         // Para Administradores VIEX
         [
@@ -392,11 +394,13 @@ return [
                     'text' => 'Dashboard VIEX',
                     'route' => 'viex.dashboard',
                     'icon' => 'fas fa-chart-line',
+                    'can' => 'works.manage.viex',
                 ],
                 [
                     'text' => 'Trabajos en VIEX',
                     'route' => 'viex.index',
                     'icon' => 'fas fa-inbox',
+                    'can' => 'works.evaluate',
                 ],
                 [
                     'text' => 'Reportes y Análisis',
@@ -407,12 +411,14 @@ return [
                             'url' => '#',
                             'icon' => 'fas fa-file-pdf',
                             'shift' => 'ml-3',
+                            'can' => 'works.generate-report',
                         ],
                         [
                             'text' => 'Descargar Certificados',
                             'url' => '#',
                             'icon' => 'fas fa-certificate',
                             'shift' => 'ml-3',
+                            'can' => 'works.generate-report',
                         ],
                     ],
                 ],
@@ -420,33 +426,37 @@ return [
         ],
 
         // SECCIÓN ADMINISTRACIÓN DEL SISTEMA
-        ['header' => 'ADMINISTRACIÓN'],
+        ['header' => 'ADMINISTRACIÓN', 'can' => 'system.manage'],
 
         // Para Super Administradores
         [
             'text' => 'Gestión de Usuarios',
             'icon' => 'fas fa-users-cog',
-            'role' => 'super_admin',
+            'can' => 'manage-system',
             'submenu' => [
                 [
                     'text' => 'Todos los Usuarios',
                     'route' => 'admin.users.index',
                     'icon' => 'fas fa-users',
+                    'can' => 'users.view.all',
                 ],
                 [
                     'text' => 'Crear Usuario',
                     'route' => 'admin.users.create',
                     'icon' => 'fas fa-user-plus',
+                    'can' => 'users.create',
                 ],
                 [
                     'text' => 'Roles y Permisos',
                     'route' => 'admin.roles.index',
                     'icon' => 'fas fa-user-shield',
+                    'can' => 'roles.manage',
                 ],
                 [
                     'text' => 'Dashboard de Roles',
                     'route' => 'admin.role-assignment.index',
                     'icon' => 'fas fa-project-diagram',
+                    'can' => 'roles.manage',
                 ],
             ],
         ],
@@ -454,18 +464,20 @@ return [
         [
             'text' => 'Configuración del Sistema',
             'icon' => 'fas fa-cog',
-            'role' => 'super_admin',
+            'can' => 'manage-system',
             'submenu' => [
                 // CATÁLOGOS ORGANIZACIONALES
                 [
                     'text' => 'Unidades Académicas',
                     'route' => 'admin.organizational-units.index',
                     'icon' => 'fas fa-university',
+                    'can' => 'system.manage',
                 ],
                 [
                     'text' => 'Tipos de Proyectos Institucionales',
                     'route' => 'admin.institutional-project-types.index',
                     'icon' => 'fas fa-layer-group',
+                    'can' => 'system.manage',
                 ],
 
                 // CATÁLOGOS DE TRABAJOS
@@ -473,11 +485,13 @@ return [
                     'text' => 'Tipos de Trabajos',
                     'route' => 'admin.work-types.index',
                     'icon' => 'fas fa-tags',
+                    'can' => 'system.manage',
                 ],
                 [
                     'text' => 'Estados de Trabajos',
                     'route' => 'admin.work-statuses.index',
                     'icon' => 'fas fa-traffic-light',
+                    'can' => 'system.manage',
                 ],
 
                 // GESTIÓN DE SEGURIDAD
@@ -485,11 +499,13 @@ return [
                     'text' => 'Roles del Sistema',
                     'route' => 'admin.roles.index',
                     'icon' => 'fas fa-user-tag',
+                    'can' => 'roles.manage',
                 ],
                 [
                     'text' => 'Permisos del Sistema',
                     'route' => 'admin.permissions.index',
                     'icon' => 'fas fa-key',
+                    'can' => 'permissions.manage',
                 ],
 
                 ['header' => 'MANTENIMIENTO'],
@@ -499,16 +515,19 @@ return [
                     'text' => 'Logs del Sistema',
                     'url' => '#',
                     'icon' => 'fas fa-file-alt',
+                    'can' => 'system.manage',
                 ],
                 [
                     'text' => 'Backup y Mantenimiento',
                     'url' => '#',
                     'icon' => 'fas fa-database',
+                    'can' => 'system.manage',
                 ],
                 [
                     'text' => 'Cache del Sistema',
                     'url' => '#',
                     'icon' => 'fas fa-memory',
+                    'can' => 'system.manage',
                 ],
             ],
         ],
@@ -550,7 +569,7 @@ return [
             'text' => 'Información Técnica',
             'route' => 'testing.info',
             'icon' => 'fas fa-info-circle',
-            'role' => 'super_admin',
+            'can' => 'manage-system',
         ],
     ],
 
@@ -567,6 +586,10 @@ return [
     */
 
     'filters' => [
+        // Nuestro filtro de roles personalizados permite usar el atributo 'role' en las entradas del menú
+        App\Menu\Filters\RoleFilter::class,
+
+        // GateFilter sigue presente para compatibilidad con 'can' y policies
         JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\HrefFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\SearchFilter::class,

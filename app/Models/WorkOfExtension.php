@@ -163,36 +163,88 @@ class WorkOfExtension extends Model implements HasMedia {
         return $query->where('publication_consent', true);
     }
 
+    /**
+     * Scope: trabajos visibles para un profesor (solo sus trabajos)
+     */
+    public function scopeVisibleToProfessor($query, $user)
+    {
+        return $query->where('primary_responsible_user_id', $user->getKey());
+    }
+
+    /**
+     * Scope: trabajos visibles para un coordinador (solo su unidad y que hayan sido enviados a coordinador)
+     */
+    public function scopeVisibleToCoordinator($query, $user)
+    {
+        $unitId = $user->getAttribute('main_organizational_unit_id');
+
+        return $query->where('organizational_unit_id', $unitId)
+            ->whereHas('currentStatus', function ($q) {
+                $q->whereIn('name', ['Enviado a Coordinador', 'En Revisión Coordinador', 'Aprobado por Coordinador']);
+            });
+    }
+
+    /**
+     * Scope: trabajos visibles para un decano/director (su unidad y subunidades, y que hayan sido aprobados por el coordinador y remitidos al decano)
+     */
+    public function scopeVisibleToDean($query, $user)
+    {
+        $unitId = $user->getAttribute('main_organizational_unit_id');
+
+        return $query->whereHas('organizationalUnit', function ($q) use ($unitId) {
+            $q->where('id', $unitId)
+                ->orWhere('parent_id', $unitId);
+        })
+            ->whereHas('currentStatus', function ($q) {
+                $q->whereIn('name', ['Enviado a Decano/Director', 'En Revisión Decano/Director', 'En Revisi\u00f3n Decano/Director']);
+            });
+    }
+
+    /**
+     * Scope: trabajos visibles para VIEX (los que pasaron por profesor->coordinador->decano, procesados o pendientes en VIEX)
+     */
+    public function scopeVisibleToViex($query)
+    {
+        return $query->whereHas('currentStatus', function ($q) {
+            $q->whereIn('name', [
+                'Enviado a VIEX',
+                'En Evaluación VIEX',
+                'En Evaluaci\u00f3n VIEX',
+                'En VIEX - Pendiente Asignaci\u00f3n',
+                'En VIEX - En Evaluaci\u00f3n',
+                'En VIEX - Aprobado',
+                'Certificado',
+                'Rechazado por VIEX'
+            ]);
+        });
+    }
+
     // Métodos estáticos para el controlador
 
     /**
      * Obtener trabajos filtrados según el rol del usuario
      */
     public static function getWorksForUser($user) {
-        $query = self::query()
-            ->with(['workType', 'currentStatus', 'organizationalUnit'])
-            ->orderBy('created_at', 'desc');
+        $query = self::query()->with(['workType', 'currentStatus', 'organizationalUnit'])->orderBy('created_at', 'desc');
 
-        // Filtrar según el rol del usuario
+        // Reglas de visibilidad centralizadas por rol
         if ($user->hasRole('profesor')) {
-            // Profesores solo ven sus propios trabajos
-            $query->where('primary_responsible_user_id', $user->getKey());
-        } elseif ($user->hasRole('coordinador_extension')) {
-            // Coordinadores ven trabajos de su unidad y le hayan sido enviados
-            $query->where(['organizational_unit_id' => $user->main_organizational_unit_id, 'current_status_id' => 2]);
-
-        } elseif ($user->hasRole('decano_director')) {
-            // Decanos ven trabajos de su unidad y subunidades
-            $query->whereHas('organizationalUnit', function ($q) use ($user) {
-                $q->where('id', $user->main_organizational_unit_id)
-                    ->orWhere('parent_id', $user->main_organizational_unit_id);
-            });
-        } else {
-            // viex_admin y super_admin ven todos los trabajos
-            $query->where('current_status_id', 8);
+            return $query->visibleToProfessor($user)->get();
         }
-        //  super_admin ven todos los trabajos
 
+        if ($user->hasRole('coordinador_extension')) {
+            return $query->visibleToCoordinator($user)->get();
+        }
+
+        if ($user->hasRole('decano_director')) {
+            return $query->visibleToDean($user)->get();
+        }
+
+        if ($user->hasRole('viex_admin')) {
+            return $query->visibleToViex()->get();
+        }
+
+        // super_admin u otros roles con permisos amplios ven todos los trabajos
         return $query->get();
     }
 

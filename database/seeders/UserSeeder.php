@@ -59,7 +59,7 @@ class UserSeeder extends Seeder {
                 'password' => Hash::make('coord2025'),
                 'cedula' => '8-666-6666',
                 'professor_code' => 'FI101',
-                'main_organizational_unit_id' => 115, // Facultad de Ingeniería
+                'main_organizational_unit_id' => 201, // Facultad de Ingeniería
                 'is_active' => true,
                 'role' => 'coordinador_extension'
             ],

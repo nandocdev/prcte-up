@@ -206,10 +206,11 @@ class CoordinatorController extends Controller {
     /**
      * Obtener trabajos pendientes de revisión para el coordinador
      */
-    private function getPendingWorksForCoordinator($user) {
+    private function getPendingWorksForCoordinator($user)
+    {
         return WorkOfExtension::where('organizational_unit_id', $user->getAttribute('main_organizational_unit_id'))
             ->whereHas('currentStatus', function ($query) {
-                $query->where('name', 'En Revisión Coordinador');
+            $query->whereIn('name', ['En Revisión Coordinador', 'Enviado a Coordinador']);
             })
             ->with(['workType', 'responsibleUser', 'currentStatus'])
             ->orderBy('submitted_at', 'asc')

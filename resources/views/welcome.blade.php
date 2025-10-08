@@ -1,7 +1,7 @@
 @extends('adminlte::master')
 
 @php
-    $bodyClasses = 'landing-page';
+$bodyClasses = 'landing-page';
 @endphp
 
 @section('adminlte_css')
@@ -144,22 +144,17 @@
                     <a class="nav-link" href="#estadisticas">Estadísticas</a>
                 </li>
                 @auth
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary text-white px-3 rounded-pill" href="{{ route('dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-success text-white px-3" href="{{ route('dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-1"></i> Ir al Dashboard
+                    </a>
+                </li>
                 @else
-                    <li class="nav-item me-2">
-                        <a class="nav-link btn btn-outline-primary px-3 rounded-pill" href="{{ route('login') }}">
-                            <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary text-white px-3 rounded-pill" href="{{ route('register') }}">
-                            <i class="fas fa-user-plus me-1"></i>Registrarse
-                        </a>
-                    </li>
+                <li class="nav-item me-2">
+                    <a class="nav-link btn btn-outline-success px-3" href="{{ route('login') }}">
+                        <i class="fas fa-sign-in-alt me-1"></i> Iniciar Sesión
+                    </a>
+                </li>
                 @endauth
             </ul>
         </div>
@@ -182,16 +177,13 @@
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     @guest
-                        <a href="{{ route('register') }}" class="btn btn-hero btn-lg">
-                            <i class="fas fa-rocket me-2"></i>Comenzar Ahora
-                        </a>
-                        <a href="{{ route('login') }}" class="btn btn-hero btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                        </a>
+                    <a href="{{ route('login') }}" class="btn btn-hero btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
+                    </a>
                     @else
-                        <a href="{{ route('dashboard') }}" class="btn btn-hero btn-lg">
-                            <i class="fas fa-tachometer-alt me-2"></i>Ir al Dashboard
-                        </a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-hero btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i> Ir al Dashboard
+                    </a>
                     @endguest
                 </div>
             </div>
@@ -214,8 +206,8 @@
                     eficiente</p>
             </div>
         </div>
-        <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
+        <div class="row">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-file-alt"></i>
@@ -227,7 +219,7 @@
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-route"></i>
@@ -239,7 +231,7 @@
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-certificate"></i>
@@ -251,7 +243,9 @@
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -263,7 +257,7 @@
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-bell"></i>
@@ -275,7 +269,7 @@
                     </p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-4 col-md-6 p-2">
                 <div class="feature-card text-center">
                     <div class="feature-icon">
                         <i class="fas fa-chart-bar"></i>
@@ -343,15 +337,11 @@
                     Únete a la transformación digital de la Universidad de Panamá y optimiza el proceso de registro y
                     certificación de tus proyectos de extensión.
                 </p>
-                @guest
-                    <a href="{{ route('register') }}" class="btn btn-hero btn-lg">
-                        <i class="fas fa-user-plus me-2"></i>Crear Cuenta Gratis
-                    </a>
-                @else
-                    <a href="{{ route('dashboard') }}" class="btn btn-hero btn-lg">
-                        <i class="fas fa-plus me-2"></i>Registrar Nuevo Trabajo
-                    </a>
-                @endguest
+                @auth
+                <a href="{{ route('dashboard') }}" class="btn btn-hero btn-lg">
+                    <i class="fas fa-plus me-2"></i> Registrar Nuevo Trabajo
+                </a>
+                @endauth
             </div>
         </div>
     </div>
@@ -397,7 +387,7 @@
 <script>
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+        anchor.addEventListener('click', function(e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
@@ -410,7 +400,7 @@
     });
 
     // Navbar background on scroll
-    window.addEventListener('scroll', function () {
+    window.addEventListener('scroll', function() {
         const navbar = document.querySelector('.navbar-custom');
         if (window.scrollY > 50) {
             navbar.style.background = 'rgba(255,255,255,0.98)';
