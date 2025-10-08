@@ -43,7 +43,7 @@ class WorkOfExtensionController extends Controller {
 
         // Obtener query base según rol del usuario
         $query = WorkOfExtension::query()
-            ->with(['workType', 'currentStatus', 'organizationalUnit', 'primaryResponsibleUser'])
+            ->with(['workType', 'currentStatus', 'organizationalUnit', 'responsibleUser'])
             ->orderBy('created_at', 'desc');
 
         // Aplicar scope de visibilidad según rol
