@@ -35,16 +35,93 @@ class WorkOfExtensionController extends Controller {
     public function index(Request $request): View {
         // Log para debug
         \Illuminate\Support\Facades\Log::info('Consultando trabajos de extensión', [
-            'user_id' => $request->user()->getKey()
+            'user_id' => $request->user()->getKey(),
+            'filters' => $request->only(['status', 'work_type', 'academic_period', 'search'])
         ]);
 
         $user = $request->user();
 
-        // Delegar lógica al modelo según rol del usuario
-        $works = WorkOfExtension::getWorksForUser($user);
+        // Obtener query base según rol del usuario
+        $query = WorkOfExtension::query()
+            ->with(['workType', 'currentStatus', 'organizationalUnit', 'primaryResponsibleUser'])
+            ->orderBy('created_at', 'desc');
 
-        // Obtener estadísticas para el dashboard
-        $statistics = WorkOfExtension::getStatisticsForUser($user);
+        // Aplicar scope de visibilidad según rol
+        if ($user->hasRole('profesor')) {
+            $query->visibleToProfessor($user);
+        } elseif ($user->hasRole('coordinador_extension')) {
+            $query->visibleToCoordinator($user);
+        } elseif ($user->hasRole('decano_director')) {
+            $query->visibleToDean($user);
+        } elseif ($user->hasRole('viex_admin')) {
+            $query->visibleToViex();
+        }
+        // super_admin no necesita scope de visibilidad
+
+        // FILTROS - Aplicar filtros del formulario
+        // Filtro por estado
+        if ($request->filled('status')) {
+            switch ($request->input('status')) {
+                case 'draft':
+                    $query->where('is_draft', true);
+                    break;
+                case 'submitted':
+                    $query->where('is_draft', false);
+                    break;
+                case 'in_review':
+                    $query->where('is_draft', false)
+                        ->whereHas('currentStatus', function ($q) {
+                            $q->whereNotIn('name', ['Borrador', 'Certificado', 'Rechazado', 'Rechazado por VIEX']);
+                        });
+                    break;
+                case 'certified':
+                    $query->whereHas('currentStatus', function ($q) {
+                        $q->where('name', 'Certificado');
+                    });
+                    break;
+                case 'rejected':
+                    $query->whereHas('currentStatus', function ($q) {
+                        $q->whereIn('name', ['Rechazado', 'Rechazado por VIEX']);
+                    });
+                    break;
+            }
+        }
+
+        // Filtro por tipo de trabajo
+        if ($request->filled('work_type')) {
+            $query->where('work_type_id', $request->input('work_type'));
+        }
+
+        // Filtro por período académico
+        if ($request->filled('academic_period')) {
+            $query->where('academic_period', $request->input('academic_period'));
+        }
+
+        // BÚSQUEDA por texto en título y descripción
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $works = $query->get();
+
+        // Calcular estadísticas con los trabajos visibles (después de filtros)
+        $statistics = [
+            'total' => $works->count(),
+            'draft' => $works->where('is_draft', '1')->count(),
+            'in_review' => $works->where('is_draft', '0')
+                ->filter(function ($work) {
+                    $statusName = $work->currentStatus?->name;
+                    return $statusName &&
+                        !in_array($statusName, ['Borrador', 'Certificado', 'Rechazado', 'Rechazado por VIEX']);
+                })->count(),
+            'certified' => $works->filter(function ($work) {
+                return $work->currentStatus?->name === 'Certificado';
+            })->count(),
+        ];
 
         return view('works.index', [
             'works' => $works,

@@ -23,11 +23,57 @@ class WorkOfExtensionPolicy {
 
     /**
      * Determine whether the user can view the model.
+     * Implementa reglas de visibilidad por rol y contexto
      */
     public function view(User $user, WorkOfExtension $workOfExtension): bool {
-        // Todos los usuarios autenticados pueden ver trabajos por ahora
-        // TODO: Implementar lógica específica por rol y unidad organizacional
-        return true;
+        // Super admin puede ver cualquier trabajo
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Profesor solo puede ver sus propios trabajos
+        if ($user->hasRole('profesor')) {
+            return $workOfExtension->getAttribute('primary_responsible_user_id') === $user->getKey();
+        }
+
+        // Coordinador puede ver trabajos de su unidad en estados relevantes
+        if ($user->hasRole('coordinador_extension')) {
+            $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+            $unitIds = \App\Models\OrganizationalUnit::descendantIds($unitId);
+
+            $coordinatorStatuses = \App\Models\WorkOfExtension::COORDINATOR_STATUS_NAMES;
+
+            $workUnitId = (int) $workOfExtension->getAttribute('organizational_unit_id');
+            $workStatusName = $workOfExtension->currentStatus?->getAttribute('name');
+
+            return in_array($workUnitId, $unitIds) &&
+                in_array($workStatusName, $coordinatorStatuses);
+        }
+
+        // Decano puede ver trabajos de su facultad en estados relevantes
+        if ($user->hasRole('decano_director')) {
+            $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+            $unitIds = \App\Models\OrganizationalUnit::descendantIds($unitId);
+
+            $deanStatuses = \App\Models\WorkOfExtension::DEAN_STATUS_NAMES;
+
+            $workUnitId = (int) $workOfExtension->getAttribute('organizational_unit_id');
+            $workStatusName = $workOfExtension->currentStatus?->getAttribute('name');
+
+            return in_array($workUnitId, $unitIds) &&
+                in_array($workStatusName, $deanStatuses);
+        }
+
+        // VIEX puede ver trabajos en estados VIEX
+        if ($user->hasRole('viex_admin')) {
+            $viexStatuses = \App\Models\WorkOfExtension::VIEX_STATUS_NAMES;
+
+            $workStatusName = $workOfExtension->currentStatus?->getAttribute('name');
+
+            return in_array($workStatusName, $viexStatuses);
+        }
+
+        return false;
     }
 
     /**

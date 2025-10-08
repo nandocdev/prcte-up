@@ -19,7 +19,7 @@ use App\Models\OrganizationalUnit;
 class WorkOfExtension extends Model implements HasMedia {
     use InteractsWithMedia;
 
-    private const COORDINATOR_STATUS_NAMES = [
+    public const COORDINATOR_STATUS_NAMES = [
         'Enviado a Coordinador',
         'En Coordinador Extensión',
         'En Coordinador de Extensión',
@@ -29,7 +29,7 @@ class WorkOfExtension extends Model implements HasMedia {
         'Aprobado por Coordinador',
     ];
 
-    private const DEAN_STATUS_NAMES = [
+    public const DEAN_STATUS_NAMES = [
         'Enviado a Decano/Director',
         'En Revisión Decano/Director',
         'Pendiente Decano',
@@ -37,7 +37,7 @@ class WorkOfExtension extends Model implements HasMedia {
         'Pendiente VIEX',
     ];
 
-    private const VIEX_STATUS_NAMES = [
+    public const VIEX_STATUS_NAMES = [
         'Enviado a VIEX',
         'Pendiente VIEX',
         'En VIEX - Pendiente Asignación',
