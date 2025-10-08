@@ -330,41 +330,41 @@
                         <p class="small text-muted mb-3">
                             {{ __('Autoriza a VIEX a publicar los resultados de este trabajo en medios institucionales y académicos.') }}
                         </p>
-                        
+
                         @if($work->publication_consent)
-                            {{-- Mostrar estado autorizado y opción de revocar --}}
-                            <div class="alert alert-success py-2 px-3 mb-2">
-                                <i class="fas fa-check-circle"></i>
-                                <strong>Publicación Autorizada</strong>
-                                <br>
-                                <small>Has autorizado la publicación de este trabajo.</small>
-                            </div>
-                            <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="authorized" value="0">
-                                <button type="submit" class="btn btn-outline-warning btn-block btn-sm"
-                                    onclick="return confirm('¿Está seguro de revocar la autorización de publicación? VIEX será notificado del cambio.')">
-                                    <i class="fas fa-times-circle"></i>
-                                    Revocar Autorización
-                                </button>
-                            </form>
+                        {{-- Mostrar estado autorizado y opción de revocar --}}
+                        <div class="alert alert-success py-2 px-3 mb-2">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Publicación Autorizada</strong>
+                            <br>
+                            <small>Has autorizado la publicación de este trabajo.</small>
+                        </div>
+                        <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="authorized" value="0">
+                            <button type="submit" class="btn btn-outline-warning btn-block btn-sm"
+                                onclick="return confirm('¿Está seguro de revocar la autorización de publicación? VIEX será notificado del cambio.')">
+                                <i class="fas fa-times-circle"></i>
+                                Revocar Autorización
+                            </button>
+                        </form>
                         @else
-                            {{-- Mostrar estado no autorizado y opción de autorizar --}}
-                            <div class="alert alert-info py-2 px-3 mb-2">
-                                <i class="fas fa-info-circle"></i>
-                                <small>Aún no has autorizado la publicación de este trabajo.</small>
-                            </div>
-                            <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="authorized" value="1">
-                                <button type="submit" class="btn btn-success btn-block btn-sm"
-                                    onclick="return confirm('¿Autoriza a VIEX a publicar los resultados de este trabajo en medios académicos e institucionales?')">
-                                    <i class="fas fa-check-circle"></i>
-                                    Autorizar Publicación
-                                </button>
-                            </form>
+                        {{-- Mostrar estado no autorizado y opción de autorizar --}}
+                        <div class="alert alert-info py-2 px-3 mb-2">
+                            <i class="fas fa-info-circle"></i>
+                            <small>Aún no has autorizado la publicación de este trabajo.</small>
+                        </div>
+                        <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="authorized" value="1">
+                            <button type="submit" class="btn btn-success btn-block btn-sm"
+                                onclick="return confirm('¿Autoriza a VIEX a publicar los resultados de este trabajo en medios académicos e institucionales?')">
+                                <i class="fas fa-check-circle"></i>
+                                Autorizar Publicación
+                            </button>
+                        </form>
                         @endif
                     </div>
                     @endcan
@@ -554,6 +554,8 @@
                         Su trabajo está siendo revisado. Será notificado de cualquier actualización.
                     </div>
                     @endif
+
+                    @endif {{-- Cierre de @if($currentStatus !== 'Borrador') --}}
 
                     {{-- Duplicar (siempre disponible) --}}
                     <hr>
