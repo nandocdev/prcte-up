@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\WorkStatus;
 use App\Models\WorkStatusHistory;
 use App\Models\User;
+use App\Models\OrganizationalUnit;
 
 /**
  * Modelo principal para los trabajos de extensión
@@ -17,6 +18,37 @@ use App\Models\User;
  */
 class WorkOfExtension extends Model implements HasMedia {
     use InteractsWithMedia;
+
+    private const COORDINATOR_STATUS_NAMES = [
+        'Enviado a Coordinador',
+        'En Coordinador Extensión',
+        'En Coordinador de Extensión',
+        'En Revisión Coordinador',
+        'En Corrección',
+        'Pendiente Decano',
+        'Aprobado por Coordinador',
+    ];
+
+    private const DEAN_STATUS_NAMES = [
+        'Enviado a Decano/Director',
+        'En Revisión Decano/Director',
+        'Pendiente Decano',
+        'Aprobado por Coordinador',
+        'Pendiente VIEX',
+    ];
+
+    private const VIEX_STATUS_NAMES = [
+        'Enviado a VIEX',
+        'Pendiente VIEX',
+        'En VIEX - Pendiente Asignación',
+        'En VIEX - En Evaluación',
+        'En Evaluación VIEX',
+        'En VIEX - Aprobado',
+        'Aprobado Internamente',
+        'Certificado',
+        'Rechazado',
+        'Rechazado por VIEX',
+    ];
 
     protected $fillable = [
         'title',
@@ -178,11 +210,14 @@ class WorkOfExtension extends Model implements HasMedia {
      */
     public function scopeVisibleToCoordinator($query, $user)
     {
-        $unitId = $user->getAttribute('main_organizational_unit_id');
+        $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+        $unitIds = OrganizationalUnit::descendantIds($unitId);
 
-        return $query->where('organizational_unit_id', $unitId)
-            ->whereHas('currentStatus', function ($q) {
-                $q->whereIn('name', ['Enviado a Coordinador', 'En Revisión Coordinador', 'Aprobado por Coordinador']);
+        $statuses = self::COORDINATOR_STATUS_NAMES;
+
+        return $query->whereIn('organizational_unit_id', $unitIds)
+            ->whereHas('currentStatus', function ($q) use ($statuses) {
+                $q->whereIn('name', $statuses);
             });
     }
 
@@ -191,14 +226,14 @@ class WorkOfExtension extends Model implements HasMedia {
      */
     public function scopeVisibleToDean($query, $user)
     {
-        $unitId = $user->getAttribute('main_organizational_unit_id');
+        $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+        $unitIds = OrganizationalUnit::descendantIds($unitId);
 
-        return $query->whereHas('organizationalUnit', function ($q) use ($unitId) {
-            $q->where('id', $unitId)
-                ->orWhere('parent_id', $unitId);
-        })
-            ->whereHas('currentStatus', function ($q) {
-                $q->whereIn('name', ['Enviado a Decano/Director', 'En Revisión Decano/Director', 'En Revisi\u00f3n Decano/Director']);
+        $statuses = self::DEAN_STATUS_NAMES;
+
+        return $query->whereIn('organizational_unit_id', $unitIds)
+            ->whereHas('currentStatus', function ($q) use ($statuses) {
+                $q->whereIn('name', $statuses);
             });
     }
 
@@ -207,17 +242,10 @@ class WorkOfExtension extends Model implements HasMedia {
      */
     public function scopeVisibleToViex($query)
     {
-        return $query->whereHas('currentStatus', function ($q) {
-            $q->whereIn('name', [
-                'Enviado a VIEX',
-                'En Evaluación VIEX',
-                'En Evaluaci\u00f3n VIEX',
-                'En VIEX - Pendiente Asignaci\u00f3n',
-                'En VIEX - En Evaluaci\u00f3n',
-                'En VIEX - Aprobado',
-                'Certificado',
-                'Rechazado por VIEX'
-            ]);
+        $statuses = self::VIEX_STATUS_NAMES;
+
+        return $query->whereHas('currentStatus', function ($q) use ($statuses) {
+            $q->whereIn('name', $statuses);
         });
     }
 
