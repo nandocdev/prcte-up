@@ -436,9 +436,143 @@ class WorkOfExtension extends Model implements HasMedia {
 
     /**
      * Verificar si el trabajo puede ser enviado
+     * Valida todos los campos obligatorios según el tipo de trabajo
+     * 
+     * @return bool
      */
     public function canBeSubmitted(): bool {
-        return $this->isInDraft() && !empty($this->title) && !empty($this->work_type_id);
+        // Verificar que esté en borrador
+        if (!$this->isInDraft()) {
+            return false;
+        }
+
+        // Validar campos básicos obligatorios
+        if (
+            empty($this->title) ||
+            empty($this->work_type_id) ||
+            empty($this->description) ||
+            empty($this->organizational_unit_id) ||
+            empty($this->start_date) ||
+            empty($this->end_date) ||
+            empty($this->academic_period)
+        ) {
+            return false;
+        }
+
+        // Validar detalles específicos según tipo de trabajo
+        return $this->validateSpecificDetails();
+    }
+
+    /**
+     * Validar que los detalles específicos del tipo de trabajo estén completos
+     * 
+     * @return bool
+     */
+    protected function validateSpecificDetails(): bool
+    {
+        switch ($this->work_type_id) {
+            case 1: // Proyecto
+                $detail = $this->projectDetail;
+                return $detail &&
+                    !empty($detail->objectives) &&
+                    !empty($detail->methodology);
+
+            case 2: // Actividad
+                $detail = $this->activityDetail;
+                return $detail &&
+                    !empty($detail->activity_type) &&
+                    !empty($detail->modality);
+
+            case 3: // Publicación
+                $detail = $this->publicationDetail;
+                return $detail &&
+                    !empty($detail->publication_type);
+
+            case 4: // Asistencia Técnica
+                $detail = $this->technicalAssistanceDetail;
+                return $detail &&
+                    !empty($detail->assistance_type) &&
+                    !empty($detail->collaborating_institution);
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Obtener lista de campos faltantes para poder enviar el trabajo
+     * Útil para mostrar mensajes de error específicos al usuario
+     * 
+     * @return array
+     */
+    public function getMissingFieldsForSubmission(): array
+    {
+        $missing = [];
+
+        // Verificar campos básicos
+        if (empty($this->title)) {
+            $missing[] = __('Título del trabajo');
+        }
+        if (empty($this->work_type_id)) {
+            $missing[] = __('Tipo de trabajo');
+        }
+        if (empty($this->description)) {
+            $missing[] = __('Descripción');
+        }
+        if (empty($this->organizational_unit_id)) {
+            $missing[] = __('Unidad organizacional');
+        }
+        if (empty($this->start_date)) {
+            $missing[] = __('Fecha de inicio');
+        }
+        if (empty($this->end_date)) {
+            $missing[] = __('Fecha de finalización');
+        }
+        if (empty($this->academic_period)) {
+            $missing[] = __('Período académico');
+        }
+
+        // Verificar campos específicos según tipo
+        switch ($this->work_type_id) {
+            case 1: // Proyecto
+                $detail = $this->projectDetail;
+                if (!$detail || empty($detail->objectives)) {
+                    $missing[] = __('Objetivos del proyecto');
+                }
+                if (!$detail || empty($detail->methodology)) {
+                    $missing[] = __('Metodología del proyecto');
+                }
+                break;
+
+            case 2: // Actividad
+                $detail = $this->activityDetail;
+                if (!$detail || empty($detail->activity_type)) {
+                    $missing[] = __('Tipo de actividad');
+                }
+                if (!$detail || empty($detail->modality)) {
+                    $missing[] = __('Modalidad de la actividad');
+                }
+                break;
+
+            case 3: // Publicación
+                $detail = $this->publicationDetail;
+                if (!$detail || empty($detail->publication_type)) {
+                    $missing[] = __('Tipo de publicación');
+                }
+                break;
+
+            case 4: // Asistencia Técnica
+                $detail = $this->technicalAssistanceDetail;
+                if (!$detail || empty($detail->assistance_type)) {
+                    $missing[] = __('Tipo de asistencia técnica');
+                }
+                if (!$detail || empty($detail->collaborating_institution)) {
+                    $missing[] = __('Institución colaboradora');
+                }
+                break;
+        }
+
+        return $missing;
     }
 
     /**
@@ -453,16 +587,36 @@ class WorkOfExtension extends Model implements HasMedia {
 
     /**
      * Enviar trabajo para revisión
+     * Valida completitud antes de enviar y proporciona mensajes de error específicos
+     * 
+     * @param User $user Usuario que envía el trabajo
+     * @throws \InvalidArgumentException Si el trabajo no cumple requisitos para ser enviado
      */
     public function submitForReview(User $user): void {
+        // Verificar validación completa
         if (!$this->canBeSubmitted()) {
-            throw new \InvalidArgumentException('El trabajo no puede ser enviado en su estado actual.');
+            $missingFields = $this->getMissingFieldsForSubmission();
+
+            if (!empty($missingFields)) {
+                $message = __('El trabajo no puede ser enviado. Faltan los siguientes campos obligatorios: ') .
+                    implode(', ', $missingFields);
+                throw new \InvalidArgumentException($message);
+            }
+
+            throw new \InvalidArgumentException(__('El trabajo no puede ser enviado en su estado actual.'));
         }
 
         $submittedStatus = WorkStatus::where('name', 'Enviado a Coordinador')->first();
 
         if (!$submittedStatus) {
-            throw new \InvalidArgumentException('No se encontró el estado "Enviado a Coordinador".');
+            // Intentar con nombres alternativos
+            $submittedStatus = WorkStatus::where('name', 'En Coordinador de Extensión')
+                ->orWhere('name', 'En Coordinador Extensión')
+                ->first();
+
+            if (!$submittedStatus) {
+                throw new \InvalidArgumentException(__('No se encontró el estado de envío a coordinador. Contacte al administrador.'));
+            }
         }
 
         // Hacer la transición y el marcado de envío de manera atómica
