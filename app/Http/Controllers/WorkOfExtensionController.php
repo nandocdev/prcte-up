@@ -1,0 +1,425 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\WorkOfExtension;
+use App\Models\WorkType;
+use App\Models\OrganizationalUnit;
+use App\Models\Certification;
+use App\Http\Requests\RegisterWorkRequest;
+use App\Http\Requests\StoreCompleteWorkRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+/**
+ * Controlador principal para gestión de trabajos de extensión
+ *
+ * Casos de Uso Cubiertos:
+ * - CU02: Registrar trabajo de extensión
+ * - CU03: Editar trabajo de extensión
+ * - CU04: Enviar trabajo a coordinador
+ * - CU05: Eliminar trabajo de extensión
+ * - CU09: Consultar estado del trabajo
+ */
+class WorkOfExtensionController extends Controller {
+    use AuthorizesRequests;
+    /**
+     * Display a listing of the resource.
+     * Muestra dashboard con trabajos del usuario según su rol
+     */
+    public function index(Request $request): View {
+        // Log para debug
+        \Illuminate\Support\Facades\Log::info('Consultando trabajos de extensión', [
+            'user_id' => $request->user()->getKey()
+        ]);
+
+        $user = $request->user();
+
+        // Delegar lógica al modelo según rol del usuario
+        $works = WorkOfExtension::getWorksForUser($user);
+
+        // Obtener estadísticas para el dashboard
+        $statistics = WorkOfExtension::getStatisticsForUser($user);
+
+        return view('works.index', [
+            'works' => $works,
+            'statistics' => $statistics,
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     * CU02: Formulario de registro de trabajo de extensión
+     */
+    public function create(): View {
+        // Log para debug
+        Log::info('Mostrando formulario de creación de trabajo', [
+            'user_id' => Auth::id()
+        ]);
+
+        // Delegar obtención de datos maestros al modelo
+        $workTypes = WorkType::getActiveTypes();
+        $organizationalUnits = OrganizationalUnit::getUnitsForSelection();
+
+        // Obtener configuración para dropdowns
+        $workTypesConfig = config('work_types');
+
+        return view('works.create', [
+            'workTypes' => $workTypes,
+            'organizationalUnits' => $organizationalUnits,
+            'workTypesConfig' => $workTypesConfig,
+            'user' => Auth::user()
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * CU02: Procesar registro de nuevo trabajo de extensión
+     */
+    public function store(StoreCompleteWorkRequest $request): RedirectResponse {
+        try {
+            // Log para debug
+            Log::info('Iniciando creación de trabajo', [
+                'user_id' => $request->user()->getKey(),
+                'has_files' => $request->hasFile('attachments')
+            ]);
+
+            // Obtener datos validados del Form Request
+            $validated = $request->getValidatedData();
+
+            // Log datos validados
+            Log::info('Datos validados', $validated);
+
+            // Lógica de negocio delegada al modelo
+            $work = WorkOfExtension::createFromCompleteRequest($validated, $request->user());
+
+            // Log trabajo creado
+            Log::info('Trabajo creado', ['work_id' => $work->getKey()]);
+
+            // evalúa si la respuesta de la logica de negocios es satisfactoria
+            if (!$work) {
+                Log::error('Error: trabajo no se creó correctamente');
+                return redirect()
+                    ->route('works.create')
+                    ->with('error', __('Error al registrar el trabajo de extensión.'));
+            }
+
+            // Manejar archivos adjuntos si existen
+            if ($request->hasFile('attachments')) {
+                Log::info('Procesando archivos adjuntos');
+                $work->handleAttachments($request->file('attachments'));
+            }
+
+            Log::info('Trabajo guardado exitosamente', ['work_id' => $work->getKey()]);
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('success', __('Trabajo de extensión registrado exitosamente.'));
+
+        } catch (\Exception $e) {
+            Log::error('Error en store method', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()
+                ->route('works.create')
+                ->with('error', __('Error al procesar el formulario: ') . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     * CU09: Consultar estado del trabajo
+     */
+    public function show(Request $request, WorkOfExtension $work): View {
+        // Verificar autorización
+        $this->authorize('view', $work);
+
+        // Cargar relaciones necesarias
+        $work->load([
+            'workType',
+            'responsibleUser',
+            'organizationalUnit',
+            'participants.user',
+            'statusHistory.changedBy',
+            'statusHistory.status',
+            'media'
+        ]);
+
+        return view('works.show', [
+            'work' => $work,
+            'canEdit' => $request->user()->can('update', $work),
+            'canSubmit' => $work->canBeSubmitted(),
+            'timeline' => $work->getStatusTimeline()
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     * CU03: Formulario de edición de trabajo de extensión
+     */
+    public function edit(WorkOfExtension $work): View|RedirectResponse {
+        // Verificar autorización
+        $this->authorize('update', $work);
+
+        // Solo permitir edición si está en borrador
+        if (!$work->isInDraft()) {
+            return redirect()
+                ->route('works.show', $work)
+                ->with('warning', __('Solo se pueden editar trabajos en estado borrador.'));
+        }
+
+        // Log para debug
+        Log::info('Mostrando formulario de edición de trabajo', [
+            'work_id' => $work->getKey(),
+            'user_id' => Auth::id()
+        ]);
+
+        // Delegar obtención de datos maestros al modelo (igual que create)
+        $workTypes = WorkType::getActiveTypes();
+        $organizationalUnits = OrganizationalUnit::getUnitsForSelection();
+
+        // Cargar datos específicos del tipo de trabajo
+        $work->load(['projectDetail', 'activityDetail', 'publicationDetail', 'technicalAssistanceDetail']);
+
+        return view('works.edit', [
+            'work' => $work,
+            'workTypes' => $workTypes,
+            'organizationalUnits' => $organizationalUnits,
+            'periods' => config('work_types.academic_periods'),
+            'config' => config('work_types')
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * CU03: Actualización de trabajo de extensión
+     */
+    public function update(StoreCompleteWorkRequest $request, WorkOfExtension $work): RedirectResponse {
+        // Verificar autorización
+        $this->authorize('update', $work);
+
+        // Validar que esté en borrador
+        if (!$work->isInDraft()) {
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', __('Solo se pueden actualizar trabajos en estado borrador.'));
+        }
+
+        // Log para debug detallado
+        Log::info('Actualizando trabajo de extensión', [
+            'work_id' => $work->getKey(),
+            'user_id' => $request->user()->getKey(),
+            'work_type_id' => $request->input('work_type_id'),
+            'activity_type' => $request->input('activity_type'),
+            'modality' => $request->input('modality'),
+            'all_input' => $request->except(['attachments', '_token']),
+            'validation_data' => $request->getValidatedData()
+        ]);
+
+        try {
+            // Debug: Capturar todos los datos de entrada ANTES de validación
+            Log::info('DEBUG: Datos RAW recibidos', [
+                'all_data' => $request->all(),
+                'activity_type_raw' => $request->input('activity_type'),
+                'modality_raw' => $request->input('modality')
+            ]);
+
+            // Intentar obtener datos validados y capturar cualquier error
+            try {
+                $validatedData = $request->getValidatedData();
+                Log::info('DEBUG: Datos validados exitosamente', $validatedData);
+            } catch (\Exception $validationError) {
+                Log::error('DEBUG: Error en validación', [
+                    'message' => $validationError->getMessage(),
+                    'errors' => $request->errors ?? 'N/A'
+                ]);
+                throw $validationError;
+            }
+
+            // Manejar eliminación de archivos antes de la actualización
+            if ($request->filled('remove_media')) {
+                $mediaToRemove = array_filter(explode(',', $request->input('remove_media')));
+                foreach ($mediaToRemove as $mediaId) {
+                    $media = $work->getMedia('attachments')->where('id', $mediaId)->first();
+                    if ($media) {
+                        $media->delete();
+                        Log::info('Archivo eliminado', ['media_id' => $mediaId, 'work_id' => $work->getKey()]);
+                    }
+                }
+            }
+
+            // Delegar lógica de negocio al modelo (reutilizar lógica de creación adaptada)
+            $updatedWork = $work->updateFromCompleteRequest($validatedData, $request->user());
+
+            // Manejar archivos adjuntos si los hay
+            if ($request->hasFile('attachments')) {
+                $updatedWork->handleAttachments($request->file('attachments'));
+            }
+
+            return redirect()
+                ->route('works.show', $updatedWork)
+                ->with('success', __('Trabajo actualizado exitosamente.'));
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar trabajo', [
+                'work_id' => $work->getKey(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', __('Error al actualizar el trabajo. Por favor, inténtalo de nuevo.'));
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     * CU05: Eliminar trabajo de extensión (solo en borrador)
+     */
+    public function destroy(WorkOfExtension $work): RedirectResponse {
+        // Log para debug
+        Log::info('Intentando eliminar trabajo de extensión', [
+            'work_id' => $work->getKey(),
+            'user_id' => Auth::id(),
+            'work_status' => $work->is_draft,
+            'work_owner' => $work->getAttribute('primary_responsible_user_id')
+        ]);
+
+        // Verificar autorización
+        $this->authorize('delete', $work);
+
+        // Solo permitir eliminación si está en borrador
+        if (!$work->isInDraft()) {
+            Log::warning('Intento de eliminar trabajo que no está en borrador', [
+                'work_id' => $work->getKey(),
+                'user_id' => Auth::id(),
+                'is_draft' => $work->is_draft
+            ]);
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', __('Solo se pueden eliminar trabajos en estado borrador.'));
+        }
+
+        try {
+            // Obtener información antes de eliminar
+            $workTitle = $work->getAttribute('title');
+            $workId = $work->getKey();
+
+            // Lógica de eliminación delegada al modelo
+            $work->safeDelete();
+
+            Log::info('Trabajo eliminado exitosamente', [
+                'work_id' => $workId,
+                'work_title' => $workTitle,
+                'user_id' => Auth::id()
+            ]);
+
+            return redirect()
+                ->route('works.index')
+                ->with('success', __('Trabajo eliminado exitosamente.'));
+
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar trabajo', [
+                'work_id' => $work->getKey(),
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', __('Error al eliminar el trabajo. Por favor, inténtalo de nuevo.'));
+        }
+    }
+
+    /**
+     * CU04: Enviar trabajo a coordinador para revisión
+     */
+    public function submit(Request $request, WorkOfExtension $work): RedirectResponse {
+        // Verificar autorización
+        $this->authorize('update', $work);
+
+        // Lógica de negocio delegada al modelo
+        try {
+            $work->submitForReview($request->user());
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('success', __('Trabajo enviado a coordinador de extensión para revisión.'));
+
+        } catch (\InvalidArgumentException $e) {
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Reenviar trabajo después de realizar correcciones
+     */
+    public function resubmit(Request $request, WorkOfExtension $work): RedirectResponse {
+        // Verificar autorización
+        $this->authorize('update', $work);
+
+        try {
+            // Verificar que el trabajo está en un estado que permite reenvío
+            $currentStatus = $work->currentStatus->name ?? '';
+            $resubmitStates = [
+                'Rechazado por Coordinador',
+                'Rechazado por Decano/Director',
+                'Rechazado por VIEX',
+                'Devuelto para Corrección'
+            ];
+
+            if (!in_array($currentStatus, $resubmitStates)) {
+                return redirect()
+                    ->route('works.show', $work)
+                    ->with('error', 'Este trabajo no se puede reenviar en su estado actual.');
+            }
+
+            $work->submitForReview($request->user());
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('success', 'Trabajo corregido y reenviado para revisión.');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', 'Error al reenviar el trabajo: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Descargar certificado del trabajo
+     */
+    public function downloadCertificate(Certification $certification) {
+        $work = $certification->work;
+
+        if (!$work) {
+            abort(404, 'Trabajo no encontrado');
+        }
+
+        // Verificar autorización usando las policies
+        $this->authorize('view', $work);
+
+        try {
+            // Redirigir a la descarga de VIEX que ya maneja la lógica
+            return redirect()->route('viex.certificate.download', $certification);
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error al descargar el certificado: ' . $e->getMessage());
+        }
+    }
+}

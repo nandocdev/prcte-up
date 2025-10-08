@@ -1,0 +1,225 @@
+/* Estilos personalizados para VIEX AdminLTE */
+
+/* Mejoras en el dashboard */
+.info-box {
+    transition: all 0.3s ease;
+}
+
+.info-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.info-box-number {
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+/* Estilos para cards */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 2px solid #f4f4f4;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.card-title i {
+    color: #007bff;
+}
+
+/* Alertas mejoradas */
+.alert {
+    border: none;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+    background-color: #e8f4fd;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+    background-color: #e8f5e8;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff8e1;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+    background-color: #fdeaea;
+}
+
+/* Botones mejorados */
+.btn {
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+/* Navegación en el perfil */
+.nav-pills .nav-link {
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+/* Widget de usuario */
+.widget-user-image img {
+    border: 3px solid #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.description-header {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.description-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Formularios */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.input-group-text {
+    border-radius: 0 10px 10px 0;
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-left: none;
+}
+
+/* Tablas mejoradas */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    font-weight: 600;
+}
+
+/* Badges */
+.badge {
+    border-radius: 15px;
+    padding: 0.5em 0.75em;
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+    background-color: transparent;
+    border-radius: 25px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Responsive mejoras */
+@media (max-width: 768px) {
+    .info-box {
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Estados de carga */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Toastr personalizado */
+.toast-top-right {
+    top: 70px;
+}
+
+/* Sidebar personalizado */
+.main-sidebar {
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.brand-link {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Footer personalizado */
+.main-footer {
+    border-top: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+/* Mejoras en modales */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+    border-bottom: 2px solid #f4f4f4;
+}
+
+.modal-footer {
+    border-radius: 0 0 15px 15px;
+    border-top: 2px solid #f4f4f4;
+}
