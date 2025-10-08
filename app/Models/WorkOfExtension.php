@@ -732,6 +732,9 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Enviado a Decano/Director".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $approvedStatus->getKey(),
         ]);
@@ -739,7 +742,7 @@ class WorkOfExtension extends Model implements HasMedia {
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $approvedStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments ?? 'Trabajo aprobado por el coordinador de extensión.',
@@ -777,14 +780,18 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Devuelto para Corrección".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $changesStatus->getKey(),
+            'is_draft' => '1', // Volver a borrador para que el profesor pueda editar
         ]);
 
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $changesStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments,
@@ -793,7 +800,7 @@ class WorkOfExtension extends Model implements HasMedia {
         Log::info('Subsanaciones solicitadas por coordinador', [
             'work_id' => $this->getKey(),
             'coordinator_id' => $user->getKey(),
-            'new_status' => 'Requiere Subsanaciones'
+            'new_status' => 'Devuelto para Corrección'
         ]);
 
         // Disparar evento para notificar al profesor
@@ -820,14 +827,18 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Rechazado por Coordinador".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $rejectedStatus->getKey(),
+            'is_draft' => '1', // Volver a borrador para que el profesor pueda editar
         ]);
 
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $rejectedStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments,
@@ -859,6 +870,9 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Enviado a VIEX".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $approvedStatus->getKey(),
         ]);
@@ -866,7 +880,7 @@ class WorkOfExtension extends Model implements HasMedia {
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $approvedStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments ?? 'Trabajo aprobado por el decano/director.',
@@ -897,14 +911,18 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Rechazado por Decano/Director".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $changesStatus->getKey(),
+            'is_draft' => '1', // Volver a borrador para que el profesor pueda editar
         ]);
 
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $changesStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments,
@@ -937,14 +955,18 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('No se encontró el estado "Rechazado por Decano/Director".');
         }
 
+        // Guardar estado anterior ANTES de actualizar
+        $oldStatusId = $this->getAttribute('current_status_id');
+
         $this->update([
             'current_status_id' => $rejectedStatus->getKey(),
+            'is_draft' => '1', // Volver a borrador para que el profesor pueda editar
         ]);
 
         // Registrar en historial
         WorkStatusHistory::create([
             'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
+            'from_status_id' => $oldStatusId,
             'to_status_id' => $rejectedStatus->getKey(),
             'changed_by_user_id' => $user->getKey(),
             'comments' => $comments,
