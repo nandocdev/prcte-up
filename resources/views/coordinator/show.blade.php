@@ -2,21 +2,6 @@
 
 @section('title', 'Revisar Trabajo - Coordinador')
 
-@section('content_header')
-<!-- <div class="row">
-    <div class="col-sm-6">
-        <h1><i class="fas fa-file-signature mr-2"></i>Revisar Trabajo de Extensión</h1>
-        <p class="text-muted">{{ $work->workType->name ?? 'N/A' }}</p>
-    </div>
-    <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="{{ route('coordinator.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Revisar Trabajo</li>
-        </ol>
-    </div>
-</div>-->
-@stop
-
 @section('content')
 <div class="row">
     <!-- Columna Izquierda: Información Principal del Trabajo (8/12) -->
@@ -35,31 +20,7 @@
                 @include('coordinator.partials._general_info_details', ['work' => $work])
 
                 <hr>
-                <!-- 
-                {{-- Descripción General --}}
-                <div class="mb-3">
-                    <h5><i class="fas fa-align-left text-primary"></i> Descripción del Trabajo</h5>
-                    <div class="callout callout-info">
-                        <p class="mb-0">{{ $work->getAttribute('description') ?? 'Sin descripción disponible' }}</p>
-                    </div>
-                </div>
 
-                {{-- Objetivos (pueden estar aquí o en los detalles específicos) --}}
-                @if($work->projectDetail && ($work->projectDetail->general_objectives || $work->projectDetail->specific_objectives))
-                <div class="mb-3">
-                    <h5><i class="fas fa-bullseye text-success"></i> Objetivos</h5>
-                    <div class="callout callout-success">
-                        @if($work->projectDetail->general_objectives)
-                        <strong>Generales:</strong>
-                        <p class="mb-0">{{ $work->projectDetail->general_objectives }}</p>
-                        @endif
-                        @if($work->projectDetail->specific_objectives)
-                        <strong>Específicos:</strong>
-                        <p class="mb-0">{{ $work->projectDetail->specific_objectives }}</p>
-                        @endif
-                    </div>
-                </div>
-                @endif -->
             </div>
         </div>
 
@@ -109,10 +70,8 @@
     </div> {{-- Fin Columna Derecha --}}
 
 </div> {{-- Fin Row Principal --}}
-@stop
 
-{{-- Modales de Acción --}}
-@section('modals')
+{{-- Modales de Acción (deben estar dentro de @section('content')) --}}
 @include('coordinator.partials._modals._modal_approve', ['work' => $work])
 @include('coordinator.partials._modals._modal_request_changes', ['work' => $work])
 @include('coordinator.partials._modals._modal_reject', ['work' => $work])
@@ -217,6 +176,19 @@
     const CHECKLIST_KEY = `coordinator_review_checklist_${WORK_ID}`;
 
     $(document).ready(function() {
+        // Debug: Verificar que los modales existen en el DOM
+        console.log('Modales cargados:');
+        console.log('- approveModal:', $('#approveModal').length > 0 ? 'SÍ' : 'NO');
+        console.log('- requestChangesModal:', $('#requestChangesModal').length > 0 ? 'SÍ' : 'NO');
+        console.log('- rejectModal:', $('#rejectModal').length > 0 ? 'SÍ' : 'NO');
+
+        // Debug: Verificar que Bootstrap modal está disponible
+        if (typeof $.fn.modal === 'undefined') {
+            console.error('ERROR: Bootstrap modal no está cargado');
+        } else {
+            console.log('✓ Bootstrap modal disponible');
+        }
+
         // Cargar notas guardadas
         loadReviewNotes();
         loadChecklist();
@@ -248,6 +220,28 @@
             localStorage.removeItem(STORAGE_KEY);
             localStorage.removeItem(CHECKLIST_KEY);
             console.log('Notas y checklist limpiados después de enviar acción');
+        });
+
+        // Fallback manual para abrir modales si data-toggle no funciona
+        $('button[data-target="#approveModal"]').on('click', function(e) {
+            console.log('Click en botón Aprobar');
+            if (!$('#approveModal').hasClass('show')) {
+                $('#approveModal').modal('show');
+            }
+        });
+
+        $('button[data-target="#requestChangesModal"]').on('click', function(e) {
+            console.log('Click en botón Solicitar Cambios');
+            if (!$('#requestChangesModal').hasClass('show')) {
+                $('#requestChangesModal').modal('show');
+            }
+        });
+
+        $('button[data-target="#rejectModal"]').on('click', function(e) {
+            console.log('Click en botón Rechazar');
+            if (!$('#rejectModal').hasClass('show')) {
+                $('#rejectModal').modal('show');
+            }
         });
     });
 
