@@ -3,9 +3,9 @@
 @section('title', 'Revisar Trabajo - Coordinador')
 
 @section('content_header')
-<div class="row">
+<!-- <div class="row">
     <div class="col-sm-6">
-        <h1>Revisar Trabajo de Extensión</h1>
+        <h1><i class="fas fa-file-signature mr-2"></i>Revisar Trabajo de Extensión</h1>
         <p class="text-muted">{{ $work->workType->name ?? 'N/A' }}</p>
     </div>
     <div class="col-sm-6">
@@ -14,435 +14,121 @@
             <li class="breadcrumb-item active">Revisar Trabajo</li>
         </ol>
     </div>
-</div>
+</div>-->
 @stop
 
 @section('content')
 <div class="row">
-    <!-- Información Principal del Trabajo -->
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-file-alt mr-1"></i>
-                    {{ $work->getAttribute('title') }}
-                </h3>
-                <div class="card-tools">
-                    @if($work->currentStatus)
-                        @php
-    $statusClass = match ($work->currentStatus->getAttribute('name')) {
-        'En Revisión Coordinador' => 'badge-warning',
-        'Enviado a Decano/Director' => 'badge-success',
-        'Devuelto para Corrección' => 'badge-danger',
-        default => 'badge-secondary'
-    };
-                        @endphp
-                        <span class="badge {{ $statusClass }}">
-                            {{ $work->currentStatus->getAttribute('name') }}
-                        </span>
-                    @endif
-                </div>
-            </div>
+    <!-- Columna Izquierda: Información Principal del Trabajo (8/12) -->
+    <div class="col-lg-8">
+
+        {{-- Encabezado del Trabajo --}}
+        @include('coordinator.partials._work_header', ['work' => $work])
+
+        {{-- Card: Datos Generales y Descripción --}}
+        <div class="card card-primary card-outline">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Profesor Responsable:</strong>
-                        <p>{{ $work->responsibleUser->name ?? 'N/A' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Fecha de Envío:</strong>
-                        <p>{{ $work->getAttribute('submitted_at')?->format('d/m/Y H:i') ?? 'N/A' }}</p>
-                    </div>
-                </div>
+                {{-- Info boxes de Profesor y Unidad --}}
+                @include('coordinator.partials._general_info_cards', ['work' => $work])
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Duración:</strong>
-                        <p>
-                            Del {{ $work->getAttribute('start_date')?->format('d/m/Y') ?? 'N/A' }}
-                            al {{ $work->getAttribute('end_date')?->format('d/m/Y') ?? 'N/A' }}
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Participantes:</strong>
-                        <p>{{ $work->getAttribute('participants_count') ?? 0 }} participantes</p>
+                {{-- Fechas, Participantes, Tipo --}}
+                @include('coordinator.partials._general_info_details', ['work' => $work])
+
+                <hr>
+                <!-- 
+                {{-- Descripción General --}}
+                <div class="mb-3">
+                    <h5><i class="fas fa-align-left text-primary"></i> Descripción del Trabajo</h5>
+                    <div class="callout callout-info">
+                        <p class="mb-0">{{ $work->getAttribute('description') ?? 'Sin descripción disponible' }}</p>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <strong>Descripción:</strong>
-                        <p>{{ $work->getAttribute('description') ?? 'Sin descripción disponible' }}</p>
-                    </div>
-                </div>
-
-                @if($work->getAttribute('objectives'))
-                    <div class="row">
-                        <div class="col-12">
-                            <strong>Objetivos:</strong>
-                            <p>{{ $work->getAttribute('objectives') }}</p>
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Detalles Específicos por Tipo -->
-        @if($work->projectDetails)
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-project-diagram mr-1"></i>
-                        Detalles del Proyecto
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>Tipo de Proyecto:</strong>
-                            <p>{{ $work->projectDetails->getAttribute('project_type') ?? 'N/A' }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Área de Conocimiento:</strong>
-                            <p>{{ $work->projectDetails->getAttribute('knowledge_area') ?? 'N/A' }}</p>
-                        </div>
-                    </div>
-
-                    @if($work->projectDetails->getAttribute('justification'))
-                        <div class="row">
-                            <div class="col-12">
-                                <strong>Justificación:</strong>
-                                <p>{{ $work->projectDetails->getAttribute('justification') }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($work->projectDetails->getAttribute('beneficiaries'))
-                        <div class="row">
-                            <div class="col-12">
-                                <strong>Beneficiarios:</strong>
-                                <p>{{ $work->projectDetails->getAttribute('beneficiaries') }}</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @endif
-
-        <!-- Archivos y Evidencias -->
-        @if($work->getMedia('evidencias')->count() > 0)
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-paperclip mr-1"></i>
-                        Evidencias y Documentos ({{ $work->getMedia('evidencias')->count() }})
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @foreach($work->getMedia('evidencias') as $media)
-                            <div class="col-md-6 mb-3">
-                                <div class="card card-outline card-info">
-                                    <div class="card-body p-2">
-                                        <div class="d-flex align-items-center">
-                                            <div class="mr-3">
-                                                @php
-        $extension = pathinfo($media->name, PATHINFO_EXTENSION);
-        $iconClass = match (strtolower($extension)) {
-            'pdf' => 'fas fa-file-pdf text-danger',
-            'doc', 'docx' => 'fas fa-file-word text-primary',
-            'xls', 'xlsx' => 'fas fa-file-excel text-success',
-            'jpg', 'jpeg', 'png', 'gif' => 'fas fa-file-image text-warning',
-            default => 'fas fa-file text-secondary'
-        };
-                                                @endphp
-                                                <i class="{{ $iconClass }} fa-2x"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <p class="mb-1 font-weight-bold">{{ $media->name }}</p>
-                                                <small class="text-muted">
-                                                    {{ number_format($media->size / 1024, 1) }} KB
-                                                </small>
-                                            </div>
-                                            <div>
-                                                <a href="{{ $media->getUrl() }}" target="_blank"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        @endif
-    </div>
-
-    <!-- Panel de Acciones -->
-    <div class="col-md-4">
-        <!-- Estado y Acciones -->
-        @can('coordinate_extension_works')
-            @php
-    $currentStatus = $work->currentStatus->name ?? '';
-            @endphp
-
-            @if($currentStatus === 'Enviado a Coordinador')
-                <div class="card card-warning">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-tasks mr-1"></i>
-                            Acciones de Coordinación
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Trabajo pendiente de revisión</strong><br>
-                            Este trabajo está esperando su revisión como coordinador de extensión.
-                        </div>
-
-                        <!-- Aprobar trabajo -->
-                        <form action="{{ route('coordinator.approve', $work) }}" method="POST" class="mb-3">
-                            @csrf
-                            <div class="form-group">
-                                <label for="approval_comments">Comentarios de aprobación (opcional):</label>
-                                <textarea name="comments" id="approval_comments" class="form-control" rows="3"
-                                    placeholder="Escriba comentarios sobre la aprobación..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-block"
-                                onclick="return confirm('¿Está seguro de que desea aprobar este trabajo y enviarlo al Decano/Director?')">
-                                <i class="fas fa-check mr-1"></i>
-                                Aprobar y Enviar al Decano/Director
-                            </button>
-                        </form>
-
-                        <hr>
-
-                        <!-- Solicitar cambios -->
-                        <button type="button" class="btn btn-warning btn-block" data-toggle="modal"
-                            data-target="#requestChangesModal">
-                            <i class="fas fa-edit mr-1"></i>
-                            Solicitar Subsanaciones
-                        </button>
-
-                        <!-- Rechazar trabajo -->
-                        <button type="button" class="btn btn-danger btn-block mt-2" data-toggle="modal"
-                            data-target="#rejectModal">
-                            <i class="fas fa-times mr-1"></i>
-                            Rechazar Trabajo
-                        </button>
-                    </div>
-                </div>
-
-            @elseif($currentStatus === 'En Revisión Coordinador')
-                <div class="card card-info">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-search mr-1"></i>
-                            Estado de Revisión
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-clock"></i>
-                            <strong>En revisión</strong><br>
-                            Este trabajo está siendo procesado por usted.
-                        </div>
-                        <!-- Mismas acciones que arriba -->
-                        <form action="{{ route('coordinator.approve', $work) }}" method="POST" class="mb-3">
-                            @csrf
-                            <div class="form-group">
-                                <label for="approval_comments2">Comentarios de aprobación (opcional):</label>
-                                <textarea name="comments" id="approval_comments2" class="form-control" rows="3"
-                                    placeholder="Escriba comentarios sobre la aprobación..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-block"
-                                onclick="return confirm('¿Está seguro de que desea aprobar este trabajo y enviarlo al Decano/Director?')">
-                                <i class="fas fa-check mr-1"></i>
-                                Aprobar y Enviar al Decano/Director
-                            </button>
-                        </form>
-
-                        <hr>
-
-                        <button type="button" class="btn btn-warning btn-block" data-toggle="modal"
-                            data-target="#requestChangesModal">
-                            <i class="fas fa-edit mr-1"></i>
-                            Solicitar Subsanaciones
-                        </button>
-
-                        <button type="button" class="btn btn-danger btn-block mt-2" data-toggle="modal"
-                            data-target="#rejectModal">
-                            <i class="fas fa-times mr-1"></i>
-                            Rechazar Trabajo
-                        </button>
-                    </div>
-                </div>
-
-            @else
-                <div class="card card-secondary">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Estado del Trabajo
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-light">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <strong>Trabajo procesado</strong><br>
-                            Este trabajo ya ha sido procesado y no requiere acciones adicionales de su parte.
-                        </div>
-
-                        <p><strong>Estado actual:</strong>                    <span class="badge badge-info">{{ $currentStatus }}</span>
-                        </p>
-
-                        @if($work->statusHistory->where('status.name', 'Aprobado por Coordinador')->isNotEmpty())
-                            <p class="text-success">
-                                <i class="fas fa-check"></i> Aprobado por usted el                    {{ $work->statusHistory->where('status.name', 'Aprobado por Coordinador')->first()->created_at->format('d/m/Y H:i') }}
-                            </p>
+                {{-- Objetivos (pueden estar aquí o en los detalles específicos) --}}
+                @if($work->projectDetail && ($work->projectDetail->general_objectives || $work->projectDetail->specific_objectives))
+                <div class="mb-3">
+                    <h5><i class="fas fa-bullseye text-success"></i> Objetivos</h5>
+                    <div class="callout callout-success">
+                        @if($work->projectDetail->general_objectives)
+                        <strong>Generales:</strong>
+                        <p class="mb-0">{{ $work->projectDetail->general_objectives }}</p>
+                        @endif
+                        @if($work->projectDetail->specific_objectives)
+                        <strong>Específicos:</strong>
+                        <p class="mb-0">{{ $work->projectDetail->specific_objectives }}</p>
                         @endif
                     </div>
                 </div>
-            @endif
-        @endcan
-
-        <!-- Historial de Estados -->
-        @if($work->statusHistory->count() > 0)
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-history mr-1"></i>
-                        Historial del Trabajo
-                    </h3>
-                </div>
-                <div class="card-body p-0">
-                    <div class="timeline">
-                        @foreach($work->statusHistory->sortByDesc('created_at') as $history)
-                            <div class="time-label">
-                                <span class="bg-blue">{{ $history->created_at->format('d/m/Y') }}</span>
-                            </div>
-                            <div>
-                                <i class="fas fa-circle bg-{{ $loop->first ? 'success' : 'secondary' }}"></i>
-                                <div class="timeline-item">
-                                    <span class="time">
-                                        <i class="fas fa-clock"></i> {{ $history->created_at->format('H:i') }}
-                                    </span>
-                                    <h3 class="timeline-header">
-                                        {{ $history->status->name ?? 'Estado desconocido' }}
-                                    </h3>
-                                    @if($history->comments)
-                                        <div class="timeline-body">
-                                            {{ $history->comments }}
-                                        </div>
-                                    @endif
-                                    @if($history->changed_by_user_id)
-                                        <div class="timeline-footer">
-                                            <small class="text-muted">
-                                                Por: {{ $history->changedBy->name ?? 'Usuario desconocido' }}
-                                            </small>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                        <div>
-                            <i class="fas fa-clock bg-gray"></i>
-                        </div>
-                    </div>
-                </div>
+                @endif -->
             </div>
+        </div>
+
+        {{-- Detalles Específicos por Tipo de Trabajo --}}
+        @if($work->workType && $work->workType->code === 'proyecto' && $work->projectDetail)
+        @include('coordinator.partials._work_details_project', ['projectDetails' => $work->projectDetail])
+        @elseif($work->workType && $work->workType->code === 'actividad' && $work->activityDetail)
+        @include('coordinator.partials._work_details_activity', ['activityDetails' => $work->activityDetail])
+        @elseif($work->workType && $work->workType->code === 'publicacion' && $work->publicationDetail)
+        @include('coordinator.partials._work_details_publication', ['publicationDetails' => $work->publicationDetail])
+        @elseif($work->workType && $work->workType->code === 'asistencia_tecnica' && $work->technicalAssistanceDetail)
+        @include('coordinator.partials._work_details_technical_assistance', ['technicalAssistanceDetails' => $work->technicalAssistanceDetail])
         @endif
-    </div>
-</div>
 
-<!-- Modal para Solicitar Cambios -->
-<div class="modal fade" id="requestChangesModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form action="{{ route('coordinator.request-changes', $work) }}" method="POST">
-                @csrf
-                <div class="modal-header bg-warning">
-                    <h4 class="modal-title">
-                        <i class="fas fa-edit mr-1"></i>
-                        Solicitar Subsanaciones
-                    </h4>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="change_comments">Comentarios sobre las subsanaciones requeridas: *</label>
-                        <textarea name="comments" id="change_comments" class="form-control" rows="4" required
-                            placeholder="Especifique claramente qué aspectos del trabajo deben ser mejorados o corregidos..."></textarea>
-                        <small class="form-text text-muted">
-                            Proporcione comentarios claros y específicos para que el profesor pueda realizar las
-                            correcciones necesarias.
-                        </small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-edit mr-1"></i>
-                        Enviar Solicitud de Subsanaciones
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        {{-- Participantes del Trabajo --}}
+        @if($work->participants && $work->participants->count() > 0)
+        @include('coordinator.partials._work_participants_list', ['participants' => $work->participants])
+        @endif
 
-<!-- Modal para Rechazar Trabajo -->
-<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form action="{{ route('coordinator.reject', $work) }}" method="POST">
-                @csrf
-                <div class="modal-header bg-danger">
-                    <h4 class="modal-title">
-                        <i class="fas fa-times mr-1"></i>
-                        Rechazar Trabajo
-                    </h4>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Atención:</strong> Al rechazar este trabajo, será devuelto al profesor y deberá realizar
-                        las correcciones necesarias antes de poder reenviarlo.
-                    </div>
-                    <div class="form-group">
-                        <label for="rejection_reason">Motivo del rechazo: *</label>
-                        <textarea name="comments" id="rejection_reason" class="form-control" rows="4" required
-                            placeholder="Explique claramente las razones por las cuales se rechaza este trabajo..."></textarea>
-                        <small class="form-text text-muted">
-                            Sea específico sobre los problemas encontrados para que el profesor pueda corregirlos
-                            adecuadamente.
-                        </small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-times mr-1"></i>
-                        Confirmar Rechazo
-                    </button>
-                </div>
-            </form>
+        {{-- Archivos y Evidencias --}}
+        @if($work->getMedia('attachments')->count() > 0)
+        @include('coordinator.partials._work_attachments_list', ['mediaItems' => $work->getMedia('attachments')])
+        @else
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Sin evidencias:</strong> Este trabajo no tiene documentos adjuntos.
         </div>
-    </div>
-</div>
+        @endif
+
+        {{-- Historial Completo --}}
+        @if($work->statusHistory->count() > 0)
+        @include('coordinator.partials._work_status_history_timeline', ['statusHistory' => $work->statusHistory])
+        @endif
+
+    </div> {{-- Fin Columna Izquierda --}}
+
+    <!-- Columna Derecha: Panel de Acciones y Notas (4/12) -->
+    <div class="col-lg-4">
+
+
+        {{-- Panel de Notas del Revisor (Sticky) --}}
+        @include('coordinator.partials._reviewer_notes_panel')
+
+        {{-- Panel de Acciones de Coordinación (Botones) --}}
+        @include('coordinator.partials._coordinator_action_panel', ['work' => $work])
+
+    </div> {{-- Fin Columna Derecha --}}
+
+</div> {{-- Fin Row Principal --}}
+@stop
+
+{{-- Modales de Acción --}}
+@section('modals')
+@include('coordinator.partials._modals._modal_approve', ['work' => $work])
+@include('coordinator.partials._modals._modal_request_changes', ['work' => $work])
+@include('coordinator.partials._modals._modal_reject', ['work' => $work])
 @stop
 
 @section('css')
+{{-- La sección CSS puede quedar aquí o moverse a un archivo CSS dedicado que Vite/Laravel mezcle --}}
 <style>
+    /* Sidebar sticky */
+    .sticky-top {
+        position: -webkit-sticky;
+        position: sticky;
+        z-index: 1020;
+    }
+
+    /* Timeline mejorado */
     .timeline {
         margin: 0;
         padding: 0;
@@ -461,30 +147,303 @@
         margin: 0 0 5px 0;
     }
 
-    .card-outline {
-        border-top: 3px solid #17a2b8;
+    /* Info boxes mejorados */
+    .info-box {
+        min-height: 90px;
+    }
+
+    .info-box-number {
+        font-size: 1.1rem;
+    }
+
+    /* Badges más grandes */
+    .badge-lg {
+        font-size: 0.95rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    /* Callouts personalizados */
+    .callout {
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .callout-info {
+        border-left: 4px solid #17a2b8;
+        background-color: #d1ecf1;
+    }
+
+    .callout-success {
+        border-left: 4px solid #28a745;
+        background-color: #d4edda;
+    }
+
+    /* Textarea de notas */
+    #reviewNotes {
+        font-family: 'Courier New', monospace;
+        resize: vertical;
+    }
+
+    /* Card outline purple para participantes */
+    .card-outline.card-purple {
+        border-top: 3px solid #6f42c1;
+    }
+
+    /* Mejoras en modales */
+    .modal-lg {
+        max-width: 800px;
+    }
+
+    /* Botones de decisión más prominentes */
+    .btn-lg {
+        font-size: 1.1rem;
+        font-weight: 600;
     }
 </style>
 @stop
 
 @section('js')
 <script>
-    $(document).ready(function () {
+    // Sistema de almacenamiento local para notas de revisión
+    const WORK_ID = {
+
+        <?=
+        $work->getKey()
+        ?>
+
+    };
+    const STORAGE_KEY = `coordinator_review_notes_${WORK_ID}`;
+    const CHECKLIST_KEY = `coordinator_review_checklist_${WORK_ID}`;
+
+    $(document).ready(function() {
+        // Cargar notas guardadas
+        loadReviewNotes();
+        loadChecklist();
+
+        // Auto-guardar notas cada 5 segundos
+        let notesTimeout;
+        $('#reviewerNotes').on('input', function() {
+            clearTimeout(notesTimeout);
+            notesTimeout = setTimeout(saveReviewNotes, 5000);
+
+            // Mostrar indicador de guardado
+            $('.autosave-indicator').html('<span class="badge badge-warning"><i class="fas fa-spinner fa-spin"></i> Guardando...</span>');
+        });
+
+        // Guardar checklist al hacer clic
+        $('.review-checklist input[type="checkbox"]').on('change', function() {
+            saveChecklist();
+        });
+
         // Auto-expandir textareas
-        $('textarea').on('input', function () {
+        $('textarea').on('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
 
-        // Confirmar acciones críticas
-        $('form').on('submit', function (e) {
-            if ($(this).find('button[type="submit"]').hasClass('btn-warning') ||
-                $(this).find('button[type="submit"]').hasClass('btn-success')) {
-                if (!confirm('¿Está seguro de realizar esta acción?')) {
-                    e.preventDefault();
-                }
-            }
+        // Limpiar notas al enviar cualquier formulario de acción
+        $('#approveModal form, #requestChangesModal form, #rejectModal form').on('submit', function() {
+            // Limpiar notas y checklist del localStorage
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(CHECKLIST_KEY);
+            console.log('Notas y checklist limpiados después de enviar acción');
         });
+    });
+
+    // Guardar notas en localStorage
+    function saveReviewNotes() {
+        const notes = $('#reviewerNotes').val();
+        localStorage.setItem(STORAGE_KEY, notes);
+        console.log('Notas guardadas automáticamente');
+
+        // Mostrar indicador de guardado
+        $('.autosave-indicator').html('<span class="badge badge-success"><i class="fas fa-check"></i> Guardado</span>');
+
+        // Ocultar indicador después de 2 segundos
+        setTimeout(function() {
+            $('.autosave-indicator').fadeOut(function() {
+                $(this).html('').show();
+            });
+        }, 2000);
+    }
+
+    // Cargar notas desde localStorage
+    function loadReviewNotes() {
+        const notes = localStorage.getItem(STORAGE_KEY);
+        if (notes) {
+            $('#reviewerNotes').val(notes);
+        }
+    }
+
+    // Guardar checklist
+    function saveChecklist() {
+        const checklist = {};
+        $('.review-checklist input[type="checkbox"]').each(function() {
+            checklist[$(this).attr('id')] = $(this).is(':checked');
+        });
+        localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
+    }
+
+    // Cargar checklist
+    function loadChecklist() {
+        const checklistJson = localStorage.getItem(CHECKLIST_KEY);
+        if (checklistJson) {
+            const checklist = JSON.parse(checklistJson);
+            $('.review-checklist input[type="checkbox"]').each(function() {
+                const checkId = $(this).attr('id');
+                if (checklist[checkId]) {
+                    $(this).prop('checked', true);
+                }
+            });
+        }
+    }
+
+    // Limpiar notas y checklist
+    function clearReviewNotes() {
+        if (confirm('¿Está seguro de que desea limpiar todas sus notas y el checklist? Esta acción no se puede deshacer.')) {
+            $('#reviewerNotes').val('');
+            $('.review-checklist input[type="checkbox"]').prop('checked', false);
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(CHECKLIST_KEY);
+            alert('Notas y checklist limpiados correctamente');
+        }
+    }
+
+    // Copiar notas al modal de aprobación
+    function copyNotesToApproval() {
+        const notes = $('#reviewerNotes').val();
+        if (notes) {
+            $('#approval_comments').val(notes);
+            alert('Notas copiadas al campo de comentarios de aprobación');
+        } else {
+            alert('No hay notas para copiar');
+        }
+    }
+
+    // Copiar notas al modal de cambios
+    function copyNotesToChanges() {
+        const notes = $('#reviewerNotes').val();
+        if (notes) {
+            $('#change_comments').val(notes);
+            alert('Notas copiadas al campo de comentarios de subsanaciones');
+        } else {
+            alert('No hay notas para copiar');
+        }
+    }
+
+    // Copiar notas al modal de rechazo
+    function copyNotesToReject() {
+        const notes = $('#reviewerNotes').val();
+        if (notes) {
+            $('#rejection_reason').val(notes);
+            alert('Notas copiadas al campo de motivo de rechazo');
+        } else {
+            alert('No hay notas para copiar');
+        }
+    }
+
+    // === MANEJO DE FORMULARIOS DE ACCIÓN ===
+
+    // Función genérica para manejar el envío de formularios
+    function handleFormSubmit($form, minLength = 0) {
+        const $submitBtn = $form.find('button[type="submit"]');
+
+        // Deshabilitar botón para evitar doble-clic
+        $submitBtn.prop('disabled', true);
+
+        // Mostrar spinner
+        const originalText = $submitBtn.html();
+        $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+
+        // Limpiar notas del localStorage
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(CHECKLIST_KEY);
+
+        // Si falla, restaurar botón después de 3 segundos
+        setTimeout(function() {
+            if ($submitBtn.prop('disabled')) {
+                $submitBtn.prop('disabled', false);
+                $submitBtn.html(originalText);
+            }
+        }, 3000);
+    }
+
+    // Modal de Aprobación
+    $('#approveModal form').on('submit', function(e) {
+        const $form = $(this);
+        const checkbox = $('#confirm_approve');
+
+        if (!checkbox.is(':checked')) {
+            e.preventDefault();
+            alert('Debe confirmar que ha revisado completamente el trabajo antes de aprobar.');
+            return false;
+        }
+
+        handleFormSubmit($form);
+    });
+
+    // Modal de Solicitar Cambios
+    $('#requestChangesModal form').on('submit', function(e) {
+        const $form = $(this);
+        const comments = $('#change_comments').val().trim();
+
+        if (comments.length < 10) {
+            e.preventDefault();
+            alert('Por favor, especifique las correcciones requeridas (mínimo 10 caracteres).');
+            return false;
+        }
+
+        if (comments.length > 1000) {
+            e.preventDefault();
+            alert('Los comentarios no pueden exceder 1000 caracteres.');
+            return false;
+        }
+
+        if (!confirm('¿Está seguro de que desea solicitar subsanaciones a este trabajo?')) {
+            e.preventDefault();
+            return false;
+        }
+
+        handleFormSubmit($form);
+    });
+
+    // Modal de Rechazo
+    $('#rejectModal form').on('submit', function(e) {
+        const $form = $(this);
+        const reason = $('#rejection_reason').val().trim();
+        const checkbox = $('#confirm_reject');
+
+        if (!checkbox.is(':checked')) {
+            e.preventDefault();
+            alert('Debe confirmar que desea rechazar este trabajo.');
+            return false;
+        }
+
+        if (reason.length < 20) {
+            e.preventDefault();
+            alert('Por favor, proporcione una razón detallada del rechazo (mínimo 20 caracteres).');
+            return false;
+        }
+
+        if (reason.length > 2000) {
+            e.preventDefault();
+            alert('Los comentarios no pueden exceder 2000 caracteres.');
+            return false;
+        }
+
+        if (!confirm('⚠️ ATENCIÓN: ¿Está completamente seguro de que desea RECHAZAR este trabajo? Esta es una acción seria que indica problemas significativos.')) {
+            e.preventDefault();
+            return false;
+        }
+
+        handleFormSubmit($form);
+    });
+
+    // Cerrar modales al hacer clic en cancelar
+    $('.modal').on('hidden.bs.modal', function() {
+        $(this).find('form')[0]?.reset();
+        $(this).find('button[type="submit"]').prop('disabled', false);
     });
 </script>
 @stop

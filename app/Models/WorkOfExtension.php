@@ -715,8 +715,14 @@ class WorkOfExtension extends Model implements HasMedia {
      * CU08: Avalar y remitir a Decano/Director
      */
     public function approveByCoordinator(User $user, ?string $comments): void {
-        if ($this->currentStatus->getAttribute('name') !== 'En Revisión Coordinador') {
-            throw new \InvalidArgumentException('El trabajo no está en el estado correcto para ser aprobado por el coordinador.');
+        // Estados válidos: Enviado a Coordinador o En Revisión Coordinador
+        $validStatuses = ['Enviado a Coordinador', 'En Revisión Coordinador'];
+        $currentStatusName = $this->currentStatus->getAttribute('name');
+
+        if (!in_array($currentStatusName, $validStatuses)) {
+            throw new \InvalidArgumentException(
+                "El trabajo no está en el estado correcto para ser aprobado. Estado actual: {$currentStatusName}"
+            );
         }
 
         // Cambiar a estado "Enviado a Decano/Director"
@@ -754,8 +760,14 @@ class WorkOfExtension extends Model implements HasMedia {
      * CU07: Solicitar subsanaciones al profesor
      */
     public function requestChangesFromCoordinator(User $user, string $comments): void {
-        if ($this->currentStatus->getAttribute('name') !== 'En Revisión Coordinador') {
-            throw new \InvalidArgumentException('El trabajo no está en el estado correcto para solicitar subsanaciones.');
+        // Estados válidos: Enviado a Coordinador o En Revisión Coordinador
+        $validStatuses = ['Enviado a Coordinador', 'En Revisión Coordinador'];
+        $currentStatusName = $this->currentStatus->getAttribute('name');
+
+        if (!in_array($currentStatusName, $validStatuses)) {
+            throw new \InvalidArgumentException(
+                "El trabajo no está en el estado correcto para solicitar cambios. Estado actual: {$currentStatusName}"
+            );
         }
 
         // Cambiar a estado "Devuelto para Corrección"
@@ -796,7 +808,9 @@ class WorkOfExtension extends Model implements HasMedia {
         $currentStatus = $this->currentStatus->getAttribute('name');
 
         if (!in_array($currentStatus, ['Enviado a Coordinador', 'En Revisión Coordinador'])) {
-            throw new \InvalidArgumentException('El trabajo no está en el estado correcto para ser rechazado por el coordinador.');
+            throw new \InvalidArgumentException(
+                "El trabajo no está en el estado correcto para ser rechazado. Estado actual: {$currentStatus}"
+            );
         }
 
         // Cambiar a estado "Rechazado por Coordinador"
