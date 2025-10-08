@@ -745,7 +745,8 @@ class WorkOfExtension extends Model implements HasMedia {
             'new_status' => 'Enviado a Decano/Director'
         ]);
 
-        // TODO: Disparar evento para notificar al Decano/Director
+        // Disparar evento para notificar al Decano/Director y Profesor
+        \App\Events\WorkApprovedByCoordinator::dispatch($this, $user, $comments);
     }
 
     /**
@@ -783,7 +784,8 @@ class WorkOfExtension extends Model implements HasMedia {
             'new_status' => 'Requiere Subsanaciones'
         ]);
 
-        // TODO: Disparar evento para notificar al profesor
+        // Disparar evento para notificar al profesor
+        \App\Events\WorkChangesRequestedByCoordinator::dispatch($this, $user, $comments);
     }
 
     /**
@@ -823,7 +825,8 @@ class WorkOfExtension extends Model implements HasMedia {
             'reason' => $comments
         ]);
 
-        // TODO: Disparar evento para notificar al profesor del rechazo
+        // Disparar evento para notificar al profesor del rechazo
+        \App\Events\WorkRejectedByCoordinator::dispatch($this, $user, $comments);
     }
 
     /**
