@@ -104,6 +104,54 @@ class User extends Authenticatable {
         return $this->hasMany(ProjectDetail::class, 'ss_tutor_user_id');
     }
 
+    /**
+     * Trabajos donde el usuario es evaluador (relación pivote con metadatos)
+     */
+    public function workEvaluatorAssignments()
+    {
+        return $this->hasMany(WorkEvaluator::class, 'evaluator_user_id');
+    }
+
+    /**
+     * Trabajos de extensión que el usuario ha evaluado (relación many-to-many)
+     */
+    public function worksAsEvaluator()
+    {
+        return $this->belongsToMany(
+            WorkOfExtension::class,
+            'work_evaluators',
+            'evaluator_user_id',
+            'work_of_extension_id'
+        )
+            ->withPivot([
+                'role',
+                'assignment_notes',
+                'assigned_at',
+                'notified_at',
+                'accepted_at',
+                'completed_at',
+                'status',
+                'assigned_by_user_id'
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Evaluaciones realizadas por el usuario
+     */
+    public function evaluations()
+    {
+        return $this->hasMany(WorkEvaluation::class, 'evaluator_user_id');
+    }
+
+    /**
+     * Asignaciones de evaluadores realizadas por el usuario
+     */
+    public function evaluatorAssignmentsMade()
+    {
+        return $this->hasMany(WorkEvaluator::class, 'assigned_by_user_id');
+    }
+
     // Métodos de negocio
 
     /**

@@ -8,11 +8,21 @@ use App\Events\WorkPublicationAuthorized;
 use App\Events\WorkApprovedByCoordinator;
 use App\Events\WorkChangesRequestedByCoordinator;
 use App\Events\WorkRejectedByCoordinator;
+use App\Events\WorkReceivedInViex;
+use App\Events\EvaluatorAssigned;
+use App\Events\EvaluationSubmitted;
+use App\Events\WorkApprovedByViex;
+use App\Events\WorkRejectedByViex;
 use App\Listeners\SendWorkSubmittedNotification;
 use App\Listeners\SendPublicationAuthorizedNotification;
 use App\Listeners\SendWorkApprovedByCoordinatorNotification;
 use App\Listeners\SendWorkChangesRequestedByCoordinatorNotification;
 use App\Listeners\SendWorkRejectedByCoordinatorNotification;
+use App\Listeners\SendWorkReceivedInViexNotification;
+use App\Listeners\SendEvaluatorAssignedNotification;
+use App\Listeners\SendEvaluationSubmittedNotification;
+use App\Listeners\SendWorkApprovedByViexNotification;
+use App\Listeners\SendWorkRejectedByViexNotification;
 
 /**
  * Proveedor de servicios de eventos
@@ -44,6 +54,23 @@ class EventServiceProvider extends ServiceProvider {
         ],
         WorkRejectedByCoordinator::class => [
             SendWorkRejectedByCoordinatorNotification::class,
+        ],
+
+        // CU9: Evaluación VIEX
+        WorkReceivedInViex::class => [
+            SendWorkReceivedInViexNotification::class,
+        ],
+        EvaluatorAssigned::class => [
+            SendEvaluatorAssignedNotification::class,
+        ],
+        EvaluationSubmitted::class => [
+            SendEvaluationSubmittedNotification::class,
+        ],
+        WorkApprovedByViex::class => [
+            SendWorkApprovedByViexNotification::class,
+        ],
+        WorkRejectedByViex::class => [
+            SendWorkRejectedByViexNotification::class,
         ],
     ];
 

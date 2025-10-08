@@ -250,4 +250,178 @@ class WorkOfExtensionPolicy {
     public function manageDeanDirectorWorkflow(User $user): bool {
         return $user->hasRole('decano_director') || $user->hasRole('super_admin');
     }
+
+    /**
+     * Determine whether the user can view work as VIEX admin.
+     * 
+     * CU9 - Fase 7: Autorización para visualización VIEX
+     */
+    public function viewAsViex(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede ver
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Verificar que el trabajo esté en estados VIEX
+        $viexStatuses = [
+            'Enviado a VIEX',
+            'En VIEX - Pendiente Asignación',
+            'En VIEX - En Evaluación',
+            'En VIEX - Aprobado',
+            'Certificado',
+        ];
+
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        return in_array($currentStatus, $viexStatuses, true);
+    }
+
+    /**
+     * Determine whether the user can assign evaluators to a work.
+     * 
+     * CU9 - Fase 7: Autorización para asignación de evaluadores
+     */
+    public function assignEvaluator(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede asignar
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX pueden asignar evaluadores
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Verificar que el trabajo esté en estado que permite asignación
+        $allowedStatuses = [
+            'En VIEX - Pendiente Asignación',
+            'En VIEX - En Evaluación', // Permite asignar evaluadores adicionales
+        ];
+
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        return in_array($currentStatus, $allowedStatuses, true);
+    }
+
+    /**
+     * Determine whether the user can approve work as VIEX.
+     * 
+     * CU9 - Fase 7: Autorización para aprobación por VIEX
+     */
+    public function approveAsViex(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede aprobar
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX pueden aprobar
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Debe estar en estado "En VIEX - En Evaluación"
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        if ($currentStatus !== 'En VIEX - En Evaluación') {
+            return false;
+        }
+
+        // Verificar que todas las evaluaciones estén completas
+        if (!$workOfExtension->allEvaluationsCompleted()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine whether the user can reject work as VIEX.
+     * 
+     * CU9 - Fase 7: Autorización para rechazo por VIEX
+     */
+    public function rejectAsViex(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede rechazar
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX pueden rechazar
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Debe estar en estado "En VIEX - En Evaluación"
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        return $currentStatus === 'En VIEX - En Evaluación';
+    }
+
+    /**
+     * Determine whether the user can view work as an evaluator.
+     * 
+     * CU9 - Fase 7: Autorización para evaluadores
+     */
+    public function viewAsEvaluator(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede ver
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Debe tener rol de evaluador
+        if (!$user->hasRole('evaluador')) {
+            return false;
+        }
+
+        // Verificar que esté asignado como evaluador a este trabajo
+        return $workOfExtension->workEvaluators()
+            ->where('evaluator_user_id', $user->id)
+            ->exists();
+    }
+
+    /**
+     * Determine whether the user can submit evaluation for a work.
+     * 
+     * CU9 - Fase 7: Autorización para envío de evaluaciones
+     */
+    public function submitEvaluation(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede evaluar
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Debe tener rol de evaluador
+        if (!$user->hasRole('evaluador')) {
+            return false;
+        }
+
+        // Verificar que esté asignado como evaluador
+        $assignment = $workOfExtension->workEvaluators()
+            ->where('evaluator_user_id', $user->id)
+            ->first();
+
+        if (!$assignment) {
+            return false;
+        }
+
+        // Verificar que haya aceptado la asignación
+        if ($assignment->status !== 'accepted' && $assignment->status !== 'in_progress') {
+            return false;
+        }
+
+        // Verificar que el trabajo esté en evaluación
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        return $currentStatus === 'En VIEX - En Evaluación';
+    }
 }

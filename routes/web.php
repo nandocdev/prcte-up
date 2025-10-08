@@ -5,6 +5,8 @@ use App\Http\Controllers\DeanDirectorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ViexAdminController;
+use App\Http\Controllers\ViexController;
+use App\Http\Controllers\EvaluatorController;
 use App\Http\Controllers\WorkOfExtensionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleManagementController;
@@ -85,6 +87,45 @@ Route::middleware('auth')->group(function () {
         // Rutas adicionales para reportes y certificados
         Route::get('/works/{work}/report', [ViexAdminController::class, 'generateReport'])->name('report');
         Route::get('/certificates/{certification}/download', [ViexAdminController::class, 'downloadCertificate'])->name('certificate.download');
+    });
+
+    // Rutas para VIEX - Nuevo Sistema de Evaluación (CU9)
+    Route::middleware(['auth', 'role:viex_admin'])->prefix('viex-evaluation')->name('viex.')->group(function () {
+        // Dashboard y listados
+        Route::get('/', [ViexController::class, 'index'])->name('evaluation.index');
+        Route::get('/works/{work}', [ViexController::class, 'show'])->name('evaluation.show');
+
+        // Recibir trabajo en VIEX
+        Route::post('/works/{work}/receive', [ViexController::class, 'receive'])->name('receive');
+
+        // Asignación de evaluadores
+        Route::get('/works/{work}/assign-evaluators', [ViexController::class, 'showAssignEvaluatorsForm'])->name('assign-evaluators');
+        Route::post('/works/{work}/assign-evaluator', [ViexController::class, 'assignEvaluator'])->name('assign-evaluator');
+
+        // Inicio de evaluación
+        Route::post('/works/{work}/start-evaluation', [ViexController::class, 'startEvaluation'])->name('start-evaluation');
+
+        // Revisión y decisión final
+        Route::get('/works/{work}/review-evaluations', [ViexController::class, 'reviewEvaluations'])->name('review-evaluations');
+        Route::post('/works/{work}/approve', [ViexController::class, 'approve'])->name('evaluation.approve');
+        Route::post('/works/{work}/reject', [ViexController::class, 'reject'])->name('evaluation.reject');
+    });
+
+    // Rutas para Evaluadores (CU9)
+    Route::middleware(['auth', 'role:evaluador'])->prefix('evaluator')->name('evaluator.')->group(function () {
+        // Dashboard del evaluador
+        Route::get('/', [EvaluatorController::class, 'index'])->name('index');
+
+        // Ver trabajo asignado
+        Route::get('/works/{work}', [EvaluatorController::class, 'show'])->name('show');
+
+        // Aceptar/Rechazar asignación
+        Route::post('/works/{work}/accept', [EvaluatorController::class, 'acceptAssignment'])->name('accept-assignment');
+        Route::post('/works/{work}/decline', [EvaluatorController::class, 'declineAssignment'])->name('decline-assignment');
+
+        // Formulario de evaluación
+        Route::get('/works/{work}/evaluate', [EvaluatorController::class, 'evaluate'])->name('evaluate');
+        Route::post('/works/{work}/submit-evaluation', [EvaluatorController::class, 'submitEvaluation'])->name('submit-evaluation');
     });
 
     // Rutas públicas para descargas de certificados (accesible por profesores)
