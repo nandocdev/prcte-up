@@ -8,6 +8,8 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Support\Facades\Log;
 use App\Models\WorkStatus;
+use App\Models\WorkStatusHistory;
+use App\Models\User;
 
 /**
  * Modelo principal para los trabajos de extensión
@@ -429,26 +431,19 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('El trabajo no puede ser enviado en su estado actual.');
         }
 
-        // Cambiar a estado "Enviado a Coordinador"
         $submittedStatus = WorkStatus::where('name', 'Enviado a Coordinador')->first();
 
         if (!$submittedStatus) {
             throw new \InvalidArgumentException('No se encontró el estado "Enviado a Coordinador".');
         }
 
+        // Usar el helper central para cambiar de estado y mantener historial correcto
+        $this->changeStatus($submittedStatus, $user, 'Trabajo enviado para revisión por el coordinador de extensión.');
+
+        // Marcar como enviado y timestamp
         $this->update([
-            'current_status_id' => $submittedStatus->getKey(),
             'is_draft' => '0',
             'submitted_at' => now(),
-        ]);
-
-        // Registrar en historial
-        WorkStatusHistory::create([
-            'work_of_extension_id' => $this->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'), // Estado anterior
-            'to_status_id' => $submittedStatus->getKey(), // Estado nuevo
-            'changed_by_user_id' => $user->getKey(),
-            'comments' => 'Trabajo enviado para revisión por el coordinador de extensión.',
         ]);
 
         // Disparar evento para notificar al coordinador
@@ -459,6 +454,60 @@ class WorkOfExtension extends Model implements HasMedia {
             'submitted_by' => $user->getKey(),
             'work_title' => $this->getAttribute('title')
         ]);
+    }
+
+    /**
+     * Método centralizado para cambiar el estado de un trabajo.
+     * Captura el estado anterior, realiza el update, crea el historial y hace logging.
+     */
+    public function changeStatus(WorkStatus $newStatus, User $by, ?string $comments = null): void
+    {
+        $oldStatusId = $this->getAttribute('current_status_id');
+
+        // Actualizar estado en el modelo
+        $this->update([
+            'current_status_id' => $newStatus->getKey(),
+        ]);
+
+        // Registrar en historial con from_status correcto
+        WorkStatusHistory::create([
+            'work_of_extension_id' => $this->getKey(),
+            'from_status_id' => $oldStatusId,
+            'to_status_id' => $newStatus->getKey(),
+            'changed_by_user_id' => $by->getKey(),
+            'comments' => $comments,
+        ]);
+
+        Log::info('Cambio de estado registrado', [
+            'work_id' => $this->getKey(),
+            'from_status_id' => $oldStatusId,
+            'to_status_id' => $newStatus->getKey(),
+            'by' => $by->getKey(),
+        ]);
+    }
+
+    /**
+     * Verificar que el trabajo NO esté en el estado indicado
+     */
+    public function statusIsNot(string $statusName): bool
+    {
+        return ($this->currentStatus?->getAttribute('name') ?? null) !== $statusName;
+    }
+
+    /**
+     * Iniciar la revisión por parte del coordinador: Enviado a Coordinador -> En Revisión Coordinador
+     */
+    public function startReviewByCoordinator(User $coordinator): void
+    {
+        $current = $this->currentStatus?->getAttribute('name') ?? null;
+
+        if ($current !== 'Enviado a Coordinador') {
+            throw new \InvalidArgumentException('El trabajo no está en el estado correcto para iniciar revisión por coordinador.');
+        }
+
+        $reviewStatus = WorkStatus::where('name', 'En Revisión Coordinador')->firstOrFail();
+
+        $this->changeStatus($reviewStatus, $coordinator, 'Coordinador inici f3 la revisi f3n.');
     }
 
     /**

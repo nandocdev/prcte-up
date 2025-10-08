@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
+use App\Models\WorkStatusHistory;
 
 /**
  * Listener que envía notificación al coordinador cuando se submite un trabajo
@@ -40,21 +41,75 @@ class SendWorkSubmittedNotification implements ShouldQueue {
             $coordinator = $this->findCoordinator($work);
 
             if ($coordinator) {
-                // Enviar notificación al coordinador
-                $coordinator->notify(new WorkSubmittedForReview($work));
+                try {
+                    // Enviar notificación al coordinador
+                    $coordinator->notify(new WorkSubmittedForReview($work));
 
-                Log::info('Notificación enviada exitosamente', [
-                    'work_id' => $work->getKey(),
-                    'coordinator_id' => $coordinator->getKey(),
-                    'coordinator_name' => $coordinator->name
-                ]);
+                    Log::info('Notificación enviada exitosamente', [
+                        'work_id' => $work->getKey(),
+                        'coordinator_id' => $coordinator->getKey(),
+                        'coordinator_name' => $coordinator->name
+                    ]);
+
+                    // Registrar trazabilidad en historial (opcional: puede ajustarse a una tabla específica)
+                    WorkStatusHistory::create([
+                        'work_of_extension_id' => $work->getKey(),
+                        'from_status_id' => $work->getAttribute('current_status_id'),
+                        'to_status_id' => $work->getAttribute('current_status_id'),
+                        'changed_by_user_id' => $submittedBy->getKey(),
+                        'comments' => 'Notificaci\u00f3n enviada al coordinador (ID: ' . $coordinator->getKey() . ')'
+                    ]);
+
+                } catch (\Exception $e) {
+                    Log::error('Error al enviar notificación al coordinador', [
+                        'work_id' => $work->getKey(),
+                        'coordinator_id' => $coordinator->getKey(),
+                        'error' => $e->getMessage()
+                    ]);
+
+                    // Re-lanzar para que la cola pueda reintentar
+                    throw $e;
+                }
             } else {
                 Log::warning('No se encontró coordinador para la unidad organizacional', [
                     'work_id' => $work->getKey(),
                     'organizational_unit_id' => $work->getAttribute('organizational_unit_id')
                 ]);
 
-                // TODO: Implementar fallback - enviar notificación a administrador
+                // Fallback: notificar a super_admins
+                $admins = User::role('super_admin')->get();
+
+                if ($admins->isNotEmpty()) {
+                    foreach ($admins as $admin) {
+                        try {
+                            $admin->notify(new WorkSubmittedForReview($work));
+
+                            WorkStatusHistory::create([
+                                'work_of_extension_id' => $work->getKey(),
+                                'from_status_id' => $work->getAttribute('current_status_id'),
+                                'to_status_id' => $work->getAttribute('current_status_id'),
+                                'changed_by_user_id' => $submittedBy->getKey(),
+                                'comments' => 'Fallback: notificación enviada a super_admin (ID: ' . $admin->getKey() . ')'
+                            ]);
+
+                            Log::info('Fallback: notificación enviada a super_admin', [
+                                'work_id' => $work->getKey(),
+                                'admin_id' => $admin->getKey()
+                            ]);
+
+                        } catch (\Exception $e) {
+                            Log::error('Error al enviar fallback de notificación a super_admin', [
+                                'work_id' => $work->getKey(),
+                                'admin_id' => $admin->getKey(),
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
+                } else {
+                    Log::error('No hay super_admins configurados para fallback de notificación', [
+                        'work_id' => $work->getKey()
+                    ]);
+                }
             }
 
         } catch (\Exception $e) {
