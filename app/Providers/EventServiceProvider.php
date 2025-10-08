@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Events\WorkSubmitted;
+use App\Events\WorkPublicationAuthorized;
 use App\Listeners\SendWorkSubmittedNotification;
+use App\Listeners\SendPublicationAuthorizedNotification;
 
 /**
  * Proveedor de servicios de eventos
@@ -19,6 +21,9 @@ class EventServiceProvider extends ServiceProvider {
     protected $listen = [
         WorkSubmitted::class => [
             SendWorkSubmittedNotification::class,
+        ],
+        WorkPublicationAuthorized::class => [
+            SendPublicationAuthorizedNotification::class,
         ],
     ];
 

@@ -15,19 +15,27 @@ use Illuminate\Queue\SerializesModels;
 /**
  * Evento disparado cuando un trabajo de extensión es enviado para revisión
  * CU04: Enviar trabajo a coordinador - componente de evento
+ * CU05: Subsanar trabajo rechazado - reutilizado para reenvíos
  */
 class WorkSubmitted {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public WorkOfExtension $work;
     public User $submittedBy;
+    public bool $isResubmission;
 
     /**
      * Create a new event instance.
+     *
+     * @param WorkOfExtension $work El trabajo enviado/reenviado
+     * @param User $submittedBy Usuario que envía
+     * @param bool $isResubmission True si es un reenvío después de rechazo
      */
-    public function __construct(WorkOfExtension $work, User $submittedBy) {
+    public function __construct(WorkOfExtension $work, User $submittedBy, bool $isResubmission = false)
+    {
         $this->work = $work;
         $this->submittedBy = $submittedBy;
+        $this->isResubmission = $isResubmission;
     }
 
     /**

@@ -34,19 +34,19 @@
                 <div class="card-tools">
                     {{-- Estado Actual --}}
                     @php
-                        $statusColors = [
-                            'Borrador' => 'secondary',
-                            'Enviado a Coordinador' => 'warning',
-                            'En Revisión Coordinador' => 'info',
-                            'Enviado a Decano' => 'primary',
-                            'En Revisión Decano' => 'primary',
-                            'Enviado a VIEX' => 'dark',
-                            'En Evaluación VIEX' => 'dark',
-                            'Certificado' => 'success',
-                            'Rechazado' => 'danger',
-                            'Subsanar' => 'orange'
-                        ];
-                        $statusColor = $statusColors[$work->currentStatus->name ?? 'Borrador'] ?? 'secondary';
+                    $statusColors = [
+                    'Borrador' => 'secondary',
+                    'Enviado a Coordinador' => 'warning',
+                    'En Revisión Coordinador' => 'info',
+                    'Enviado a Decano' => 'primary',
+                    'En Revisión Decano' => 'primary',
+                    'Enviado a VIEX' => 'dark',
+                    'En Evaluación VIEX' => 'dark',
+                    'Certificado' => 'success',
+                    'Rechazado' => 'danger',
+                    'Subsanar' => 'orange'
+                    ];
+                    $statusColor = $statusColors[$work->currentStatus->name ?? 'Borrador'] ?? 'secondary';
                     @endphp
                     <span class="badge badge-{{ $statusColor }} badge-lg">
                         <i class="fas fa-circle"></i>
@@ -130,9 +130,9 @@
                                 <strong><i class="fas fa-clock text-info"></i> Duración:</strong><br>
                                 <span class="text-muted">
                                     @if($work->start_date && $work->end_date)
-                                        {{ $work->start_date->diffInDays($work->end_date) + 1 }} días
+                                    {{ $work->start_date->diffInDays($work->end_date) + 1 }} días
                                     @else
-                                        No calculable
+                                    No calculable
                                     @endif
                                 </span>
                             </div>
@@ -164,105 +164,105 @@
 
         {{-- Participantes --}}
         @if($work->participants && $work->participants->count() > 0)
-            <div class="card card-info">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-users"></i>
-                        Participantes del Trabajo
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Rol</th>
-                                    <th>Unidad</th>
-                                    <th>Contacto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($work->participants as $participant)
-                                    <tr>
-                                        <td>
-                                            <i class="fas fa-user text-primary"></i>
-                                            {{ $participant->user->name ?? 'N/A' }}
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="badge badge-secondary">{{ $participant->role ?? 'Participante' }}</span>
-                                        </td>
-                                        <td>{{ $participant->user->organizationalUnit->name ?? 'N/A' }}</td>
-                                        <td>{{ $participant->user->email ?? 'N/A' }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users"></i>
+                    Participantes del Trabajo
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th>Unidad</th>
+                                <th>Contacto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($work->participants as $participant)
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user text-primary"></i>
+                                    {{ $participant->user->name ?? 'N/A' }}
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge badge-secondary">{{ $participant->role ?? 'Participante' }}</span>
+                                </td>
+                                <td>{{ $participant->user->organizationalUnit->name ?? 'N/A' }}</td>
+                                <td>{{ $participant->user->email ?? 'N/A' }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
         @endif
 
         {{-- Documentos Adjuntos --}}
         @if($work->media && $work->media->count() > 0)
-            <div class="card card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-paperclip"></i>
-                        Documentos Adjuntos
-                        <span class="badge badge-light ml-2">{{ $work->media->count() }}</span>
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @foreach($work->media as $document)
-                            <div class="col-md-6 mb-3">
-                                <div class="card border">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="mr-3">
-                                                @php
-                                                    $extension = pathinfo($document->file_name, PATHINFO_EXTENSION);
-                                                    $iconClass = match (strtolower($extension)) {
-                                                        'pdf' => 'fa-file-pdf text-danger',
-                                                        'doc', 'docx' => 'fa-file-word text-primary',
-                                                        'xls', 'xlsx' => 'fa-file-excel text-success',
-                                                        'jpg', 'jpeg', 'png', 'gif' => 'fa-file-image text-warning',
-                                                        default => 'fa-file text-secondary'
-                                                    };
-                                                @endphp
-                                                <i class="fas {{ $iconClass }} fa-2x"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1">{{ $document->name }}</h6>
-                                                <small class="text-muted">
-                                                    {{ number_format($document->size / 1024, 2) }} KB •
-                                                    {{ $document->created_at->format('d/m/Y H:i') }}
-                                                </small>
-                                            </div>
-                                            <div class="ml-2">
-                                                <a href="{{ $document->getUrl() }}" class="btn btn-sm btn-outline-primary"
-                                                    target="_blank" title="Descargar archivo">
-                                                    <i class="fas fa-download"></i>
-                                                </a>
-                                            </div>
-                                        </div>
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-paperclip"></i>
+                    Documentos Adjuntos
+                    <span class="badge badge-light ml-2">{{ $work->media->count() }}</span>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach($work->media as $document)
+                    <div class="col-md-6 mb-3">
+                        <div class="card border">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-3">
+                                        @php
+                                        $extension = pathinfo($document->file_name, PATHINFO_EXTENSION);
+                                        $iconClass = match (strtolower($extension)) {
+                                        'pdf' => 'fa-file-pdf text-danger',
+                                        'doc', 'docx' => 'fa-file-word text-primary',
+                                        'xls', 'xlsx' => 'fa-file-excel text-success',
+                                        'jpg', 'jpeg', 'png', 'gif' => 'fa-file-image text-warning',
+                                        default => 'fa-file text-secondary'
+                                        };
+                                        @endphp
+                                        <i class="fas {{ $iconClass }} fa-2x"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ $document->name }}</h6>
+                                        <small class="text-muted">
+                                            {{ number_format($document->size / 1024, 2) }} KB •
+                                            {{ $document->created_at->format('d/m/Y H:i') }}
+                                        </small>
+                                    </div>
+                                    <div class="ml-2">
+                                        <a href="{{ $document->getUrl() }}" class="btn btn-sm btn-outline-primary"
+                                            target="_blank" title="Descargar archivo">
+                                            <i class="fas fa-download"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
                     </div>
+                    @endforeach
                 </div>
             </div>
+        </div>
         @else
-            <div class="card card-secondary">
-                <div class="card-body text-center text-muted">
-                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                    <h5>No hay documentos adjuntos</h5>
-                    <p>Este trabajo aún no tiene documentos de soporte adjuntos.</p>
-                </div>
+        <div class="card card-secondary">
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>No hay documentos adjuntos</h5>
+                <p>Este trabajo aún no tiene documentos de soporte adjuntos.</p>
             </div>
+        </div>
         @endif
     </div>
 
@@ -280,140 +280,279 @@
                 <div class="btn-group-vertical btn-block">
                     {{-- Acciones según el estado actual --}}
                     @php
-                        $currentStatus = $work->currentStatus->name ?? 'Borrador';
+                    $currentStatus = $work->currentStatus->name ?? 'Borrador';
                     @endphp
 
                     {{-- Estado: Borrador --}}
                     @if($currentStatus === 'Borrador')
-                        {{-- Editar --}}
-                        <a href="{{ route('works.edit', $work) }}" class="btn btn-warning mb-2">
-                            <i class="fas fa-edit"></i>
-                            Editar Trabajo
-                        </a>
+                    {{-- Editar --}}
+                    <a href="{{ route('works.edit', $work) }}" class="btn btn-warning mb-2">
+                        <i class="fas fa-edit"></i>
+                        Editar Trabajo
+                    </a>
 
-                        {{-- Enviar para Revisión --}}
-                        @if($work->title && $work->work_type_id)
-                            <form action="{{ route('works.submit', $work) }}" method="POST" class="d-inline">
+                    {{-- Enviar para Revisión --}}
+                    @if($work->title && $work->work_type_id)
+                    <form action="{{ route('works.submit', $work) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-primary btn-block mb-2"
+                            onclick="return confirm('¿Está seguro de enviar este trabajo para revisión? Una vez enviado no podrá editarlo.')">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar para Revisión
+                        </button>
+                    </form>
+                    @endif
+
+                    {{-- Eliminar --}}
+                    @can('delete', $work)
+                    <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-block mb-2"
+                            onclick="return confirm('¿Está seguro de eliminar este trabajo? Esta acción no se puede deshacer.')">
+                            <i class="fas fa-trash"></i>
+                            Eliminar Trabajo
+                        </button>
+                    </form>
+                    @endcan
+
+                    @endif
+
+                    {{-- Autorización de Publicación (disponible en cualquier estado para el profesor responsable) --}}
+                    @can('update', $work)
+                    <hr class="my-3">
+                    <div class="mb-2">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-book-open"></i>
+                            Autorización de Publicación
+                        </h6>
+                        <p class="small text-muted mb-3">
+                            {{ __('Autoriza a VIEX a publicar los resultados de este trabajo en medios institucionales y académicos.') }}
+                        </p>
+                        
+                        @if($work->publication_consent)
+                            {{-- Mostrar estado autorizado y opción de revocar --}}
+                            <div class="alert alert-success py-2 px-3 mb-2">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Publicación Autorizada</strong>
+                                <br>
+                                <small>Has autorizado la publicación de este trabajo.</small>
+                            </div>
+                            <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-primary btn-block mb-2"
-                                    onclick="return confirm('¿Está seguro de enviar este trabajo para revisión? Una vez enviado no podrá editarlo.')">
-                                    <i class="fas fa-paper-plane"></i>
-                                    Enviar para Revisión
+                                <input type="hidden" name="authorized" value="0">
+                                <button type="submit" class="btn btn-outline-warning btn-block btn-sm"
+                                    onclick="return confirm('¿Está seguro de revocar la autorización de publicación? VIEX será notificado del cambio.')">
+                                    <i class="fas fa-times-circle"></i>
+                                    Revocar Autorización
+                                </button>
+                            </form>
+                        @else
+                            {{-- Mostrar estado no autorizado y opción de autorizar --}}
+                            <div class="alert alert-info py-2 px-3 mb-2">
+                                <i class="fas fa-info-circle"></i>
+                                <small>Aún no has autorizado la publicación de este trabajo.</small>
+                            </div>
+                            <form action="{{ route('works.authorize-publication', $work) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="authorized" value="1">
+                                <button type="submit" class="btn btn-success btn-block btn-sm"
+                                    onclick="return confirm('¿Autoriza a VIEX a publicar los resultados de este trabajo en medios académicos e institucionales?')">
+                                    <i class="fas fa-check-circle"></i>
+                                    Autorizar Publicación
                                 </button>
                             </form>
                         @endif
+                    </div>
+                    @endcan
 
-                        {{-- Eliminar --}}
-                        @can('delete', $work)
-                            <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-block mb-2"
-                                    onclick="return confirm('¿Está seguro de eliminar este trabajo? Esta acción no se puede deshacer.')">
-                                    <i class="fas fa-trash"></i>
-                                    Eliminar Trabajo
-                                </button>
-                            </form>
-                        @endcan
+                    @if($currentStatus !== 'Borrador')
+                    {{-- Aquí continúan los demás estados --}}
 
                     {{-- Estado: Rechazado por Coordinador --}}
-                    @elseif($currentStatus === 'Rechazado por Coordinador')
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Trabajo rechazado por el Coordinador</strong><br>
-                            Debe realizar las correcciones solicitadas.
-                        </div>
+                    @if($currentStatus === 'Rechazado por Coordinador')
+                    @php
+                    $lastRejection = $work->statusHistory
+                    ->where('status.name', 'Rechazado por Coordinador')
+                    ->sortByDesc('created_at')
+                    ->first();
+                    @endphp
 
-                        <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
-                            <i class="fas fa-edit"></i>
-                            Realizar Correcciones
-                        </a>
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Trabajo rechazado por el Coordinador</strong><br>
+                        Debe realizar las correcciones solicitadas.
+
+                        @if($lastRejection && $lastRejection->comments)
+                        <hr class="my-2">
+                        <strong><i class="fas fa-comment-dots"></i> Motivo del rechazo:</strong>
+                        <p class="mb-2 mt-1">{{ $lastRejection->comments }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> Por: {{ $lastRejection->changedBy->name ?? 'Sistema' }} ·
+                            <i class="fas fa-clock"></i> {{ $lastRejection->created_at->diffForHumans() }}
+                        </small>
+                        @endif
+                    </div>
+
+                    <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i>
+                        Realizar Correcciones
+                    </a>
+
+                    {{-- Botón de reenvío después de correcciones --}}
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success btn-block mb-2"
+                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                            <i class="fas fa-redo"></i>
+                            Reenviar Trabajo Corregido
+                        </button>
+                    </form>
 
                     {{-- Estado: Rechazado por Decano/Director --}}
                     @elseif($currentStatus === 'Rechazado por Decano/Director')
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Trabajo rechazado por el Decano/Director</strong><br>
-                            Debe realizar las correcciones solicitadas.
-                        </div>
+                    @php
+                    $lastRejection = $work->statusHistory
+                    ->where('status.name', 'Rechazado por Decano/Director')
+                    ->sortByDesc('created_at')
+                    ->first();
+                    @endphp
 
-                        <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
-                            <i class="fas fa-edit"></i>
-                            Realizar Correcciones
-                        </a>
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Trabajo rechazado por el Decano/Director</strong><br>
+                        Debe realizar las correcciones solicitadas.
+
+                        @if($lastRejection && $lastRejection->comments)
+                        <hr class="my-2">
+                        <strong><i class="fas fa-comment-dots"></i> Motivo del rechazo:</strong>
+                        <p class="mb-2 mt-1">{{ $lastRejection->comments }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> Por: {{ $lastRejection->changedBy->name ?? 'Sistema' }} ·
+                            <i class="fas fa-clock"></i> {{ $lastRejection->created_at->diffForHumans() }}
+                        </small>
+                        @endif
+                    </div>
+
+                    <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i>
+                        Realizar Correcciones
+                    </a>
+
+                    {{-- Botón de reenvío después de correcciones --}}
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success btn-block mb-2"
+                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                            <i class="fas fa-redo"></i>
+                            Reenviar Trabajo Corregido
+                        </button>
+                    </form>
 
                     {{-- Estado: Rechazado por VIEX --}}
                     @elseif($currentStatus === 'Rechazado por VIEX')
-                        <div class="alert alert-danger mb-3">
-                            <i class="fas fa-times-circle"></i>
-                            <strong>Trabajo rechazado por VIEX</strong><br>
-                            Debe realizar las correcciones solicitadas.
-                        </div>
+                    @php
+                    $lastRejection = $work->statusHistory
+                    ->where('status.name', 'Rechazado por VIEX')
+                    ->sortByDesc('created_at')
+                    ->first();
+                    @endphp
 
-                        <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
-                            <i class="fas fa-edit"></i>
-                            Realizar Correcciones
-                        </a>
+                    <div class="alert alert-danger mb-3">
+                        <i class="fas fa-times-circle"></i>
+                        <strong>Trabajo rechazado por VIEX</strong><br>
+                        Debe realizar las correcciones solicitadas.
+
+                        @if($lastRejection && $lastRejection->comments)
+                        <hr class="my-2">
+                        <strong><i class="fas fa-comment-dots"></i> Motivo del rechazo:</strong>
+                        <p class="mb-2 mt-1">{{ $lastRejection->comments }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> Por: {{ $lastRejection->changedBy->name ?? 'Sistema' }} ·
+                            <i class="fas fa-clock"></i> {{ $lastRejection->created_at->diffForHumans() }}
+                        </small>
+                        @endif
+                    </div>
+
+                    <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i>
+                        Realizar Correcciones
+                    </a>
+
+                    {{-- Botón de reenvío después de correcciones --}}
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success btn-block mb-2"
+                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                            <i class="fas fa-redo"></i>
+                            Reenviar Trabajo Corregido
+                        </button>
+                    </form>
 
                     {{-- Estado: Devuelto para Corrección --}}
                     @elseif($currentStatus === 'Devuelto para Corrección')
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Trabajo devuelto para corrección</strong><br>
-                            Realice las modificaciones solicitadas y reenvíe.
-                        </div>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Trabajo devuelto para corrección</strong><br>
+                        Realice las modificaciones solicitadas y reenvíe.
+                    </div>
 
-                        <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
-                            <i class="fas fa-edit"></i>
-                            Realizar Correcciones
-                        </a>
+                    <a href="{{ route('works.edit', $work) }}" class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit"></i>
+                        Realizar Correcciones
+                    </a>
 
-                        {{-- Reenviar después de correcciones --}}
-                        <form action="{{ route('works.resubmit', $work) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-success btn-block mb-2"
-                                onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
-                                <i class="fas fa-redo"></i>
-                                Reenviar Trabajo Corregido
-                            </button>
-                        </form>
+                    {{-- Reenviar después de correcciones --}}
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success btn-block mb-2"
+                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                            <i class="fas fa-redo"></i>
+                            Reenviar Trabajo Corregido
+                        </button>
+                    </form>
 
                     {{-- Estado: Certificado --}}
                     @elseif($currentStatus === 'Certificado')
-                        <div class="alert alert-success mb-3">
-                            <i class="fas fa-certificate"></i>
-                            <strong>¡Felicitaciones!</strong><br>
-                            Su trabajo ha sido certificado oficialmente.
-                        </div>
+                    <div class="alert alert-success mb-3">
+                        <i class="fas fa-certificate"></i>
+                        <strong>¡Felicitaciones!</strong><br>
+                        Su trabajo ha sido certificado oficialmente.
+                    </div>
 
-                        @if($work->certification)
-                            <a href="{{ route('certificates.download', $work->certification) }}"
-                               class="btn btn-success btn-block mb-2">
-                                <i class="fas fa-download"></i>
-                                Descargar Certificado
-                            </a>
-                        @endif
+                    @if($work->certification)
+                    <a href="{{ route('certificates.download', $work->certification) }}"
+                        class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-download"></i>
+                        Descargar Certificado
+                    </a>
+                    @endif
 
                     {{-- Estados de revisión (solo visualización) --}}
                     @elseif(in_array($currentStatus, [
-                        'Enviado a Coordinador',
-                        'En Revisión Coordinador',
-                        'Aprobado por Coordinador',
-                        'Enviado a Decano/Director',
-                        'En Revisión Decano/Director',
-                        'Aprobado por Decano/Director',
-                        'Enviado a VIEX',
-                        'En VIEX - Pendiente Asignación',
-                        'En VIEX - En Evaluación',
-                        'En VIEX - Aprobado'
+                    'Enviado a Coordinador',
+                    'En Revisión Coordinador',
+                    'Aprobado por Coordinador',
+                    'Enviado a Decano/Director',
+                    'En Revisión Decano/Director',
+                    'Aprobado por Decano/Director',
+                    'Enviado a VIEX',
+                    'En VIEX - Pendiente Asignación',
+                    'En VIEX - En Evaluación',
+                    'En VIEX - Aprobado'
                     ]))
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-clock"></i>
-                            <strong>Trabajo en proceso</strong><br>
-                            Su trabajo está siendo revisado. Será notificado de cualquier actualización.
-                        </div>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-clock"></i>
+                        <strong>Trabajo en proceso</strong><br>
+                        Su trabajo está siendo revisado. Será notificado de cualquier actualización.
+                    </div>
                     @endif
 
                     {{-- Duplicar (siempre disponible) --}}
@@ -444,56 +583,56 @@
             </div>
             <div class="card-body">
                 @if($timeline && $timeline->count() > 0)
-                    <div class="timeline timeline-inverse">
-                        @foreach($timeline as $history)
-                            <div class="time-label">
-                                <span class="bg-primary">
-                                    {{ $history->created_at->format('d M Y') }}
-                                </span>
+                <div class="timeline timeline-inverse">
+                    @foreach($timeline as $history)
+                    <div class="time-label">
+                        <span class="bg-primary">
+                            {{ $history->created_at->format('d M Y') }}
+                        </span>
+                    </div>
+                    <div>
+                        @php
+                        $iconClass = match ($history->status->name ?? '') {
+                        'Borrador' => 'fa-pencil-alt bg-secondary',
+                        'Enviado a Coordinador' => 'fa-paper-plane bg-warning',
+                        'En Revisión Coordinador' => 'fa-search bg-info',
+                        'Enviado a Decano' => 'fa-level-up-alt bg-primary',
+                        'En Revisión Decano' => 'fa-user-tie bg-primary',
+                        'Enviado a VIEX' => 'fa-university bg-dark',
+                        'En Evaluación VIEX' => 'fa-clipboard-check bg-dark',
+                        'Certificado' => 'fa-certificate bg-success',
+                        'Rechazado' => 'fa-times-circle bg-danger',
+                        'Subsanar' => 'fa-exclamation-triangle bg-orange',
+                        default => 'fa-circle bg-secondary'
+                        };
+                        @endphp
+                        <i class="fas {{ $iconClass }}"></i>
+                        <div class="timeline-item">
+                            <span class="time">
+                                <i class="far fa-clock"></i>
+                                {{ $history->created_at->format('H:i') }}
+                            </span>
+                            <h3 class="timeline-header">{{ $history->status->name ?? 'Estado Desconocido' }}</h3>
+                            <div class="timeline-body">
+                                @if($history->comments)
+                                <p>{{ $history->comments }}</p>
+                                @endif
+                                <small class="text-muted">
+                                    Por: {{ $history->changedBy->name ?? 'Sistema' }}
+                                </small>
                             </div>
-                            <div>
-                                @php
-                                    $iconClass = match ($history->status->name ?? '') {
-                                        'Borrador' => 'fa-pencil-alt bg-secondary',
-                                        'Enviado a Coordinador' => 'fa-paper-plane bg-warning',
-                                        'En Revisión Coordinador' => 'fa-search bg-info',
-                                        'Enviado a Decano' => 'fa-level-up-alt bg-primary',
-                                        'En Revisión Decano' => 'fa-user-tie bg-primary',
-                                        'Enviado a VIEX' => 'fa-university bg-dark',
-                                        'En Evaluación VIEX' => 'fa-clipboard-check bg-dark',
-                                        'Certificado' => 'fa-certificate bg-success',
-                                        'Rechazado' => 'fa-times-circle bg-danger',
-                                        'Subsanar' => 'fa-exclamation-triangle bg-orange',
-                                        default => 'fa-circle bg-secondary'
-                                    };
-                                @endphp
-                                <i class="fas {{ $iconClass }}"></i>
-                                <div class="timeline-item">
-                                    <span class="time">
-                                        <i class="far fa-clock"></i>
-                                        {{ $history->created_at->format('H:i') }}
-                                    </span>
-                                    <h3 class="timeline-header">{{ $history->status->name ?? 'Estado Desconocido' }}</h3>
-                                    <div class="timeline-body">
-                                        @if($history->comments)
-                                            <p>{{ $history->comments }}</p>
-                                        @endif
-                                        <small class="text-muted">
-                                            Por: {{ $history->changedBy->name ?? 'Sistema' }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                        <div>
-                            <i class="far fa-clock bg-gray"></i>
                         </div>
                     </div>
-                @else
-                    <div class="text-center text-muted">
-                        <i class="fas fa-clock fa-2x mb-2"></i>
-                        <p>Sin historial de cambios disponible</p>
+                    @endforeach
+                    <div>
+                        <i class="far fa-clock bg-gray"></i>
                     </div>
+                </div>
+                @else
+                <div class="text-center text-muted">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <p>Sin historial de cambios disponible</p>
+                </div>
                 @endif
             </div>
         </div>
@@ -512,7 +651,7 @@
                     <strong>Creado:</strong> {{ $work->created_at->format('d/m/Y H:i') }}<br>
                     <strong>Última Modificación:</strong> {{ $work->updated_at->format('d/m/Y H:i') }}<br>
                     @if($work->submitted_at)
-                        <strong>Enviado:</strong> {{ $work->submitted_at->format('d/m/Y H:i') }}<br>
+                    <strong>Enviado:</strong> {{ $work->submitted_at->format('d/m/Y H:i') }}<br>
                     @endif
                 </small>
             </div>
@@ -588,12 +727,12 @@
 
 @section('js')
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Tooltips
         $('[title]').tooltip();
 
         // Confirmación para acciones críticas
-        $('form[action*="destroy"], form[action*="submit"]').on('submit', function (e) {
+        $('form[action*="destroy"], form[action*="submit"]').on('submit', function(e) {
             const btn = $(this).find('button[type="submit"]');
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
 
@@ -604,7 +743,7 @@
         });
 
         // Copiar ID al hacer clic
-        $('.card-light').on('click', function () {
+        $('.card-light').on('click', function() {
             const workId = '{{ $work->id }}';
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(workId).then(() => {

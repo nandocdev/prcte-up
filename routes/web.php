@@ -47,6 +47,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('works/{work}/resubmit', [WorkOfExtensionController::class, 'resubmit'])
         ->name('works.resubmit');
 
+    // Ruta adicional para autorización de publicación (CU06)
+    Route::patch('works/{work}/authorize-publication', [WorkOfExtensionController::class, 'authorizePublication'])
+        ->name('works.authorize-publication');
+
     // Rutas para Coordinador de Extensión (CU06, CU07, CU08)
     // Usamos auth middleware y validación en el controlador para mejor control
     Route::middleware(['auth'])->group(function () {

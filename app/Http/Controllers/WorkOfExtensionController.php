@@ -443,6 +443,7 @@ class WorkOfExtensionController extends Controller {
 
     /**
      * Reenviar trabajo después de realizar correcciones
+     * CU05: Subsanar Trabajo Rechazado
      */
     public function resubmit(Request $request, WorkOfExtension $work): RedirectResponse {
         // Verificar autorización
@@ -464,7 +465,8 @@ class WorkOfExtensionController extends Controller {
                     ->with('error', 'Este trabajo no se puede reenviar en su estado actual.');
             }
 
-            $work->submitForReview($request->user());
+            // Reenviar con flag isResubmission=true para diferenciar notificación
+            $work->submitForReview($request->user(), isResubmission: true);
 
             return redirect()
                 ->route('works.show', $work)
@@ -474,6 +476,41 @@ class WorkOfExtensionController extends Controller {
             return redirect()
                 ->route('works.show', $work)
                 ->with('error', 'Error al reenviar el trabajo: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Autorizar/Revocar publicación de resultados del trabajo
+     * CU06: Autorizar Publicación de Resultados
+     */
+    public function authorizePublication(Request $request, WorkOfExtension $work): RedirectResponse
+    {
+        // Verificar autorización
+        $this->authorize('update', $work);
+
+        try {
+            $isAuthorized = $request->boolean('authorized', true);
+            
+            // Actualizar consentimiento
+            $work->update([
+                'publication_consent' => $isAuthorized,
+            ]);
+
+            // Disparar evento para notificar a VIEX
+            \App\Events\WorkPublicationAuthorized::dispatch($work, $request->user(), $isAuthorized);
+
+            $message = $isAuthorized
+                ? __('¡Autorización registrada exitosamente! VIEX ha sido notificado de su consentimiento para publicar este trabajo.')
+                : __('Autorización de publicación revocada exitosamente. VIEX ha sido notificado del cambio.');
+
+            return redirect()
+                ->route('works.show', $work)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('works.show', $work)
+                ->with('error', __('Error al procesar la autorización: ') . $e->getMessage());
         }
     }
 

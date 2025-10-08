@@ -13,6 +13,7 @@ use App\Models\WorkStatusHistory;
 /**
  * Listener que envía notificación al coordinador cuando se submite un trabajo
  * CU04: Enviar trabajo a coordinador - componente de listener
+ * CU05: Subsanar trabajo rechazado - reutilizado para reenvíos con contexto diferenciado
  */
 class SendWorkSubmittedNotification implements ShouldQueue {
     use InteractsWithQueue;
@@ -29,11 +30,13 @@ class SendWorkSubmittedNotification implements ShouldQueue {
     public function handle(WorkSubmitted $event): void {
         $work = $event->work;
         $submittedBy = $event->submittedBy;
+        $isResubmission = $event->isResubmission;
 
-        Log::info('Procesando notificación de trabajo enviado', [
+        Log::info($isResubmission ? 'Procesando notificación de trabajo reenviado' : 'Procesando notificación de trabajo enviado', [
             'work_id' => $work->getKey(),
             'submitted_by' => $submittedBy->getKey(),
-            'organizational_unit_id' => $work->getAttribute('organizational_unit_id')
+            'organizational_unit_id' => $work->getAttribute('organizational_unit_id'),
+            'is_resubmission' => $isResubmission
         ]);
 
         try {
@@ -42,13 +45,14 @@ class SendWorkSubmittedNotification implements ShouldQueue {
 
             if ($coordinator) {
                 try {
-                    // Enviar notificación al coordinador
-                    $coordinator->notify(new WorkSubmittedForReview($work));
+                    // Enviar notificación al coordinador (con contexto de reenvío)
+                    $coordinator->notify(new WorkSubmittedForReview($work, $isResubmission));
 
                     Log::info('Notificación enviada exitosamente', [
                         'work_id' => $work->getKey(),
                         'coordinator_id' => $coordinator->getKey(),
-                        'coordinator_name' => $coordinator->name
+                        'coordinator_name' => $coordinator->name,
+                        'is_resubmission' => $isResubmission
                     ]);
 
                     // Registrar trazabilidad en historial (opcional: puede ajustarse a una tabla específica)
@@ -57,7 +61,9 @@ class SendWorkSubmittedNotification implements ShouldQueue {
                         'from_status_id' => $work->getAttribute('current_status_id'),
                         'to_status_id' => $work->getAttribute('current_status_id'),
                         'changed_by_user_id' => $submittedBy->getKey(),
-                        'comments' => 'Notificaci\u00f3n enviada al coordinador (ID: ' . $coordinator->getKey() . ')'
+                        'comments' => $isResubmission
+                            ? 'Notificación de reenvío enviada al coordinador (ID: ' . $coordinator->getKey() . ')'
+                            : 'Notificación enviada al coordinador (ID: ' . $coordinator->getKey() . ')'
                     ]);
 
                 } catch (\Exception $e) {
@@ -82,7 +88,7 @@ class SendWorkSubmittedNotification implements ShouldQueue {
                 if ($admins->isNotEmpty()) {
                     foreach ($admins as $admin) {
                         try {
-                            $admin->notify(new WorkSubmittedForReview($work));
+                            $admin->notify(new WorkSubmittedForReview($work, $isResubmission));
 
                             WorkStatusHistory::create([
                                 'work_of_extension_id' => $work->getKey(),

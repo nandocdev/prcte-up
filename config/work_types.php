@@ -68,4 +68,7 @@ return [
         3 => 'publicacion', // Publicación
         4 => 'asistencia',  // Asistencia Técnica
     ],
+
+    // Configuración de Correos Institucionales
+    'viex_projects_email' => env('VIEX_PROJECTS_EMAIL', 'viexproyectos@up.ac.pa'),
 ];

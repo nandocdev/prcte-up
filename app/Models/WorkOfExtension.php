@@ -592,7 +592,16 @@ class WorkOfExtension extends Model implements HasMedia {
      * @param User $user Usuario que envía el trabajo
      * @throws \InvalidArgumentException Si el trabajo no cumple requisitos para ser enviado
      */
-    public function submitForReview(User $user): void {
+    /**
+     * Envía el trabajo para revisión por el coordinador de extensión.
+     * Puede usarse tanto para envío inicial (CU04) como reenvío después de rechazo (CU05).
+     *
+     * @param User $user Usuario que envía/reenvía
+     * @param bool $isResubmission True si es un reenvío después de rechazo
+     * @throws \InvalidArgumentException Si el trabajo no está listo para envío
+     */
+    public function submitForReview(User $user, bool $isResubmission = false): void
+    {
         // Verificar validación completa
         if (!$this->canBeSubmitted()) {
             $missingFields = $this->getMissingFieldsForSubmission();
@@ -620,9 +629,14 @@ class WorkOfExtension extends Model implements HasMedia {
         }
 
         // Hacer la transición y el marcado de envío de manera atómica
-        DB::transaction(function () use ($submittedStatus, $user) {
+        DB::transaction(function () use ($submittedStatus, $user, $isResubmission) {
+            // Mensaje diferenciado para historial
+            $comment = $isResubmission
+                ? 'Trabajo corregido y reenviado para revisión por el coordinador de extensión.'
+                : 'Trabajo enviado para revisión por el coordinador de extensión.';
+
             // Cambiar estado (actualiza current_status_id y crea WorkStatusHistory)
-            $this->changeStatus($submittedStatus, $user, 'Trabajo enviado para revisión por el coordinador de extensión.');
+            $this->changeStatus($submittedStatus, $user, $comment);
 
             // Marcar como enviado y timestamp
             $this->update([
@@ -631,13 +645,14 @@ class WorkOfExtension extends Model implements HasMedia {
             ]);
         });
 
-        // Disparar evento para notificar al coordinador
-        \App\Events\WorkSubmitted::dispatch($this, $user);
+        // Disparar evento para notificar al coordinador (con contexto de reenvío)
+        \App\Events\WorkSubmitted::dispatch($this, $user, $isResubmission);
 
-        Log::info('Evento WorkSubmitted disparado', [
+        Log::info($isResubmission ? 'Trabajo reenviado (WorkSubmitted)' : 'Evento WorkSubmitted disparado', [
             'work_id' => $this->getKey(),
             'submitted_by' => $user->getKey(),
-            'work_title' => $this->getAttribute('title')
+            'work_title' => $this->getAttribute('title'),
+            'is_resubmission' => $isResubmission
         ]);
     }
 
