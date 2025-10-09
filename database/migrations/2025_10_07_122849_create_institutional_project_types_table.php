@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('institutional_project_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 255)->unique();
+            $table->string('name', 255)->unique('ipt_name_uq');
             $table->text('description')->nullable();
             $table->timestamps();
         });

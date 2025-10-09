@@ -22,9 +22,9 @@ return new class extends Migration {
             $table->string('url')->nullable();
             $table->timestamp('created_at')->useCurrent();
 
-            $table->index('event');
-            $table->index('created_at');
-            $table->index(['auditable_type', 'auditable_id'], 'audits_auditable_index');
+            $table->index('event', 'audits_event_idx');
+            $table->index('created_at', 'audits_created_idx');
+            $table->index(['auditable_type', 'auditable_id'], 'audits_audit_idx');
         });
     }
 

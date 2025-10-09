@@ -40,10 +40,10 @@ return new class extends Migration
             // Auditoría
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Índices
-            $table->index('is_active');
-            $table->index(['is_active', 'order']);
+            // $table->index('is_active', 'ec_active_idx');
+            // $table->index(['is_active', 'order'], 'ec_active_order_idx');
         });
         
         // Comentario en la tabla

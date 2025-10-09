@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email', 100)->unique();
+            $table->string('email', 100)->unique('users_email_uq');
             $table->string('password');
-            $table->string('cedula', 20)->unique();
-            $table->string('professor_code', 20)->nullable()->unique();
+            $table->string('cedula', 20)->unique('users_cedula_uq');
+            $table->string('professor_code', 20)->nullable()->unique('users_prof_code_uq');
             $table->foreignId('main_organizational_unit_id')->nullable()->constrained('organizational_units');
             $table->timestamp('email_verified_at')->nullable();
             $table->char('is_active', 1)->default('1');

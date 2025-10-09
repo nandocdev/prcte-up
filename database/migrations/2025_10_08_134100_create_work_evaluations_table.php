@@ -84,17 +84,16 @@ return new class extends Migration
             // Auditoría
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Índices
-            $table->index('work_of_extension_id');
-            $table->index('evaluator_user_id');
-            $table->index(['work_of_extension_id', 'evaluator_user_id']);
-            $table->index('status');
-            $table->index('final_decision');
-            $table->index('submitted_at');
-            
+            $table->index('work_of_extension_id', 'we_work_idx');
+            $table->index('evaluator_user_id', 'we_eval_idx');
+            $table->index('status', 'we_status_idx');
+            $table->index('final_decision', 'we_decision_idx');
+            $table->index('submitted_at', 'we_submitted_idx');
+
             // Constraint único: un evaluador solo puede tener una evaluación por trabajo
-            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'unique_evaluation_per_work');
+            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'we_work_eval_uq');
         });
         
         // Comentario en la tabla

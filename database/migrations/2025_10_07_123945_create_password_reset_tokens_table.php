@@ -12,19 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('email')->index('prt_email_pk');
             $table->string('token');
             $table->timestamp('created_at')->nullable();
+
+            // $table->primary(['email'], 'prt_email_pk');
         });
 
 
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->string('id')->index('sessions_id_pk');
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
+
+            // $table->primary(['id'], 'sessions_id_pk');
         });
     }
 

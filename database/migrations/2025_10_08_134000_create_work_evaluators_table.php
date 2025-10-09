@@ -67,16 +67,15 @@ return new class extends Migration
             
             // Auditoría
             $table->timestamps();
-            
+
             // Índices
-            $table->index('work_of_extension_id');
-            $table->index('evaluator_user_id');
-            $table->index(['work_of_extension_id', 'evaluator_user_id']);
-            $table->index('status');
-            $table->index('assigned_at');
-            
+            $table->index('work_of_extension_id', 'weval_work_idx');
+            $table->index('evaluator_user_id', 'weval_eval_idx');
+            $table->index('status', 'weval_status_idx');
+            $table->index('assigned_at', 'weval_assigned_idx');
+
             // Constraint único: un evaluador solo puede ser asignado una vez por trabajo
-            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'unique_work_evaluator');
+            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'weval_work_eval_uq');
         });
         
         // Comentario en la tabla

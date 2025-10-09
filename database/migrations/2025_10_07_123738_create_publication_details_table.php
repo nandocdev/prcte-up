@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('publication_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->primary();
+            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('pub_details_pk');
             $table->string('publication_type', 50);
             $table->string('editorial')->nullable();
             $table->string('isbn_issn', 50)->nullable();
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('media_type', 100);
             $table->string('media_nature', 100)->nullable();
             $table->timestamps();
+
+            // $table->primary(['work_of_extension_id'], 'pub_details_pk');
         });
     }
 

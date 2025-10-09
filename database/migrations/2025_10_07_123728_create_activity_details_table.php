@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('activity_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->primary();
+            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('act_details_pk');
             $table->string('activity_type', 50)->nullable();
             $table->string('modality', 20)->nullable();
             $table->integer('duration_hours')->nullable();
@@ -22,6 +22,8 @@ return new class extends Migration
             $table->boolean('offers_certificate')->default(false);
             $table->text('details_json');
             $table->timestamps();
+
+            // $table->primary(['work_of_extension_id'], 'act_details_pk');
         });
     }
 

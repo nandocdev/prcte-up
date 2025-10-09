@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('technical_assistance_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->primary();
+            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('tech_assist_pk');
             $table->string('specialization_area')->nullable();
             $table->text('expected_products')->nullable();
             $table->string('work_modality', 20);
@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('collaborating_institution', 255);
             $table->text('details_json');
             $table->timestamps();
+
+            // $table->primary(['work_of_extension_id'], 'tech_assist_pk');
         });
     }
 

@@ -54,14 +54,14 @@ return new class extends Migration
             
             // Auditoría
             $table->timestamps();
-            
+
             // Índices
-            $table->index('work_evaluation_id');
-            $table->index('evaluation_criteria_id');
-            $table->index(['work_evaluation_id', 'evaluation_criteria_id']);
-            
+            $table->index('work_evaluation_id', 'ed_work_eval_idx');
+            $table->index('evaluation_criteria_id', 'ed_criteria_idx');
+            $table->index(['work_evaluation_id', 'evaluation_criteria_id'], 'ed_work_criteria_idx');
+
             // Constraint único: un criterio solo puede evaluarse una vez por evaluación
-            $table->unique(['work_evaluation_id', 'evaluation_criteria_id'], 'unique_criteria_per_evaluation');
+            $table->unique(['work_evaluation_id', 'evaluation_criteria_id'], 'ed_work_criteria_uq');
         });
         
         // Comentario en la tabla

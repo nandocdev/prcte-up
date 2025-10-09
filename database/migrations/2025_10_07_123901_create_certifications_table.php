@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('certifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions');
-            $table->string('certification_number', 50)->unique();
+            $table->string('certification_number', 50)->unique('cert_number_uq');
             $table->date('issue_date');
             $table->date('valid_until');
             $table->foreignId('issued_by_user_id')->constrained('users');
