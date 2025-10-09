@@ -14,7 +14,6 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Controlador principal para gestión de trabajos de extensión
@@ -528,12 +527,23 @@ class WorkOfExtensionController extends Controller {
         $this->authorize('view', $work);
 
         try {
-            // Redirigir a la descarga de VIEX que ya maneja la lógica
-            return redirect()->route('viex.certificate.download', $certification);
+            return $certification->buildDownloadResponse();
+        } catch (\RuntimeException $exception) {
+            Log::warning('Archivo de certificación no disponible para descarga pública.', [
+                'certification_id' => $certification->getKey(),
+                'work_id' => $work->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
 
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Error al descargar el certificado: ' . $e->getMessage());
+            return redirect()->back()->with('error', __('certifications.download_missing_file'));
+        } catch (\Throwable $exception) {
+            Log::error('Error inesperado al descargar certificado.', [
+                'certification_id' => $certification->getKey(),
+                'work_id' => $work->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', __('certifications.download_error'));
         }
     }
 }

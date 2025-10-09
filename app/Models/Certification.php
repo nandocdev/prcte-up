@@ -3,13 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Modelo para las certificaciones emitidas
  * Tabla: certifications
  */
-class Certification extends Model {
+class Certification extends Model implements HasMedia
+{
+    use InteractsWithMedia;
     protected $fillable = [
         'work_of_extension_id',
         'certification_number',
@@ -63,6 +71,42 @@ class Certification extends Model {
      */
     public function getVerificationUrlAttribute(): string {
         return route('certifications.verify', $this->getAttribute('certification_number'));
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('certificates')->singleFile();
+    }
+
+    public function getCertificateMedia(): ?Media
+    {
+        return $this->getFirstMedia('certificates');
+    }
+
+    public function buildDownloadResponse(): BinaryFileResponse
+    {
+        $media = $this->getCertificateMedia();
+
+        if (!$media) {
+            throw new RuntimeException(__('certifications.download_missing_file'));
+        }
+
+        $absolutePath = $media->getPath();
+
+        if (!$absolutePath || !is_file($absolutePath)) {
+            Log::warning('Archivo de certificación no encontrado en disco.', [
+                'certification_id' => $this->getKey(),
+                'media_id' => $media->getKey(),
+                'disk' => $media->disk,
+                'path' => $media->getPathRelativeToRoot(),
+            ]);
+
+            throw new RuntimeException(__('certifications.download_missing_file'));
+        }
+
+        $fileName = sprintf('certificacion-%s.pdf', Str::slug($this->getAttribute('certification_number') ?? (string) $this->getKey(), '_'));
+
+        return response()->download($absolutePath, $fileName);
     }
 
     // Boot method para generar número automáticamente

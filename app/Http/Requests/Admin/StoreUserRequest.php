@@ -12,6 +12,13 @@ class StoreUserRequest extends FormRequest {
         return $this->user()->hasRole('super_admin');
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->has('is_active') ? $this->boolean('is_active') : $this->isMethod('post'),
+        ]);
+    }
+
     public function rules(): array {
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -21,6 +28,7 @@ class StoreUserRequest extends FormRequest {
             'organizational_unit_id' => ['required', 'exists:organizational_units,id'],
             'roles' => ['array'],
             'roles.*' => ['string', 'exists:roles,name'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 
@@ -36,6 +44,7 @@ class StoreUserRequest extends FormRequest {
             'professor_code.unique' => __('Este código de profesor ya está en uso.'),
             'organizational_unit_id.required' => __('La unidad organizacional es obligatoria.'),
             'organizational_unit_id.exists' => __('La unidad organizacional seleccionada no es válida.'),
+            'is_active.boolean' => __('El estado del usuario no es válido.'),
         ];
     }
 }

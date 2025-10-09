@@ -1,65 +1,81 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Admin\StoreWorkStatusRequest;
+use App\Http\Requests\Admin\UpdateWorkStatusRequest;
+use App\Models\WorkStatus;
+use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Http\RedirectResponse;
 
 class WorkStatusesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): ViewContract
     {
-        //
+        $statuses = WorkStatus::query()
+            ->withCount(['currentWorks', 'transitionsFrom', 'transitionsTo'])
+            ->orderBy('name')
+            ->paginate(20);
+
+        return view('admin.work-statuses.index', [
+            'statuses' => $statuses,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): ViewContract
     {
-        //
+        return view('admin.work-statuses.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreWorkStatusRequest $request): RedirectResponse
     {
-        //
+        WorkStatus::create($request->validated());
+
+        return redirect()
+            ->route('admin.work-statuses.index')
+            ->with('success', __('Estado de trabajo creado exitosamente.'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(WorkStatus $workStatus): ViewContract
     {
-        //
+        $workStatus->loadCount(['currentWorks', 'transitionsFrom', 'transitionsTo']);
+
+        return view('admin.work-statuses.show', [
+            'workStatus' => $workStatus,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(WorkStatus $workStatus): ViewContract
     {
-        //
+        return view('admin.work-statuses.edit', [
+            'workStatus' => $workStatus,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateWorkStatusRequest $request, WorkStatus $workStatus): RedirectResponse
     {
-        //
+        $workStatus->update($request->validated());
+
+        return redirect()
+            ->route('admin.work-statuses.index')
+            ->with('success', __('Estado de trabajo actualizado exitosamente.'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(WorkStatus $workStatus): RedirectResponse
     {
-        //
+        if ($workStatus->hasAssociations()) {
+            return redirect()
+                ->route('admin.work-statuses.index')
+                ->with('error', __('No se puede eliminar un estado que está asociado a trabajos o historial.'));
+        }
+
+        $workStatus->delete();
+
+        return redirect()
+            ->route('admin.work-statuses.index')
+            ->with('success', __('Estado de trabajo eliminado exitosamente.'));
     }
 }

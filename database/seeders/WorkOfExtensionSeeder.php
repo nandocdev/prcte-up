@@ -60,7 +60,7 @@ class WorkOfExtensionSeeder extends Seeder {
                 'end_date' => '2024-12-15',
                 'publication_consent' => '1',
                 'status' => 'Borrador',
-                'unit_type' => 'Facultad'
+                'unit_type' => 'Faculty'
             ],
             [
                 'title' => 'Asesoría Técnica en Sistemas de Información para PYMES',
@@ -71,7 +71,7 @@ class WorkOfExtensionSeeder extends Seeder {
                 'end_date' => '2025-02-28',
                 'publication_consent' => '1',
                 'status' => 'En Coordinador de Extensión',
-                'unit_type' => 'Escuela'
+                'unit_type' => 'School'
             ],
             [
                 'title' => 'Investigación sobre Impacto Ambiental de Residuos Plásticos',
@@ -82,7 +82,7 @@ class WorkOfExtensionSeeder extends Seeder {
                 'end_date' => '2025-06-30',
                 'publication_consent' => '1',
                 'status' => 'Borrador',
-                'unit_type' => 'Centro'
+                'unit_type' => 'Regional Center'
             ],
             [
                 'title' => 'Servicio Social Universitario en Comunidades Rurales',
@@ -93,7 +93,7 @@ class WorkOfExtensionSeeder extends Seeder {
                 'end_date' => '2025-01-31',
                 'publication_consent' => '0',
                 'status' => 'Borrador',
-                'unit_type' => 'Facultad'
+                'unit_type' => 'Faculty'
             ],
         ];
 

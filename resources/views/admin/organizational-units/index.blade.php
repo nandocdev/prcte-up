@@ -1,203 +1,158 @@
 @extends('adminlte::page')
 
-@section('title', 'Unidades Académicas')
+@section('title', __('Unidades organizacionales'))
 
 @section('content_header')
-    <div class="row">
-        <div class="col-sm-6">
-            <h1>
-                <i class="fas fa-university"></i>
-                Unidades Académicas
-            </h1>
-        </div>
-        <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="#">Configuración</a></li>
-                <li class="breadcrumb-item active">Unidades Académicas</li>
-            </ol>
-        </div>
+<div class="row">
+    <div class="col-sm-6">
+        <h1>
+            <i class="fas fa-sitemap"></i>
+            {{ __('Unidades organizacionales') }}
+        </h1>
     </div>
+    <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Inicio') }}</a></li>
+            <li class="breadcrumb-item"><a href="#">{{ __('Configuración') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('Unidades organizacionales') }}</li>
+        </ol>
+    </div>
+</div>
 @stop
 
 @section('content')
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-list"></i>
-                Listado de Unidades Académicas
-            </h3>
-            <div class="card-tools">
-                <a href="{{ route('admin.organizational-units.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i>
-                    Nueva Unidad
-                </a>
-            </div>
-        </div>
-
-        <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <i class="icon fas fa-check"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <i class="icon fas fa-ban"></i>
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th style="width: 10px">#</th>
-                            <th>Código</th>
-                            <th>Nombre</th>
-                            <th>Tipo</th>
-                            <th>Unidad Padre</th>
-                            <th>Sub-unidades</th>
-                            <th>Usuarios</th>
-                            <th style="width: 150px">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($units as $unit)
-                            <tr>
-                                <td>{{ $unit->id }}</td>
-                                <td>
-                                    <span class="badge badge-info">{{ $unit->code }}</span>
-                                </td>
-                                <td>
-                                    <strong>{{ $unit->name }}</strong>
-                                    @if($unit->description)
-                                        <br>
-                                        <small class="text-muted">{{ Str::limit($unit->description, 50) }}</small>
-                                    @endif
-                                </td>
-                                <td>
-                                    @switch($unit->unit_type)
-                                        @case('faculty')
-                                            <span class="badge badge-primary">
-                                                <i class="fas fa-university"></i> Facultad
-                                            </span>
-                                            @break
-                                        @case('department')
-                                            <span class="badge badge-success">
-                                                <i class="fas fa-building"></i> Departamento
-                                            </span>
-                                            @break
-                                        @case('school')
-                                            <span class="badge badge-warning">
-                                                <i class="fas fa-graduation-cap"></i> Escuela
-                                            </span>
-                                            @break
-                                        @case('center')
-                                            <span class="badge badge-info">
-                                                <i class="fas fa-map-marker-alt"></i> Centro
-                                            </span>
-                                            @break
-                                        @default
-                                            <span class="badge badge-secondary">{{ $unit->unit_type }}</span>
-                                    @endswitch
-                                </td>
-                                <td>
-                                    @if($unit->parent)
-                                        <span class="text-sm">{{ $unit->parent->name }}</span>
-                                    @else
-                                        <span class="text-muted">— Sin unidad padre —</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge badge-light">
-                                        {{ $unit->children->count() }} sub-unidades
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-light">
-                                        {{ $unit->users->count() ?? 0 }} usuarios
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.organizational-units.show', $unit) }}"
-                                           class="btn btn-info btn-xs" title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.organizational-units.edit', $unit) }}"
-                                           class="btn btn-warning btn-xs" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-xs"
-                                                onclick="confirmDelete({{ $unit->id }})" title="Eliminar">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Form hidden para eliminación -->
-                                    <form id="delete-form-{{ $unit->id }}"
-                                          action="{{ route('admin.organizational-units.destroy', $unit) }}"
-                                          method="POST" style="display: none;">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    <i class="fas fa-university fa-3x mb-3"></i>
-                                    <br>
-                                    No hay unidades académicas registradas.
-                                    <br>
-                                    <a href="{{ route('admin.organizational-units.create') }}" class="btn btn-primary btn-sm mt-2">
-                                        <i class="fas fa-plus"></i> Crear primera unidad
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        @if($units->hasPages())
-            <div class="card-footer">
-                {{ $units->links() }}
-            </div>
-        @endif
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">
+            <i class="fas fa-list"></i>
+            {{ __('Listado de unidades') }}
+        </h3>
+        <a href="{{ route('admin.organizational-units.create') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i>
+            {{ __('Nueva unidad') }}
+        </a>
     </div>
+
+    <div class="card-body">
+        @foreach (['success', 'error'] as $flash)
+        @if (session($flash))
+        <div class="alert alert-{{ $flash === 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
+            <i class="icon fas fa-{{ $flash === 'success' ? 'check' : 'ban' }} mr-2"></i>
+            {{ session($flash) }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        @endif
+        @endforeach
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">#</th>
+                        <th>{{ __('Nombre') }}</th>
+                        <th>{{ __('Tipo') }}</th>
+                        <th>{{ __('Unidad padre') }}</th>
+                        <th>{{ __('Subunidades') }}</th>
+                        <th>{{ __('Usuarios') }}</th>
+                        <th style="width: 140px">{{ __('Acciones') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($units as $unit)
+                    <tr>
+                        <td>{{ $unit->id }}</td>
+                        <td>{{ $unit->name }}</td>
+                        <td>
+                            <span class="badge badge-primary">
+                                {{ $unit->typeLabel() }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($unit->parent)
+                            {{ $unit->parent->name }}
+                            @else
+                            <span class="text-muted">{{ __('Sin unidad padre') }}</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge badge-light">
+                                {{ $unit->children->count() }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-light">
+                                {{ $unit->users->count() }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ route('admin.organizational-units.show', $unit) }}" class="btn btn-info" title="{{ __('Ver detalle') }}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('admin.organizational-units.edit', $unit) }}" class="btn btn-warning" title="{{ __('Editar') }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-delete-unit" title="{{ __('Eliminar') }}"
+                                    data-unit-id="{{ $unit->id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <form id="delete-form-{{ $unit->id }}" action="{{ route('admin.organizational-units.destroy', $unit) }}" method="POST" class="d-none">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-university fa-3x mb-3"></i>
+                            <div>{{ __('No hay unidades organizacionales registradas.') }}</div>
+                            <a href="{{ route('admin.organizational-units.create') }}" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-plus"></i> {{ __('Crear primera unidad') }}
+                            </a>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if ($units->hasPages())
+    <div class="card-footer">
+        {{ $units->links() }}
+    </div>
+    @endif
+</div>
 @stop
 
 @section('css')
-    <style>
-        .table th {
-            vertical-align: middle;
-        }
-        .btn-group-sm > .btn, .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-    </style>
+<style>
+    .table th {
+        vertical-align: middle;
+    }
+
+    .btn-group-sm>.btn {
+        padding: 0.35rem 0.5rem;
+    }
+</style>
 @stop
 
 @section('js')
 <script>
     function confirmDelete(unitId) {
         Swal.fire({
-            title: '¿Estás seguro?',
-            text: "Esta acción no se puede deshacer. Se eliminará la unidad académica permanentemente.",
+            title: "{{ __('¿Estás seguro?') }}",
+            text: "{{ __('Esta acción no se puede deshacer.') }}",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
+            confirmButtonText: "{{ __('Sí, eliminar') }}",
+            cancelButtonText: "{{ __('Cancelar') }}"
         }).then((result) => {
             if (result.isConfirmed) {
                 document.getElementById('delete-form-' + unitId).submit();
@@ -205,11 +160,15 @@
         });
     }
 
-    // Auto-hide alerts after 5 seconds
     $(document).ready(function() {
         setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
+
+        $('.btn-delete-unit').on('click', function() {
+            const unitId = $(this).data('unit-id');
+            confirmDelete(unitId);
+        });
     });
 </script>
 @stop

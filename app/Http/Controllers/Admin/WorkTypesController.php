@@ -1,96 +1,81 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreWorkTypeRequest;
+use App\Http\Requests\Admin\UpdateWorkTypeRequest;
 use App\Models\WorkType;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Http\RedirectResponse;
 
 class WorkTypesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): ViewContract
     {
-        $workTypes = WorkType::orderBy('name')->paginate(20);
+        $workTypes = WorkType::query()
+            ->withCount('works')
+            ->orderBy('name')
+            ->paginate(20);
 
-        return view('admin.work-types.index', compact('workTypes'));
+        return view('admin.work-types.index', [
+            'workTypes' => $workTypes,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): ViewContract
     {
         return view('admin.work-types.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreWorkTypeRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:work_type',
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'boolean',
-        ]);
-
         WorkType::create($request->validated());
 
-        return redirect()->route('admin.work-types.index')
+        return redirect()
+            ->route('admin.work-types.index')
             ->with('success', __('Tipo de trabajo creado exitosamente.'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(WorkType $workType)
+    public function show(WorkType $workType): ViewContract
     {
-        $workType->loadCount('workOfExtensions');
+        $workType->loadCount('works');
 
-        return view('admin.work-types.show', compact('workType'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(WorkType $workType)
-    {
-        return view('admin.work-types.edit', compact('workType'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, WorkType $workType)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:work_type,name,' . $workType->id,
-            'description' => 'nullable|string|max:1000',
-            'is_active' => 'boolean',
+        return view('admin.work-types.show', [
+            'workType' => $workType,
         ]);
+    }
 
+    public function edit(WorkType $workType): ViewContract
+    {
+        return view('admin.work-types.edit', [
+            'workType' => $workType,
+        ]);
+    }
+
+    public function update(UpdateWorkTypeRequest $request, WorkType $workType): RedirectResponse
+    {
         $workType->update($request->validated());
 
-        return redirect()->route('admin.work-types.index')
+        return redirect()
+            ->route('admin.work-types.index')
             ->with('success', __('Tipo de trabajo actualizado exitosamente.'));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(WorkType $workType)
+    public function destroy(WorkType $workType): RedirectResponse
     {
-        if ($workType->workOfExtensions()->exists()) {
-            return redirect()->route('admin.work-types.index')
+        if ($workType->hasAssociatedWorks()) {
+            return redirect()
+                ->route('admin.work-types.index')
                 ->with('error', __('No se puede eliminar un tipo de trabajo que tiene trabajos registrados.'));
         }
 
         $workType->delete();
 
-        return redirect()->route('admin.work-types.index')
+        return redirect()
+            ->route('admin.work-types.index')
             ->with('success', __('Tipo de trabajo eliminado exitosamente.'));
     }
 }

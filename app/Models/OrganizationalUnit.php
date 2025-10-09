@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,6 +13,17 @@ use Illuminate\Database\Eloquent\Model;
  * Tabla: organizational_units
  */
 class OrganizationalUnit extends Model {
+    public const TYPE_LABELS = [
+        'Main Campus' => 'Campus central',
+        'Faculty' => 'Facultad',
+        'Department' => 'Departamento',
+        'School' => 'Escuela',
+        'Regional Center' => 'Centro regional',
+        'University Extension' => 'Extension universitaria',
+        'Extension Unit' => 'Unidad de extension',
+        'Directorate' => 'Direccion',
+    ];
+
     protected $fillable = [
         'name',
         'type',
@@ -22,14 +36,14 @@ class OrganizationalUnit extends Model {
      * Unidad padre en la jerarquía
      */
     public function parent() {
-        return $this->belongsTo(OrganizationalUnit::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
      * Unidades hijas en la jerarquía
      */
     public function children() {
-        return $this->hasMany(OrganizationalUnit::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**
@@ -82,10 +96,36 @@ class OrganizationalUnit extends Model {
     /**
      * Obtener unidades organizacionales para selectores en formularios
      */
-    public static function getUnitsForSelection() {
+    public static function getUnitsForSelection(): Collection
+    {
         return self::orderBy('type')
             ->orderBy('name')
             ->get()
             ->groupBy('type');
+    }
+
+    public function typeLabel(): string
+    {
+        return self::TYPE_LABELS[$this->type] ?? $this->type;
+    }
+
+    public function isDescendantOf(int $ancestorId): bool
+    {
+        $parent = $this->parent;
+
+        while ($parent instanceof self) {
+            if ($parent->getKey() === $ancestorId) {
+                return true;
+            }
+
+            $parent = $parent->parent;
+        }
+
+        return false;
+    }
+
+    public static function typeOptions(): array
+    {
+        return self::TYPE_LABELS;
     }
 }

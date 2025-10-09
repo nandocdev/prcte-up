@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\GenerateCertificationPdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
@@ -27,6 +28,8 @@ class WorkOfExtension extends Model implements HasMedia {
         'En Corrección',
         'Pendiente Decano',
         'Aprobado por Coordinador',
+        'Certificado',
+        'Rechazado por VIEX',
     ];
 
     public const DEAN_STATUS_NAMES = [
@@ -35,6 +38,8 @@ class WorkOfExtension extends Model implements HasMedia {
         'Pendiente Decano',
         'Aprobado por Coordinador',
         'Pendiente VIEX',
+        'Certificado',
+        'Rechazado por VIEX',
     ];
 
     public const VIEX_STATUS_NAMES = [
@@ -1526,43 +1531,72 @@ class WorkOfExtension extends Model implements HasMedia {
      * CU15: Generar certificación oficial
      *
      * @param User $issuedBy Usuario que emite la certificación
-     * @param string $certificationNumber Número de certificación
+     * @param string|null $certificationNumber Número de certificación (auto si null)
      * @param string|null $comments Comentarios adicionales
      * @param int $validityYears Años de vigencia del certificado
      * @return \App\Models\Certification
      */
-    public function generateCertification(User $issuedBy, string $certificationNumber, ?string $comments = null, int $validityYears = 5): \App\Models\Certification {
-        if ($this->statusIsNot('Certificado')) {
-            throw new \InvalidArgumentException('El trabajo debe estar en estado "Certificado" para generar certificación oficial.');
+    public function generateCertification(User $issuedBy, ?string $certificationNumber = null, ?string $comments = null, int $validityYears = 5): \App\Models\Certification
+    {
+        $currentStatusName = $this->currentStatus?->getAttribute('name');
+
+        if (!in_array($currentStatusName, ['En VIEX - Aprobado', 'Certificado'], true)) {
+            throw new \InvalidArgumentException('El trabajo debe estar en estado "En VIEX - Aprobado" para generar certificación oficial.');
         }
 
-        // Crear registro de certificación
+        $issueDate = now();
+        $validUntil = $issueDate->copy()->addYears($validityYears);
+        $number = $certificationNumber ?: \App\Models\Certification::generateCertificationNumber();
+
+        $statusComment = __(
+            'certifications.status_comment',
+            [
+                'number' => $number,
+                'date' => $validUntil->format('d/m/Y'),
+            ]
+        );
+
+        if ($currentStatusName !== 'Certificado') {
+            $certifiedStatus = WorkStatus::where('name', 'Certificado')->firstOrFail();
+            $this->changeStatus($certifiedStatus, $issuedBy, $statusComment);
+            $this->refresh();
+        } else {
+            $this->statusHistory()->create([
+                'work_of_extension_id' => $this->getKey(),
+                'from_status_id' => $this->getAttribute('current_status_id'),
+                'to_status_id' => $this->getAttribute('current_status_id'),
+                'changed_by_user_id' => $issuedBy->getKey(),
+                'comments' => $statusComment,
+            ]);
+        }
+
         $certification = \App\Models\Certification::create([
             'work_of_extension_id' => $this->getKey(),
-            'certification_number' => $certificationNumber,
+            'certification_number' => $number,
             'issued_by_user_id' => $issuedBy->getKey(),
-            'issue_date' => now(),
-            'valid_until' => now()->addYears($validityYears),
+            'issue_date' => $issueDate,
+            'valid_until' => $validUntil,
             'comments' => $comments,
         ]);
 
-        // Registrar en el historial
-        $this->statusHistory()->create([
-            'user_id' => $issuedBy->getKey(),
-            'from_status_id' => $this->getAttribute('current_status_id'),
-            'to_status_id' => $this->getAttribute('current_status_id'), // Mantiene el mismo estado
-            'changed_by_user_id' => $issuedBy->getKey(),
-            'comments' => "Certificación #{$certificationNumber} emitida con vigencia hasta " . now()->addYears($validityYears)->format('d/m/Y'),
-        ]);
+        try {
+            GenerateCertificationPdf::dispatchSync($certification->getKey());
+        } catch (\Throwable $exception) {
+            Log::error('No se pudo generar el PDF de la certificación', [
+                'certification_id' => $certification->getKey(),
+                'work_id' => $this->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         Log::info('Certificación generada', [
             'work_id' => $this->getKey(),
-            'certification_number' => $certificationNumber,
+            'certification_number' => $number,
             'issued_by' => $issuedBy->getKey(),
             'validity_years' => $validityYears,
         ]);
 
-        return $certification;
+        return $certification->fresh();
     }
 
 
@@ -1602,7 +1636,7 @@ class WorkOfExtension extends Model implements HasMedia {
      * Verificar si el trabajo está listo para certificación
      */
     public function isReadyForCertification(): bool {
-        return $this->currentStatus->getAttribute('name') === 'Certificado' && !$this->hasCertification();
+        return $this->currentStatus->getAttribute('name') === 'En VIEX - Aprobado' && !$this->hasCertification();
     }
 
     /**

@@ -14,18 +14,22 @@ class WorkTypeSeeder extends Seeder {
             [
                 'name' => 'Proyecto de Extensión',
                 'description' => 'Proyectos institucionales, de unidades académicas y de servicio social orientados a la vinculación con la comunidad.',
+                'is_active' => true,
             ],
             [
                 'name' => 'Actividad de Extensión',
                 'description' => 'Actividades de educación continua e intervenciones puntuales no retribuidas a título personal.',
+                'is_active' => true,
             ],
             [
                 'name' => 'Publicación',
                 'description' => 'Artículos, libros, audiolibros que generen conocimiento para la comunidad universitaria y sociedad.',
+                'is_active' => true,
             ],
             [
                 'name' => 'Asistencia Técnica',
                 'description' => 'Asesorías y consultorías especializadas a otras unidades de la UP, al Estado o a organizaciones privadas.',
+                'is_active' => true,
             ]
         ];
 

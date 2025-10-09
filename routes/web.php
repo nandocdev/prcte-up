@@ -133,32 +133,37 @@ Route::middleware('auth')->group(function () {
         ->name('certificates.download')
         ->middleware('auth');
 
-    // Rutas de Administración (solo para super_admin)
-    Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
-        // Gestión de Usuarios
-        Route::resource('users', UserManagementController::class);
-        Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
-        Route::delete('/users/{user}/remove-role', [UserManagementController::class, 'removeRole'])->name('users.remove-role');
-        Route::post('/users/{user}/give-permission', [UserManagementController::class, 'givePermission'])->name('users.give-permission');
-        Route::delete('/users/{user}/revoke-permission', [UserManagementController::class, 'revokePermission'])->name('users.revoke-permission');
+    // Rutas de Administración
+    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+        Route::middleware('role:super_admin')->group(function () {
+            // Gestión de Usuarios
+            Route::resource('users', UserManagementController::class);
+            Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
+            Route::delete('/users/{user}/remove-role', [UserManagementController::class, 'removeRole'])->name('users.remove-role');
+            Route::post('/users/{user}/give-permission', [UserManagementController::class, 'givePermission'])->name('users.give-permission');
+            Route::delete('/users/{user}/revoke-permission', [UserManagementController::class, 'revokePermission'])->name('users.revoke-permission');
 
-        // Gestión de Roles
-        Route::resource('roles', RoleManagementController::class);
+            // Gestión de Roles
+            Route::resource('roles', RoleManagementController::class);
 
-        // Dashboard Avanzado de Asignación de Roles
-        Route::get('/role-assignment', [RoleAssignmentController::class, 'index'])->name('role-assignment.index');
-        Route::get('/users/{user}/roles', [RoleAssignmentController::class, 'getUserRoles'])->name('users.roles');
-        Route::post('/users/{user}/sync-roles', [RoleAssignmentController::class, 'syncUserRoles'])->name('users.sync-roles');
-        Route::post('/role-assignment/mass-assign', [RoleAssignmentController::class, 'massAssign'])->name('role-assignment.mass-assign');
-        Route::get('/role-assignment/export', [RoleAssignmentController::class, 'export'])->name('role-assignment.export');
+            // Dashboard Avanzado de Asignación de Roles
+            Route::get('/role-assignment', [RoleAssignmentController::class, 'index'])->name('role-assignment.index');
+            Route::get('/users/{user}/roles', [RoleAssignmentController::class, 'getUserRoles'])->name('users.roles');
+            Route::post('/users/{user}/sync-roles', [RoleAssignmentController::class, 'syncUserRoles'])->name('users.sync-roles');
+            Route::post('/role-assignment/mass-assign', [RoleAssignmentController::class, 'massAssign'])->name('role-assignment.mass-assign');
+            Route::get('/role-assignment/export', [RoleAssignmentController::class, 'export'])->name('role-assignment.export');
 
-        // Configuración del Sistema - CRUDs
-        Route::resource('organizational-units', \App\Http\Controllers\Admin\OrganizationalUnitsController::class);
-        Route::resource('work-types', \App\Http\Controllers\Admin\WorkTypesController::class);
-        Route::resource('work-statuses', \App\Http\Controllers\Admin\WorkStatusesController::class);
-        Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
-        Route::resource('roles', \App\Http\Controllers\Admin\RolesController::class);
-        Route::resource('permissions', \App\Http\Controllers\Admin\PermissionsController::class);
+            // Configuración exclusiva de Super Administrador
+            Route::resource('organizational-units', \App\Http\Controllers\Admin\OrganizationalUnitsController::class);
+            Route::resource('roles', \App\Http\Controllers\Admin\RolesController::class);
+            Route::resource('permissions', \App\Http\Controllers\Admin\PermissionsController::class);
+        });
+
+        Route::middleware('role:super_admin|viex_admin')->group(function () {
+            Route::resource('work-types', \App\Http\Controllers\Admin\WorkTypesController::class);
+            Route::resource('work-statuses', \App\Http\Controllers\Admin\WorkStatusesController::class);
+            Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
+        });
     });
 });
 

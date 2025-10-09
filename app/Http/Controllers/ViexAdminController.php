@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certification;
 use App\Models\User;
 use App\Models\WorkOfExtension;
 use App\Models\WorkStatus;
@@ -500,6 +501,45 @@ class ViexAdminController extends Controller {
             ]);
 
             return back()->withErrors(['error' => 'Error al generar certificación: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * CU13: Descargar certificación emitida
+     */
+    public function downloadCertificate(Certification $certification)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, __('certifications.unauthenticated'));
+        }
+
+        $work = $certification->work;
+
+        if (!$work) {
+            abort(404, __('certifications.work_not_found'));
+        }
+
+        $this->authorize('view', $work);
+
+        try {
+            return $certification->buildDownloadResponse();
+        } catch (\RuntimeException $exception) {
+            Log::warning('Archivo de certificación no disponible.', [
+                'certification_id' => $certification->getKey(),
+                'work_id' => $work->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            return back()->with('error', __('certifications.download_missing_file'));
+        } catch (\Throwable $exception) {
+            Log::error('Error inesperado al descargar certificación.', [
+                'certification_id' => $certification->getKey(),
+                'work_id' => $work->getKey(),
+                'error' => $exception->getMessage(),
+            ]);
+
+            return back()->with('error', __('certifications.download_error'));
         }
     }
 
