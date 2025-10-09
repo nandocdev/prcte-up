@@ -50,7 +50,7 @@ class AssignEvaluatorRequest extends FormRequest
                     }
                 },
             ],
-            'role' => [
+            'role_evaluator' => [
                 'required',
                 'string',
                 Rule::in([WorkEvaluator::ROLE_LEAD, WorkEvaluator::ROLE_EVALUATOR]),
@@ -72,7 +72,7 @@ class AssignEvaluatorRequest extends FormRequest
     {
         return [
             'evaluator_id' => __('evaluador'),
-            'role' => __('rol'),
+            'role_evaluator' => __('rol'),
             'assignment_notes' => __('notas de asignación'),
         ];
     }
@@ -87,8 +87,8 @@ class AssignEvaluatorRequest extends FormRequest
         return [
             'evaluator_id.required' => __('Debe seleccionar un evaluador.'),
             'evaluator_id.exists' => __('El evaluador seleccionado no existe.'),
-            'role.required' => __('Debe especificar el rol del evaluador.'),
-            'role.in' => __('El rol del evaluador no es válido. Debe ser "Evaluador Principal" o "Evaluador".'),
+            'role_evaluator.required' => __('Debe especificar el rol del evaluador.'),
+            'role_evaluator.in' => __('El rol del evaluador no es válido. Debe ser "Evaluador Principal" o "Evaluador".'),
             'assignment_notes.max' => __('Las notas de asignación no pueden exceder :max caracteres.'),
         ];
     }

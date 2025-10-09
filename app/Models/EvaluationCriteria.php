@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $category
  * @property int $max_score
  * @property int $weight
- * @property int $order
+ * @property int $order_visualization
  * @property bool $is_active
  * @property bool $is_required
  * @property \Carbon\Carbon $created_at
@@ -50,7 +50,7 @@ class EvaluationCriteria extends Model
         'category',
         'max_score',
         'weight',
-        'order',
+        'order_visualization',
         'is_active',
         'is_required',
     ];
@@ -63,7 +63,7 @@ class EvaluationCriteria extends Model
     protected $casts = [
         'max_score' => 'integer',
         'weight' => 'integer',
-        'order' => 'integer',
+        'order_visualization' => 'integer',
         'is_active' => 'boolean',
         'is_required' => 'boolean',
         'deleted_at' => 'datetime',
@@ -88,7 +88,7 @@ class EvaluationCriteria extends Model
      */
     public function scopeOrdered($query)
     {
-        return $query->orderBy('order')->orderBy('name');
+        return $query->orderBy('order_visualization')->orderBy('name');
     }
 
     /**

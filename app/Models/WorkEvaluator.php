@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $work_of_extension_id
  * @property int $evaluator_user_id
  * @property int $assigned_by_user_id
- * @property string $role
+ * @property string $role_evaluator
  * @property string|null $assignment_notes
  * @property \Carbon\Carbon $assigned_at
  * @property \Carbon\Carbon|null $notified_at
@@ -50,7 +50,7 @@ class WorkEvaluator extends Model
         'work_of_extension_id',
         'evaluator_user_id',
         'assigned_by_user_id',
-        'role',
+        'role_evaluator',
         'assignment_notes',
         'assigned_at',
         'notified_at',
@@ -94,7 +94,7 @@ class WorkEvaluator extends Model
      */
     public function scopeLeadEvaluators($query)
     {
-        return $query->where('role', self::ROLE_LEAD);
+        return $query->where('role_evaluator', self::ROLE_LEAD);
     }
 
     /**
@@ -229,7 +229,7 @@ class WorkEvaluator extends Model
      */
     public function isLeadEvaluator(): bool
     {
-        return $this->role === self::ROLE_LEAD;
+        return $this->role_evaluator === self::ROLE_LEAD;
     }
 
     /**

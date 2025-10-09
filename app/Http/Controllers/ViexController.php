@@ -202,16 +202,18 @@ class ViexController extends Controller
     {
         $this->authorize('assignEvaluator', $work);
 
+        $validated = $request->validated();
+
         try {
             DB::beginTransaction();
 
-            $evaluator = User::findOrFail($request->validated()['evaluator_id']);
-            
+            $evaluator = User::findOrFail($validated['evaluator_id']);
+
             $workEvaluator = $work->assignEvaluator(
                 $evaluator,
                 Auth::user(),
-                $request->validated()['role'],
-                $request->validated()['assignment_notes']
+                $validated['role_evaluator'],
+                $validated['assignment_notes']
             );
 
             // Disparar evento para notificar al evaluador
@@ -227,7 +229,7 @@ class ViexController extends Controller
             DB::rollBack();
             Log::error('Error al asignar evaluador', [
                 'work_id' => $work->id,
-                'evaluator_id' => $request->validated()['evaluator_id'],
+                'evaluator_id' => $validated['evaluator_id'] ?? null,
                 'error' => $e->getMessage(),
             ]);
 

@@ -124,7 +124,7 @@ class User extends Authenticatable {
             'work_of_extension_id'
         )
             ->withPivot([
-                'role',
+            'role_evaluator',
                 'assignment_notes',
                 'assigned_at',
                 'notified_at',

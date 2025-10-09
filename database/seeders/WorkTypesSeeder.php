@@ -15,21 +15,25 @@ class WorkTypesSeeder extends Seeder {
         WorkType::updateOrCreate(['id' => 1], [
             'name' => 'Proyecto de Extensión',
             'description' => 'Proyectos de extensión universitaria con objetivos específicos',
+            'is_active' => WorkType::ACTIVE,
         ]);
 
         WorkType::updateOrCreate(['id' => 2], [
             'name' => 'Actividad de Extensión',
             'description' => 'Actividades formativas como cursos, talleres, seminarios',
+            'is_active' => WorkType::ACTIVE,
         ]);
 
         WorkType::updateOrCreate(['id' => 3], [
             'name' => 'Publicación',
             'description' => 'Publicaciones de divulgación, manuales, guías',
+            'is_active' => WorkType::ACTIVE,
         ]);
 
         WorkType::updateOrCreate(['id' => 4], [
             'name' => 'Asistencia Técnica Especializada',
             'description' => 'Consultorías, asesorías y servicios técnicos especializados',
+            'is_active' => WorkType::ACTIVE,
         ]);
 
         // Crear unidades organizacionales

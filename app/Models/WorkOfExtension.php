@@ -185,7 +185,7 @@ class WorkOfExtension extends Model implements HasMedia {
             'evaluator_user_id'
         )
             ->withPivot([
-                'role',
+            'role_evaluator',
                 'assignment_notes',
                 'assigned_at',
                 'notified_at',
@@ -1347,7 +1347,7 @@ class WorkOfExtension extends Model implements HasMedia {
         $workEvaluator = $this->workEvaluators()->create([
             'evaluator_user_id' => $evaluator->id,
             'assigned_by_user_id' => $assignedBy->id,
-            'role' => $role,
+            'role_evaluator' => $role,
             'assignment_notes' => $assignmentNotes,
             'assigned_at' => now(),
             'status' => WorkEvaluator::STATUS_PENDING,
@@ -1356,7 +1356,7 @@ class WorkOfExtension extends Model implements HasMedia {
         Log::info('Evaluador asignado al trabajo', [
             'work_id' => $this->getKey(),
             'evaluator_id' => $evaluator->id,
-            'role' => $role,
+            'role_evaluator' => $role,
             'assigned_by' => $assignedBy->id,
         ]);
 
@@ -1441,7 +1441,7 @@ class WorkOfExtension extends Model implements HasMedia {
 
         // Evaluadores principales
         $leadEvaluators = $this->workEvaluators()
-            ->where('role', WorkEvaluator::ROLE_LEAD)
+            ->where('role_evaluator', WorkEvaluator::ROLE_LEAD)
             ->with('evaluator')
             ->get();
 

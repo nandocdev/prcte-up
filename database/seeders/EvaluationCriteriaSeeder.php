@@ -26,7 +26,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Pertinencia y Relevancia',
                 'max_score' => 10,
                 'weight' => 14,
-                'order' => 1,
+                'order_visualization' => 1,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -36,7 +36,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Pertinencia y Relevancia',
                 'max_score' => 10,
                 'weight' => 9,
-                'order' => 2,
+                'order_visualization' => 2,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -48,7 +48,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Metodología y Ejecución',
                 'max_score' => 10,
                 'weight' => 9,
-                'order' => 3,
+                'order_visualization' => 3,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -58,7 +58,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Metodología y Ejecución',
                 'max_score' => 10,
                 'weight' => 9,
-                'order' => 4,
+                'order_visualization' => 4,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -68,7 +68,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Metodología y Ejecución',
                 'max_score' => 10,
                 'weight' => 5,
-                'order' => 5,
+                'order_visualization' => 5,
                 'is_active' => true,
                 'is_required' => false,
             ],
@@ -80,7 +80,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Impacto',
                 'max_score' => 10,
                 'weight' => 14,
-                'order' => 6,
+                'order_visualization' => 6,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -90,7 +90,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Impacto',
                 'max_score' => 10,
                 'weight' => 10,
-                'order' => 7,
+                'order_visualization' => 7,
                 'is_active' => true,
                 'is_required' => false,
             ],
@@ -102,7 +102,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Documentación y Evidencias',
                 'max_score' => 10,
                 'weight' => 10,
-                'order' => 8,
+                'order_visualization' => 8,
                 'is_active' => true,
                 'is_required' => true,
             ],
@@ -112,7 +112,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Documentación y Evidencias',
                 'max_score' => 10,
                 'weight' => 5,
-                'order' => 9,
+                'order_visualization' => 9,
                 'is_active' => true,
                 'is_required' => false,
             ],
@@ -124,7 +124,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Participación y Colaboración',
                 'max_score' => 10,
                 'weight' => 5,
-                'order' => 10,
+                'order_visualization' => 10,
                 'is_active' => true,
                 'is_required' => false,
             ],
@@ -134,7 +134,7 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Participación y Colaboración',
                 'max_score' => 10,
                 'weight' => 5,
-                'order' => 11,
+                'order_visualization' => 11,
                 'is_active' => true,
                 'is_required' => false,
             ],
@@ -145,21 +145,30 @@ class EvaluationCriteriaSeeder extends Seeder
                 'category' => 'Aspectos Éticos',
                 'max_score' => 10,
                 'weight' => 5,
-                'order' => 12,
+                'order_visualization' => 12,
                 'is_active' => true,
                 'is_required' => false,
             ],
         ];
 
         foreach ($criteria as $criterion) {
-            EvaluationCriteria::create($criterion);
+            $model = EvaluationCriteria::withTrashed()->updateOrCreate(
+                ['name' => $criterion['name']],
+                $criterion
+            );
+
+            if ($model->trashed()) {
+                $model->restore();
+            }
         }
 
-        $this->command->info('Criterios de evaluación creados exitosamente.');
-        $this->command->info('Total de criterios: ' . count($criteria));
-        
-        // Mostrar resumen de pesos
-        $totalWeight = EvaluationCriteria::sum('weight');
-        $this->command->info('Peso total de criterios: ' . $totalWeight);
+        if ($this->command) {
+            $this->command->info('Criterios de evaluación creados exitosamente.');
+            $this->command->info('Total de criterios: ' . count($criteria));
+
+            // Mostrar resumen de pesos
+            $totalWeight = EvaluationCriteria::sum('weight');
+            $this->command->info('Peso total de criterios: ' . $totalWeight);
+        }
     }
 }
