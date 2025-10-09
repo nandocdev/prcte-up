@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany as EloquentHasMany;
 
 /**
  * Modelo para los tipos de proyectos institucionales.
- * Tabla: institutional_project_types
+ * Tabla: inst_project_types
  */
 class InstitutionalProjectType extends Model
 {
+    protected $table = 'inst_project_types';
     protected $fillable = [
         'name',
         'description',

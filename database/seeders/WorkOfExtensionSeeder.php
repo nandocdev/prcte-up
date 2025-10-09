@@ -36,7 +36,7 @@ class WorkOfExtensionSeeder extends Seeder {
         $workTypes = WorkType::all();
         $organizationalUnits = OrganizationalUnit::all();
         $draftStatus = WorkStatus::where('name', 'Borrador')->first();
-        $submittedStatus = WorkStatus::where('name', 'En Coordinador de Extensión')->first();
+    $submittedStatus = WorkStatus::where('name', 'En Revisión Coordinador')->first();
 
         // Debug
         $this->command->info("Estados encontrados: " . WorkStatus::count());
@@ -70,7 +70,7 @@ class WorkOfExtensionSeeder extends Seeder {
                 'start_date' => '2024-08-15',
                 'end_date' => '2025-02-28',
                 'publication_consent' => '1',
-                'status' => 'En Coordinador de Extensión',
+                'status' => 'En Revisión Coordinador',
                 'unit_type' => 'School'
             ],
             [

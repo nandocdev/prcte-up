@@ -31,7 +31,7 @@ return new class extends Migration
             // Configuración de puntuación
             $table->integer('max_score')->default(10)->comment('Puntuación máxima posible');
             $table->integer('weight')->default(1)->comment('Peso del criterio en la evaluación final');
-            $table->integer('order')->default(0)->comment('Orden de visualización');
+            $table->integer('order_visualization')->default(0)->comment('Orden de visualización');
             
             // Estado
             $table->boolean('is_active')->default(true)->comment('Si el criterio está activo');
@@ -44,7 +44,7 @@ return new class extends Migration
             // Índices
             $table->primary(['id'], 'evc_pk');
             $table->index('is_active', 'evc_active_idx');
-            $table->index(['is_active', 'order'], 'evc_active_order_idx');
+            $table->index(['is_active', 'order_visualization'], 'evc_active_order_idx');
         });
         
         // Comentario en la tabla

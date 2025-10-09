@@ -33,9 +33,9 @@ return new class extends Migration
 
             $table->unsignedBigInteger('assigned_by_user_id')
                 ->comment('Usuario de VIEX que realizó la asignación');
-            
+
             // Información de la asignación
-            $table->enum('role', ['lead_evaluator', 'evaluator'])
+            $table->enum('role_evaluator', ['lead_evaluator', 'evaluator'])
                 ->default('evaluator')
                 ->comment('Rol del evaluador: lead_evaluator (principal) o evaluator (secundario)');
                 

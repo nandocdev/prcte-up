@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('institutional_project_types', function (Blueprint $table) {
-            $table->id()->index('ipt_id_idx');
+        Schema::create('inst_project_types', function (Blueprint $table) {
+            $table->id();
             $table->string('name', 255)->unique('ipt_name_uq');
             $table->text('description')->nullable();
+            $table->char('is_active', 1)
+                ->default('1')
+                ->comment('Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)');
             $table->timestamps();
 
             // $table->primary(['id'], 'ipt_pk');
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('institutional_project_types');
+        Schema::dropIfExists('inst_project_types');
     }
 };

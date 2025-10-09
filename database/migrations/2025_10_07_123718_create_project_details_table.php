@@ -38,7 +38,7 @@ return new class extends Migration
                 ->on('work_of_extensions');
             $table->foreign('institutional_project_type_id', 'pd_inst_type_fk')
                 ->references('id')
-                ->on('institutional_project_types');
+                ->on('inst_project_types');
             $table->foreign('ss_tutor_user_id', 'pd_ss_tutor_fk')
                 ->references('id')
                 ->on('users');

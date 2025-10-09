@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('technical_assistance_details', function (Blueprint $table) {
+        Schema::create('technical_assistance', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('work_of_extension_id');
             $table->string('specialization_area')->nullable();
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('technical_assistance_details');
+        Schema::dropIfExists('technical_assistance');
     }
 };

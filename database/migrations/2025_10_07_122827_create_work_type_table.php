@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name', 100)->unique('wt_name_uq')->index('wt_name_idx');
             $table->text('description')->nullable();
+            $table->char('is_active', 1)
+                ->default('1')
+                ->comment('Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)');
             $table->timestamps();
 
             $table->primary(['id'], 'wt_pk');

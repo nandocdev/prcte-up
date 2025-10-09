@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Modelo para los detalles de asistencias técnicas
- * Tabla: technical_assistance_details
+ * Tabla: technical_assistance
  */
 class TechnicalAssistanceDetail extends Model {
+
+    protected $table = 'technical_assistance';
     protected $fillable = [
         'work_of_extension_id',
         'assistance_type',
