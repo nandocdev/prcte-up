@@ -256,7 +256,17 @@ class WorkOfExtension extends Model implements HasMedia {
     public function scopeVisibleToCoordinator($query, $user)
     {
         $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+        if ($unitId === 0) {
+            return $query->whereRaw('0 = 1');
+        }
+
         $unitIds = OrganizationalUnit::descendantIds($unitId);
+
+        $coordinatorUnit = OrganizationalUnit::find($unitId);
+        if ($coordinatorUnit && $coordinatorUnit->getAttribute('parent_id')) {
+            $parentBranchIds = OrganizationalUnit::descendantIds((int) $coordinatorUnit->getAttribute('parent_id'));
+            $unitIds = array_values(array_unique(array_merge($unitIds, $parentBranchIds)));
+        }
 
         $statuses = self::COORDINATOR_STATUS_NAMES;
 

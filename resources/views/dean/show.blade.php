@@ -30,17 +30,17 @@
                 </h3>
                 <div class="card-tools">
                     @if($work->currentStatus)
-                        @php
-                            $statusClass = match ($work->currentStatus->getAttribute('name')) {
-                                'Enviado a Decano/Director' => 'badge-warning',
-                                'Enviado a VIEX' => 'badge-success',
-                                'Rechazado por Decano/Director' => 'badge-danger',
-                                default => 'badge-secondary'
-                            };
-                        @endphp
-                        <span class="badge {{ $statusClass }}">
-                            {{ $work->currentStatus->getAttribute('name') }}
-                        </span>
+                    @php
+                    $statusClass = match ($work->currentStatus->getAttribute('name')) {
+                    'Enviado a Decano/Director' => 'badge-warning',
+                    'Enviado a VIEX' => 'badge-success',
+                    'Rechazado por Decano/Director' => 'badge-danger',
+                    default => 'badge-secondary'
+                    };
+                    @endphp
+                    <span class="badge {{ $statusClass }}">
+                        {{ $work->currentStatus->getAttribute('name') }}
+                    </span>
                     @endif
                 </div>
             </div>
@@ -71,18 +71,18 @@
                     </dd>
 
                     @if($work->getAttribute('objectives'))
-                        <dt class="col-sm-3">Objetivos:</dt>
-                        <dd class="col-sm-9">{{ $work->getAttribute('objectives') }}</dd>
+                    <dt class="col-sm-3">Objetivos:</dt>
+                    <dd class="col-sm-9">{{ $work->getAttribute('objectives') }}</dd>
                     @endif
 
                     @if($work->getAttribute('methodology'))
-                        <dt class="col-sm-3">Metodología:</dt>
-                        <dd class="col-sm-9">{{ $work->getAttribute('methodology') }}</dd>
+                    <dt class="col-sm-3">Metodología:</dt>
+                    <dd class="col-sm-9">{{ $work->getAttribute('methodology') }}</dd>
                     @endif
 
                     @if($work->getAttribute('expected_results'))
-                        <dt class="col-sm-3">Resultados Esperados:</dt>
-                        <dd class="col-sm-9">{{ $work->getAttribute('expected_results') }}</dd>
+                    <dt class="col-sm-3">Resultados Esperados:</dt>
+                    <dd class="col-sm-9">{{ $work->getAttribute('expected_results') }}</dd>
                     @endif
                 </dl>
             </div>
@@ -120,55 +120,55 @@
             </div>
             <div class="card-body">
                 @if($work->statusHistory && $work->statusHistory->count() > 0)
-                    <div class="timeline">
-                        @foreach($work->statusHistory->sortByDesc('created_at') as $history)
-                            <div class="time-label">
-                                <span class="bg-primary">{{ $history->created_at->format('d/m/Y') }}</span>
-                            </div>
-                            <div>
-                                @php
-                                    $iconClass = match ($history->status->getAttribute('name')) {
-                                        'Enviado' => 'fas fa-paper-plane bg-info',
-                                        'En Revisión por Coordinador' => 'fas fa-search bg-warning',
-                                        'Avalado por Coordinador' => 'fas fa-thumbs-up bg-success',
-                                        'Enviado a Decano/Director' => 'fas fa-user-tie bg-warning',
-                                        'Enviado a VIEX' => 'fas fa-check-circle bg-success',
-                                        'Rechazado por Coordinador' => 'fas fa-times-circle bg-danger',
-                                        'Rechazado por Decano/Director' => 'fas fa-ban bg-danger',
-                                        'Certificado' => 'fas fa-certificate bg-primary',
-                                        default => 'fas fa-circle bg-secondary'
-                                    };
-                                @endphp
-                                <i class="{{ $iconClass }}"></i>
-                                <div class="timeline-item">
-                                    <span class="time">
-                                        <i class="fas fa-clock"></i> {{ $history->created_at->format('H:i') }}
-                                    </span>
-                                    <h3 class="timeline-header">
-                                        <strong>{{ $history->status->getAttribute('name') }}</strong>
-                                    </h3>
-                                    @if($history->getAttribute('comments'))
-                                        <div class="timeline-body">
-                                            <p><strong>Observaciones:</strong></p>
-                                            <p>{{ $history->getAttribute('comments') }}</p>
-                                        </div>
-                                    @endif
-                                    @if($history->changedBy)
-                                        <div class="timeline-footer">
-                                            <small class="text-muted">
-                                                Por: {{ $history->changedBy->name }}
-                                            </small>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                <div class="timeline">
+                    @foreach($work->statusHistory->sortByDesc('created_at') as $history)
+                    <div class="time-label">
+                        <span class="bg-primary">{{ $history->created_at->format('d/m/Y') }}</span>
                     </div>
+                    <div>
+                        @php
+                        $iconClass = match ($history->status->getAttribute('name')) {
+                        'Enviado' => 'fas fa-paper-plane bg-info',
+                        'En Revisión por Coordinador' => 'fas fa-search bg-warning',
+                        'Avalado por Coordinador' => 'fas fa-thumbs-up bg-success',
+                        'Enviado a Decano/Director' => 'fas fa-user-tie bg-warning',
+                        'Enviado a VIEX' => 'fas fa-check-circle bg-success',
+                        'Rechazado por Coordinador' => 'fas fa-times-circle bg-danger',
+                        'Rechazado por Decano/Director' => 'fas fa-ban bg-danger',
+                        'Certificado' => 'fas fa-certificate bg-primary',
+                        default => 'fas fa-circle bg-secondary'
+                        };
+                        @endphp
+                        <i class="{{ $iconClass }}"></i>
+                        <div class="timeline-item">
+                            <span class="time">
+                                <i class="fas fa-clock"></i> {{ $history->created_at->format('H:i') }}
+                            </span>
+                            <h3 class="timeline-header">
+                                <strong>{{ $history->status->getAttribute('name') }}</strong>
+                            </h3>
+                            @if($history->getAttribute('comments'))
+                            <div class="timeline-body">
+                                <p><strong>Observaciones:</strong></p>
+                                <p>{{ $history->getAttribute('comments') }}</p>
+                            </div>
+                            @endif
+                            @if($history->changedBy)
+                            <div class="timeline-footer">
+                                <small class="text-muted">
+                                    Por: {{ $history->changedBy->name }}
+                                </small>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
                 @else
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-history fa-3x mb-3"></i>
-                        <p>No hay historial disponible para este trabajo.</p>
-                    </div>
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-history fa-3x mb-3"></i>
+                    <p>No hay historial disponible para este trabajo.</p>
+                </div>
                 @endif
             </div>
         </div>
@@ -185,75 +185,75 @@
             </div>
             <div class="card-body">
                 @php
-                    $currentStatus = $work->currentStatus->name ?? '';
+                $currentStatus = $work->currentStatus->name ?? '';
                 @endphp
 
                 @if(in_array($currentStatus, ['Enviado a Decano/Director', 'En Revisión Decano/Director']))
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        <strong>Trabajo pendiente de revisión</strong><br>
-                        Este trabajo ha sido avalado por el coordinador y está listo para su evaluación institucional.
-                    </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    <strong>Trabajo pendiente de revisión</strong><br>
+                    Este trabajo ha sido avalado por el coordinador y está listo para su evaluación institucional.
+                </div>
 
-                    <!-- Aprobar y Enviar a VIEX -->
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-success btn-block" data-toggle="modal"
-                            data-target="#approveModal">
-                            <i class="fas fa-check mr-2"></i>
-                            Aprobar y Enviar a VIEX
-                        </button>
-                    </div>
+                <!-- Aprobar y Enviar a VIEX -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-success btn-block" data-toggle="modal"
+                        data-target="#approveModal">
+                        <i class="fas fa-check mr-2"></i>
+                        Aprobar y Enviar a VIEX
+                    </button>
+                </div>
 
-                    <!-- Solicitar Cambios -->
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-warning btn-block" data-toggle="modal"
-                            data-target="#changesModal">
-                            <i class="fas fa-edit mr-2"></i>
-                            Devolver para Corrección
-                        </button>
-                    </div>
+                <!-- Solicitar Cambios -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-warning btn-block" data-toggle="modal"
+                        data-target="#changesModal">
+                        <i class="fas fa-edit mr-2"></i>
+                        Devolver para Corrección
+                    </button>
+                </div>
 
-                    <!-- Rechazar Definitivamente -->
-                    <div class="mb-3">
-                        <button type="button" class="btn btn-danger btn-block" data-toggle="modal"
-                            data-target="#rejectModal">
-                            <i class="fas fa-times mr-2"></i>
-                            Rechazar Trabajo
-                        </button>
-                    </div>
+                <!-- Rechazar Definitivamente -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-danger btn-block" data-toggle="modal"
+                        data-target="#rejectModal">
+                        <i class="fas fa-times mr-2"></i>
+                        Rechazar Trabajo
+                    </button>
+                </div>
 
-                    <hr>
+                <hr>
 
-                    <small class="text-muted">
-                        <i class="fas fa-lightbulb mr-1"></i>
-                        <strong>Recuerde:</strong> Una vez aprobado, el trabajo será enviado automáticamente a VIEX para su
-                        certificación final.
-                    </small>
+                <small class="text-muted">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    <strong>Recuerde:</strong> Una vez aprobado, el trabajo será enviado automáticamente a VIEX para su
+                    certificación final.
+                </small>
 
                 @elseif($currentStatus === 'Aprobado por Decano/Director')
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <strong>Trabajo aprobado exitosamente</strong><br>
-                        Este trabajo ha sido enviado a VIEX para evaluación final.
-                    </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <strong>Trabajo aprobado exitosamente</strong><br>
+                    Este trabajo ha sido enviado a VIEX para evaluación final.
+                </div>
 
                 @elseif($currentStatus === 'Rechazado por Decano/Director')
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle mr-2"></i>
-                        <strong>Trabajo rechazado</strong><br>
-                        Este trabajo fue rechazado y devuelto al profesor.
-                    </div>
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle mr-2"></i>
+                    <strong>Trabajo rechazado</strong><br>
+                    Este trabajo fue rechazado y devuelto al profesor.
+                </div>
 
                 @else
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>No requiere acción</strong><br>
-                        Este trabajo ya fue procesado y no requiere acciones adicionales.
-                    </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>No requiere acción</strong><br>
+                    Este trabajo ya fue procesado y no requiere acciones adicionales.
+                </div>
 
-                    <p><strong>Estado actual:</strong>
-                        <span class="badge badge-info">{{ $currentStatus }}</span>
-                    </p>
+                <p><strong>Estado actual:</strong>
+                    <span class="badge badge-info">{{ $currentStatus }}</span>
+                </p>
                 @endif
             </div>
 
@@ -282,12 +282,12 @@
                     <dd class="col-6">{{ $work->updated_at->format('d/m/Y H:i') }}</dd>
 
                     @if($work->updated_at->diffInDays(now()) > 0)
-                        <dt class="col-6">Días pendiente:</dt>
-                        <dd class="col-6">
-                            <span class="badge badge-warning">
-                                {{ $work->updated_at->diffInDays(now()) }} días
-                            </span>
-                        </dd>
+                    <dt class="col-6">Días pendiente:</dt>
+                    <dd class="col-6">
+                        <span class="badge badge-warning">
+                            {{ $work->updated_at->diffInDays(now()) }} días
+                        </span>
+                    </dd>
                     @endif
                 </dl>
             </div>
@@ -497,22 +497,69 @@
 
 @section('js')
 <script>
-    $(document).ready(function () {
-        // Validación del modal de cambios
-        $('#changesModal form').on('submit', function (e) {
-            var comments = $('#change_comments').val().trim();
+    $(document).ready(function() {
+        // Validación del modal de cambios con SweetAlert
+        $('#changesModal form').on('submit', function(e) {
+            const comments = $('#change_comments').val().trim();
             if (comments.length < 10) {
                 e.preventDefault();
-                alert('Por favor, proporcione observaciones más detalladas (mínimo 10 caracteres).');
-                $('#change_comments').focus();
+                Swal.fire({
+                    title: 'Observaciones insuficientes',
+                    text: 'Por favor, describa las correcciones con al menos 10 caracteres para orientar al profesor.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#ffc107',
+                }).then(() => {
+                    $('#change_comments').focus();
+                });
             }
         });
 
-        // Confirmación para aprobar
-        $('#approveModal form').on('submit', function (e) {
-            if (!confirm('¿Está completamente seguro de que desea aprobar este trabajo? Esta acción no se puede deshacer.')) {
-                e.preventDefault();
+        // Confirmación para aprobar con SweetAlert
+        $('#approveModal form').on('submit', function(e) {
+            const $form = $(this);
+
+            if ($form.data('sweetalert-confirmed')) {
+                return true;
             }
+
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Aprobar y enviar a VIEX?',
+                html: '<p class="mb-2">Esta acción enviará el trabajo a VIEX para su evaluación final.</p>' +
+                    '<p class="text-muted small">Confirme solo si ya verificó toda la información.</p>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-check"></i> Sí, aprobar',
+                cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    confirmButton: 'btn btn-success btn-lg',
+                    cancelButton: 'btn btn-secondary btn-lg'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Enviando a VIEX...',
+                        html: 'Estamos registrando su aprobación. Esto puede tardar unos segundos.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $form.data('sweetalert-confirmed', true);
+                    $form.trigger('submit');
+                }
+            });
         });
     });
 </script>
