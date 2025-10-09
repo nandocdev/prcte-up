@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('organizational_units', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('ou_id_idx');
             $table->string('name');
             $table->string('type', 50);
             $table->foreignId('parent_id')->nullable()->constrained('organizational_units');

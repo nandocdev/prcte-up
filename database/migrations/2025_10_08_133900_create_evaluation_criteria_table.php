@@ -21,7 +21,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evaluation_criteria', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('ec_id_idx');
             
             // Información del criterio
             $table->string('name', 200)->comment('Nombre del criterio de evaluación');

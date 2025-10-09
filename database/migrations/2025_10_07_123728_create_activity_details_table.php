@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activity_details', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('acdtl_id_idx');
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('act_details_pk');
             $table->string('activity_type', 50)->nullable();
             $table->string('modality', 20)->nullable();

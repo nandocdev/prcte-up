@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_status_history', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('wsh_id_idx');
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions');
             $table->foreignId('from_status_id')->nullable()->constrained('work_statuses');
             $table->foreignId('to_status_id')->constrained('work_statuses');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_of_extensions', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('woe_id_idx');
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->foreignId('work_type_id')->constrained('work_type');

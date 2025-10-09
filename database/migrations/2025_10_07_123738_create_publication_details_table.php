@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('publication_details', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('pubd_id_idx');
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('pub_details_pk');
             $table->string('publication_type', 50);
             $table->string('editorial')->nullable();

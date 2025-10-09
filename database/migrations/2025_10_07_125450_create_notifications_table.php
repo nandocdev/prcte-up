@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->uuid('id')->primary()->index('notif_id_idx');
             $table->string('type');
             $table->morphs('notifiable');
             $table->text('data');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('technical_assistance_details', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('techasist_id_idx');
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('tech_assist_pk');
             $table->string('specialization_area')->nullable();
             $table->text('expected_products')->nullable();

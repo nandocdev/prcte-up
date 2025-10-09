@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('project_details', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('pd_id_idx');
             $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('proj_details_work_idx');
             $table->string('project_category', 50);
             $table->foreignId('institutional_project_type_id')->nullable()->constrained('institutional_project_types');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('institutional_project_types', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('ipt_id_idx');
             $table->string('name', 255)->unique('ipt_name_uq');
             $table->text('description')->nullable();
             $table->timestamps();

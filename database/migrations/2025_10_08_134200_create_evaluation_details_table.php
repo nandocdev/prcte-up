@@ -22,7 +22,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evaluation_details', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('ed_id_idx');
             
             // Relaciones
             $table->foreignId('work_evaluation_id')

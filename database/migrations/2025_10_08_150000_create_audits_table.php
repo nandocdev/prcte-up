@@ -10,7 +10,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('audits', function (Blueprint $table): void {
-            $table->id();
+            $table->id()->index('audits_id_idx');
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('event', 100);
             $table->string('auditable_type', 150)->nullable();

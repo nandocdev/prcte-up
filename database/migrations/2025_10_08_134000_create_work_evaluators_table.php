@@ -22,7 +22,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_evaluators', function (Blueprint $table) {
-            $table->id();
+            $table->id()->index('weval_id_idx');
             
             // Relaciones
             $table->foreignId('work_of_extension_id')
