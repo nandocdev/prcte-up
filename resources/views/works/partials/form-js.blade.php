@@ -5,13 +5,21 @@
     function showWorkTypeSection(workTypeId) {
         console.log('Mostrando sección para tipo:', workTypeId);
 
-        // Ocultar todas las secciones
-        $('.work-type-section').removeClass('active').hide();
+        // Ocultar todas las secciones disponibles
+        $('.work-section').removeClass('active').hide();
 
-        // Mostrar la sección correspondiente
-        if (workTypeId) {
-            $(`#section-${workTypeId}`).addClass('active').show();
+        if (!workTypeId) {
+            return;
         }
+
+        const sectionKey = window.sectionConfig?.[workTypeId]?.section ?? null;
+        if (sectionKey) {
+            $(`#section-${sectionKey}`).addClass('active').show();
+            return;
+        }
+
+        // Compatibilidad con IDs numéricos antiguos
+        $(`#section-${workTypeId}`).addClass('active').show();
     }
 
     // /**
@@ -60,7 +68,7 @@
     //     }
     // }
 
-    $(function () {
+    $(function() {
         //     // Configurar toastr si está disponible
         //     if (typeof toastr !== 'undefined') {
         //         toastr.options = {
@@ -155,6 +163,8 @@
             }
         };
 
+        window.sectionConfig = sectionConfig;
+
         // Configuración de documentos por tipo de trabajo
         const documentRequirements = {
             '1': {
@@ -176,7 +186,7 @@
         };
 
         // Mostrar/ocultar secciones según tipo de trabajo
-        workTypeSelect.on('change', function () {
+        workTypeSelect.on('change', function() {
             const selectedType = $(this).val();
 
             // Ocultar todas las secciones específicas
@@ -294,7 +304,7 @@
                 const sectionRequiredFields = activeSection.find('[data-required="true"]');
                 total += sectionRequiredFields.length;
 
-                sectionRequiredFields.each(function () {
+                sectionRequiredFields.each(function() {
                     if ($(this).val() && $(this).val().trim() !== '') {
                         completed++;
                     }
@@ -318,13 +328,30 @@
 
         // Actualizar lista visual de campos requeridos
         function updateRequiredFieldsList() {
-            const fieldChecks = [
-                { field: workTypeSelect, label: '{{ __("Tipo de trabajo") }}' },
-                { field: $('#organizational_unit_id'), label: '{{ __("Unidad organizacional") }}' },
-                { field: titleInput, label: '{{ __("Título") }}' },
-                { field: descriptionTextarea, label: '{{ __("Descripción") }}' },
-                { field: startDateInput, label: '{{ __("Fecha de inicio") }}' },
-                { field: endDateInput, label: '{{ __("Fecha de finalización") }}' }
+            const fieldChecks = [{
+                    field: workTypeSelect,
+                    label: '{{ __("Tipo de trabajo") }}'
+                },
+                {
+                    field: $('#organizational_unit_id'),
+                    label: '{{ __("Unidad organizacional") }}'
+                },
+                {
+                    field: titleInput,
+                    label: '{{ __("Título") }}'
+                },
+                {
+                    field: descriptionTextarea,
+                    label: '{{ __("Descripción") }}'
+                },
+                {
+                    field: startDateInput,
+                    label: '{{ __("Fecha de inicio") }}'
+                },
+                {
+                    field: endDateInput,
+                    label: '{{ __("Fecha de finalización") }}'
+                }
             ];
 
             requiredFieldsList.empty();
@@ -345,12 +372,12 @@
         descriptionTextarea.on('input', updateCharacterCount);
 
         // Actualizar progreso en tiempo real
-        form.find('input, textarea, select').on('input change', function () {
+        form.find('input, textarea, select').on('input change', function() {
             setTimeout(updateFormProgress, 100);
         });
 
         // Validación al enviar formulario
-        form.on('submit', function (e) {
+        form.on('submit', function(e) {
             if (!validateDates()) {
                 e.preventDefault();
                 toastr?.error('{{ __("Por favor corrija los errores en las fechas") }}');
@@ -387,15 +414,19 @@
 
         // Trigger initial work type change if there's an old value
         const oldWorkType = '{{ old("work_type_id") }}';
-        if (oldWorkType) {
+        const initialWorkType = workTypeSelect.val() || oldWorkType;
+
+        if (initialWorkType) {
+            showWorkTypeSection(initialWorkType);
             workTypeSelect.trigger('change');
         }
 
         // Auto-save functionality (optional)
         let autoSaveTimer;
+
         function autoSave() {
             clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(function () {
+            autoSaveTimer = setTimeout(function() {
                 console.log('Auto-save checkpoint');
                 // Here you could implement actual auto-save functionality
             }, 60000); // Every minute
@@ -430,7 +461,7 @@
 
         // Click en botón seleccionar
         if (selectFilesBtn.length > 0) {
-            selectFilesBtn.on('click', function (e) {
+            selectFilesBtn.on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 fileInput.click();
@@ -439,7 +470,7 @@
 
         // Click en zona de carga
         if (uploadZone.length > 0) {
-            uploadZone.on('click', function (e) {
+            uploadZone.on('click', function(e) {
                 // Solo abrir el selector si no se hizo click en un botón o elemento interactivo
                 if (!$(e.target).is('button, a, input') && !$(e.target).closest('button, a, input').length) {
                     console.log('Zona de carga clickeada');
@@ -453,19 +484,19 @@
 
         // Drag and drop functionality
         if (uploadZone.length > 0) {
-            uploadZone.on('dragover dragenter', function (e) {
+            uploadZone.on('dragover dragenter', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 $(this).addClass('dragover');
             });
 
-            uploadZone.on('dragleave dragend', function (e) {
+            uploadZone.on('dragleave dragend', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 $(this).removeClass('dragover');
             });
 
-            uploadZone.on('drop', function (e) {
+            uploadZone.on('drop', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 $(this).removeClass('dragover');
@@ -477,7 +508,7 @@
 
         // Cambio en input de archivos
         if (fileInput.length > 0) {
-            fileInput.on('change', function () {
+            fileInput.on('change', function() {
                 // Evitar recursión cuando estamos actualizando programáticamente
                 if (isUpdatingFileInput) {
                     return;
@@ -566,7 +597,7 @@
         }
 
         // Remover archivo - Event listener global (solo se registra una vez)
-        $(document).on('click', '.remove-file', function () {
+        $(document).on('click', '.remove-file', function() {
             const index = $(this).data('index');
             selectedFiles.splice(index, 1);
             updateFilesList();
@@ -602,74 +633,74 @@
             }
         }
 
-         /**
-     * Función para calcular el período académico basado en las fechas de inicio y finalización
-     */
-    function calculateAcademicPeriod(startDate, endDate) {
-        if (!startDate || !endDate) {
-            return '';
+        /**
+         * Función para calcular el período académico basado en las fechas de inicio y finalización
+         */
+        function calculateAcademicPeriod(startDate, endDate) {
+            if (!startDate || !endDate) {
+                return '';
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            // Validar que la fecha de inicio sea menor que la de finalización
+            if (start > end) {
+                return '';
+            }
+
+            // Obtener el año de la fecha de inicio
+            const year = start.getFullYear();
+
+            // Determinar el semestre basado en el mes de inicio
+            // Primer semestre: Enero a Julio (meses 0-6)
+            // Segundo semestre: Agosto a Diciembre (meses 7-11)
+            const startMonth = start.getMonth();
+            const semester = startMonth < 6 ? 'I' : 'II';
+
+            return `${year}-${semester}`;
         }
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        /**
+         * Función para actualizar el período académico cuando cambien las fechas
+         */
+        function updateAcademicPeriod() {
+            const startDate = $('#start_date').val();
+            const endDate = $('#end_date').val();
+            const academicPeriod = calculateAcademicPeriod(startDate, endDate);
+            // console.log(academicPeriod);
 
-        // Validar que la fecha de inicio sea menor que la de finalización
-        if (start > end) {
-            return '';
+            $('#academic_period').val(academicPeriod);
+
+            // Agregar feedback visual
+            if (academicPeriod) {
+                $('#academic_period').removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $('#academic_period').removeClass('is-valid');
+            }
         }
 
-        // Obtener el año de la fecha de inicio
-        const year = start.getFullYear();
-
-        // Determinar el semestre basado en el mes de inicio
-        // Primer semestre: Enero a Julio (meses 0-6)
-        // Segundo semestre: Agosto a Diciembre (meses 7-11)
-        const startMonth = start.getMonth();
-        const semester = startMonth < 6 ? 'I' : 'II';
-
-        return `${year}-${semester}`;
-    }
-
-    /**
-     * Función para actualizar el período académico cuando cambien las fechas
-     */
-    function updateAcademicPeriod() {
-        const startDate = $('#start_date').val();
-        const endDate = $('#end_date').val();
-        const academicPeriod = calculateAcademicPeriod(startDate, endDate);
-        // console.log(academicPeriod);
-
-        $('#academic_period').val(academicPeriod);
-
-        // Agregar feedback visual
-        if (academicPeriod) {
-            $('#academic_period').removeClass('is-invalid').addClass('is-valid');
-        } else {
-            $('#academic_period').removeClass('is-valid');
+        function setMinStartDate() {
+            const startDateInput = document.getElementById("start_date");
+            const endDateInput = document.getElementById("end_date");
+            const today = new Date().toISOString().split("T")[0];
+            startDateInput.min = today;
+            endDateInput.min = today; // Asegurar que la fecha de fin no sea antes de hoy
         }
-    }
 
-    function setMinStartDate() {
-    const startDateInput = document.getElementById("start_date");
-    const endDateInput = document.getElementById("end_date");
-    const today = new Date().toISOString().split("T")[0];
-    startDateInput.min = today;
-    endDateInput.min = today; // Asegurar que la fecha de fin no sea antes de hoy
-    }
+        function setMinEndDate() {
+            const startDateInput = document.getElementById("start_date");
+            const endDateInput = document.getElementById("end_date");
 
-function setMinEndDate() {
-  const startDateInput = document.getElementById("start_date");
-  const endDateInput = document.getElementById("end_date");
-
-  startDateInput.addEventListener("change", () => {
-    if (startDateInput.value) {
-      const startDate = new Date(startDateInput.value);
-      startDate.setDate(startDate.getDate() + 1); // fecha siguiente
-      const minEndDate = startDate.toISOString().split("T")[0];
-      endDateInput.min = minEndDate;
-    }
-  });
-}
+            startDateInput.addEventListener("change", () => {
+                if (startDateInput.value) {
+                    const startDate = new Date(startDateInput.value);
+                    startDate.setDate(startDate.getDate() + 1); // fecha siguiente
+                    const minEndDate = startDate.toISOString().split("T")[0];
+                    endDateInput.min = minEndDate;
+                }
+            });
+        }
 
 
     });

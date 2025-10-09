@@ -1,4 +1,10 @@
 <!-- Sección 5: Específica para Asistencia Técnica -->
+@php
+$technicalDetail = $technicalDetail ?? null;
+$workTypesConfig = $workTypesConfig ?? [];
+$workModalities = $workTypesConfig['work_modalities'] ?? ($workTypesConfig['modalities'] ?? []);
+@endphp
+
 <div class="card card-secondary work-section" id="section-asistencia" style="display: none;">
     <div class="card-header">
         <h3 class="card-title">
@@ -20,14 +26,14 @@
             <select class="form-control @error('assistance_type') is-invalid @enderror" id="assistance_type"
                 name="assistance_type" data-required="true">
                 <option value="">{{ __('Seleccione...') }}</option>
-                @foreach($workTypesConfig['assistance_types'] ?? [] as $value => $label)
-                    <option value="{{ $value }}" {{ old('assistance_type') == $value ? 'selected' : '' }}>
-                        {{ __($label) }}
-                    </option>
+                @foreach(($workTypesConfig['assistance_types'] ?? []) as $value => $label)
+                <option value="{{ $value }}" {{ old('assistance_type', optional($technicalDetail)->assistance_type) == $value ? 'selected' : '' }}>
+                    {{ __($label) }}
+                </option>
                 @endforeach
             </select>
             @error('assistance_type')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -38,10 +44,10 @@
             </label>
             <input type="text" class="form-control @error('collaborating_institution') is-invalid @enderror"
                 id="collaborating_institution" name="collaborating_institution" data-required="true"
-                value="{{ old('collaborating_institution') }}"
+                value="{{ old('collaborating_institution', optional($technicalDetail)->collaborating_institution) }}"
                 placeholder="{{ __('Nombre de la organización beneficiaria') }}">
             @error('collaborating_institution')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -52,10 +58,10 @@
             </label>
             <input type="text" class="form-control @error('specialization_area') is-invalid @enderror"
                 id="specialization_area" name="specialization_area"
-                value="{{ old('specialization_area') }}"
+                value="{{ old('specialization_area', optional($technicalDetail)->specialization_area) }}"
                 placeholder="{{ __('Ej: Tecnología, Salud, Educación...') }}">
             @error('specialization_area')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -66,9 +72,9 @@
             </label>
             <textarea class="form-control @error('expected_products') is-invalid @enderror"
                 id="expected_products" name="expected_products" rows="3"
-                placeholder="{{ __('Describa los productos o resultados esperados de la asistencia técnica...') }}">{{ old('expected_products') }}</textarea>
+                placeholder="{{ __('Describa los productos o resultados esperados de la asistencia técnica...') }}">{{ old('expected_products', optional($technicalDetail)->expected_products) }}</textarea>
             @error('expected_products')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -81,14 +87,14 @@
                     </label>
                     <select class="form-control @error('work_modality') is-invalid @enderror"
                         id="work_modality" name="work_modality">
-                        @foreach($workTypesConfig['modalities'] ?? [] as $value => $label)
-                            <option value="{{ $value }}" {{ (old('work_modality', 'presencial') == $value) ? 'selected' : '' }}>
-                                {{ __($label) }}
-                            </option>
+                        @foreach($workModalities as $value => $label)
+                        <option value="{{ $value }}" {{ (old('work_modality', optional($technicalDetail)->work_modality ?? 'presencial') == $value) ? 'selected' : '' }}>
+                            {{ __($label) }}
+                        </option>
                         @endforeach
                     </select>
                     @error('work_modality')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -99,9 +105,9 @@
                     </label>
                     <input type="number" class="form-control @error('estimated_hours') is-invalid @enderror"
                         id="estimated_hours" name="estimated_hours" min="1"
-                        value="{{ old('estimated_hours') }}" placeholder="{{ __('Ej: 40') }}">
+                        value="{{ old('estimated_hours', optional($technicalDetail)->estimated_hours) }}" placeholder="{{ __('Ej: 40') }}">
                     @error('estimated_hours')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>

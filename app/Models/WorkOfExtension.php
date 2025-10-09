@@ -1037,7 +1037,9 @@ class WorkOfExtension extends Model implements HasMedia {
             // Extraer datos estructurados del request (igual que en creación)
             $workData = $data['work_data'];
             $specificData = $data['specific_data'];
-            $workType = $data['work_type'];
+            $workType = (string) ($data['work_type'] ?? $workData['work_type_id']);
+            $previousType = (string) $this->getAttribute('work_type_id');
+            $newWorkTypeId = (string) ($workData['work_type_id'] ?? $previousType);
 
             // Actualizar trabajo principal
             $this->update([
@@ -1046,11 +1048,16 @@ class WorkOfExtension extends Model implements HasMedia {
                 'organizational_unit_id' => $workData['organizational_unit_id'],
                 'start_date' => $workData['start_date'],
                 'end_date' => $workData['end_date'],
-                'publication_consent' => $workData['publication_consent'] ?? false,
+                'publication_consent' => isset($workData['publication_consent']) ? (bool) $workData['publication_consent'] : false,
                 'description' => $workData['description'],
                 'academic_period' => $workData['academic_period'] ?? config('work_types.current_academic_period'),
                 'responsible_phone' => $workData['responsible_phone'] ?? null,
             ]);
+
+            // Limpiar detalles que no correspondan al nuevo tipo
+            if ($previousType !== $newWorkTypeId) {
+                $this->removeDetailRecordsExcept($newWorkTypeId);
+            }
 
             // Actualizar o crear detalles específicos según tipo
             switch ($workType) {
@@ -1084,14 +1091,14 @@ class WorkOfExtension extends Model implements HasMedia {
                             'duration_hours' => $specificData['duration_hours'] ?? null,
                             'expected_participants' => $specificData['expected_participants'] ?? null,
                             'participant_profile' => $specificData['participant_profile'] ?? null,
-                            'offers_certificate' => $specificData['offers_certificate'] ?? false,
+                            'offers_certificate' => isset($specificData['offers_certificate']) ? (bool) $specificData['offers_certificate'] : false,
                             'details_json' => json_encode([
                                 'activity_type' => $specificData['activity_type'] ?? null,
                                 'modality' => $specificData['modality'] ?? null,
                                 'duration_hours' => $specificData['duration_hours'] ?? null,
                                 'expected_participants' => $specificData['expected_participants'] ?? null,
                                 'participant_profile' => $specificData['participant_profile'] ?? null,
-                                'offers_certificate' => $specificData['offers_certificate'] ?? false,
+                                'offers_certificate' => isset($specificData['offers_certificate']) ? (bool) $specificData['offers_certificate'] : false,
                             ]),
                         ]
                     );
@@ -1152,11 +1159,38 @@ class WorkOfExtension extends Model implements HasMedia {
 
             DB::commit();
 
-            return $this;
+            return $this->fresh([
+                'projectDetail',
+                'activityDetail',
+                'publicationDetail',
+                'technicalAssistanceDetail',
+            ]);
 
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;
+        }
+    }
+
+    /**
+     * Eliminar detalles específicos que ya no corresponden al tipo de trabajo actual.
+     */
+    protected function removeDetailRecordsExcept(string $currentType): void
+    {
+        if ($currentType !== '1') {
+            $this->projectDetail()->delete();
+        }
+
+        if ($currentType !== '2') {
+            $this->activityDetail()->delete();
+        }
+
+        if ($currentType !== '3') {
+            $this->publicationDetail()->delete();
+        }
+
+        if ($currentType !== '4') {
+            $this->technicalAssistanceDetail()->delete();
         }
     }
 

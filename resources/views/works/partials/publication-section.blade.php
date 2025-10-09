@@ -1,4 +1,9 @@
 <!-- Sección 4: Específica para Publicaciones -->
+@php
+$publicationDetail = $publicationDetail ?? null;
+$workTypesConfig = $workTypesConfig ?? [];
+@endphp
+
 <div class="card card-info work-section" id="section-publicacion" style="display: none;">
     <div class="card-header">
         <h3 class="card-title">
@@ -20,14 +25,14 @@
             <select class="form-control @error('publication_type') is-invalid @enderror" id="publication_type"
                 name="publication_type" data-required="true">
                 <option value="">{{ __('Seleccione...') }}</option>
-                @foreach($workTypesConfig['publication_types'] ?? [] as $value => $label)
-                    <option value="{{ $value }}" {{ old('publication_type') == $value ? 'selected' : '' }}>
-                        {{ __($label) }}
-                    </option>
+                @foreach(($workTypesConfig['publication_types'] ?? []) as $value => $label)
+                <option value="{{ $value }}" {{ old('publication_type', optional($publicationDetail)->publication_type) == $value ? 'selected' : '' }}>
+                    {{ __($label) }}
+                </option>
                 @endforeach
             </select>
             @error('publication_type')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -40,10 +45,10 @@
                     </label>
                     <input type="text" class="form-control @error('editorial') is-invalid @enderror"
                         id="editorial" name="editorial"
-                        value="{{ old('editorial') }}"
+                        value="{{ old('editorial', optional($publicationDetail)->editorial) }}"
                         placeholder="{{ __('Nombre de la editorial o revista') }}">
                     @error('editorial')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -54,9 +59,9 @@
                     </label>
                     <input type="text" class="form-control @error('isbn_issn') is-invalid @enderror"
                         id="isbn_issn" name="isbn_issn"
-                        value="{{ old('isbn_issn') }}" placeholder="{{ __('Número ISBN o ISSN') }}">
+                        value="{{ old('isbn_issn', optional($publicationDetail)->isbn_issn) }}" placeholder="{{ __('Número ISBN o ISSN') }}">
                     @error('isbn_issn')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -69,9 +74,9 @@
             </label>
             <textarea class="form-control @error('target_audience') is-invalid @enderror"
                 id="target_audience" name="target_audience" rows="2"
-                placeholder="{{ __('Describa el público al que va dirigida la publicación...') }}">{{ old('target_audience') }}</textarea>
+                placeholder="{{ __('Describa el público al que va dirigida la publicación...') }}">{{ old('target_audience', optional($publicationDetail)->target_audience) }}</textarea>
             @error('target_audience')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -84,14 +89,14 @@
                     </label>
                     <select class="form-control @error('language') is-invalid @enderror"
                         id="language" name="language">
-                        @foreach($workTypesConfig['languages'] ?? [] as $value => $label)
-                            <option value="{{ $value }}" {{ (old('language', 'español') == $value) ? 'selected' : '' }}>
-                                {{ __($label) }}
-                            </option>
+                        @foreach(($workTypesConfig['languages'] ?? []) as $value => $label)
+                        <option value="{{ $value }}" {{ (old('language', optional($publicationDetail)->language ?? 'español') == $value) ? 'selected' : '' }}>
+                            {{ __($label) }}
+                        </option>
                         @endforeach
                     </select>
                     @error('language')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -102,9 +107,9 @@
                     </label>
                     <input type="number" class="form-control @error('print_run') is-invalid @enderror"
                         id="print_run" name="print_run" min="1"
-                        value="{{ old('print_run') }}" placeholder="{{ __('Número de ejemplares') }}">
+                        value="{{ old('print_run', optional($publicationDetail)->print_run) }}" placeholder="{{ __('Número de ejemplares') }}">
                     @error('print_run')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>

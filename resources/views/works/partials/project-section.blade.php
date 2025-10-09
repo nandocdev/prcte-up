@@ -1,4 +1,8 @@
 <!-- Sección 2: Específica para Proyectos de Extensión -->
+@php
+$projectDetail = $projectDetail ?? null;
+@endphp
+
 <div class="card card-success work-section" id="section-proyecto" style="display: none;">
     <div class="card-header">
         <h3 class="card-title">
@@ -19,9 +23,9 @@
             </label>
             <textarea class="form-control @error('objectives') is-invalid @enderror" id="objectives"
                 name="objectives" rows="3" data-required="true"
-                placeholder="{{ __('Describa los objetivos general y específicos del proyecto...') }}">{{ old('objectives') }}</textarea>
+                placeholder="{{ __('Describa los objetivos general y específicos del proyecto...') }}">{{ old('objectives', optional($projectDetail)->objectives) }}</textarea>
             @error('objectives')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -32,9 +36,9 @@
             </label>
             <textarea class="form-control @error('methodology') is-invalid @enderror" id="methodology"
                 name="methodology" rows="3" data-required="true"
-                placeholder="{{ __('Describa la metodología a utilizar en el proyecto...') }}">{{ old('methodology') }}</textarea>
+                placeholder="{{ __('Describa la metodología a utilizar en el proyecto...') }}">{{ old('methodology', optional($projectDetail)->methodology) }}</textarea>
             @error('methodology')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
@@ -48,9 +52,9 @@
                     <input type="number"
                         class="form-control @error('direct_beneficiaries') is-invalid @enderror"
                         id="direct_beneficiaries" name="direct_beneficiaries" min="0"
-                        value="{{ old('direct_beneficiaries') }}" placeholder="{{ __('Número estimado') }}">
+                        value="{{ old('direct_beneficiaries', optional($projectDetail)->direct_beneficiaries) }}" placeholder="{{ __('Número estimado') }}">
                     @error('direct_beneficiaries')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -62,10 +66,10 @@
                     <input type="number"
                         class="form-control @error('indirect_beneficiaries') is-invalid @enderror"
                         id="indirect_beneficiaries" name="indirect_beneficiaries" min="0"
-                        value="{{ old('indirect_beneficiaries') }}"
+                        value="{{ old('indirect_beneficiaries', optional($projectDetail)->indirect_beneficiaries) }}"
                         placeholder="{{ __('Número estimado') }}">
                     @error('indirect_beneficiaries')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -78,10 +82,10 @@
             </label>
             <input type="text" class="form-control @error('geographic_area') is-invalid @enderror"
                 id="geographic_area" name="geographic_area"
-                value="{{ old('geographic_area') }}"
+                value="{{ old('geographic_area', optional($projectDetail)->geographic_area) }}"
                 placeholder="{{ __('Municipio, departamento, región...') }}">
             @error('geographic_area')
-                <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
     </div>
