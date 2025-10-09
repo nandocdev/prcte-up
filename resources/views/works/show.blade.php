@@ -402,11 +402,10 @@
                     </a>
 
                     {{-- Botón de reenvío después de correcciones --}}
-                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="resubmit-work-form">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success btn-block mb-2"
-                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                        <button type="button" class="btn btn-success btn-block mb-2 js-resubmit-btn">
                             <i class="fas fa-redo"></i>
                             Reenviar Trabajo Corregido
                         </button>
@@ -443,11 +442,10 @@
                     </a>
 
                     {{-- Botón de reenvío después de correcciones --}}
-                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="resubmit-work-form">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success btn-block mb-2"
-                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                        <button type="button" class="btn btn-success btn-block mb-2 js-resubmit-btn">
                             <i class="fas fa-redo"></i>
                             Reenviar Trabajo Corregido
                         </button>
@@ -484,11 +482,10 @@
                     </a>
 
                     {{-- Botón de reenvío después de correcciones --}}
-                    <form action="{{ route('works.resubmit', $work) }}" method="POST">
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="resubmit-work-form">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success btn-block mb-2"
-                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                        <button type="button" class="btn btn-success btn-block mb-2 js-resubmit-btn">
                             <i class="fas fa-redo"></i>
                             Reenviar Trabajo Corregido
                         </button>
@@ -508,11 +505,10 @@
                     </a>
 
                     {{-- Reenviar después de correcciones --}}
-                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="d-inline">
+                    <form action="{{ route('works.resubmit', $work) }}" method="POST" class="d-inline resubmit-work-form">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success btn-block mb-2"
-                            onclick="return confirm('¿Ha realizado todas las correcciones solicitadas? El trabajo será reenviado para revisión.')">
+                        <button type="button" class="btn btn-success btn-block mb-2 js-resubmit-btn">
                             <i class="fas fa-redo"></i>
                             Reenviar Trabajo Corregido
                         </button>
@@ -652,7 +648,7 @@
                     <strong>Creado:</strong> {{ $work->created_at->format('d/m/Y H:i') }}<br>
                     <strong>Última Modificación:</strong> {{ $work->updated_at->format('d/m/Y H:i') }}<br>
                     @if($work->submitted_at)
-                    <strong>Enviado:</strong> {{ $work->submitted_at->format('d/m/Y H:i') }}<br>
+                    <strong>Enviado:</strong> {{ optional($work->submitted_at)->format('d/m/Y H:i') }}<br>
                     @endif
                 </small>
             </div>
@@ -759,11 +755,11 @@
         // SweetAlert para envío de trabajo a revisión
         $('#submitWorkBtn').on('click', function(e) {
             e.preventDefault();
-            
+
             Swal.fire({
                 title: '¿Enviar trabajo a revisión?',
                 html: '<p class="mb-2">Una vez enviado, <strong>no podrá editarlo</strong> hasta que sea revisado.</p>' +
-                      '<p class="text-muted small">El trabajo será enviado al Coordinador de Extensión para su evaluación.</p>',
+                    '<p class="text-muted small">El trabajo será enviado al Coordinador de Extensión para su evaluación.</p>',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#007bff',
@@ -791,9 +787,50 @@
                             Swal.showLoading();
                         }
                     });
-                    
+
                     // Enviar el formulario
                     $('#submitWorkForm').submit();
+                }
+            });
+        });
+
+        $('.js-resubmit-btn').on('click', function(e) {
+            e.preventDefault();
+
+            const form = $(this).closest('form');
+
+            Swal.fire({
+                title: '¿Reenviar trabajo corregido?',
+                html: '<p class="mb-2">Confirma que incorporaste <strong>todas las correcciones solicitadas</strong>.</p>' +
+                    '<p class="text-muted small">El trabajo volverá al flujo de revisión correspondiente.</p>',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-redo"></i> Sí, reenviar',
+                cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    confirmButton: 'btn btn-success btn-lg',
+                    cancelButton: 'btn btn-secondary btn-lg'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Reenviando trabajo...',
+                        html: 'Por favor espere mientras actualizamos el registro.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    form.trigger('submit');
                 }
             });
         });
