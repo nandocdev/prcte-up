@@ -33,7 +33,7 @@ class WorkOfExtensionPolicy {
 
         // Profesor solo puede ver sus propios trabajos
         if ($user->hasRole('profesor')) {
-            return $workOfExtension->getAttribute('primary_responsible_user_id') === $user->getKey();
+            return (int) $workOfExtension->getAttribute('primary_responsible_user_id') === (int) $user->getKey();
         }
 
         // Coordinador puede ver trabajos de su unidad en estados relevantes
@@ -99,7 +99,7 @@ class WorkOfExtensionPolicy {
         }
 
         // Verificar propiedad del trabajo
-        if ($workOfExtension->getAttribute('primary_responsible_user_id') !== $user->getKey()) {
+        if ((int) $workOfExtension->getAttribute('primary_responsible_user_id') !== (int) $user->getKey()) {
             return false;
         }
 
@@ -126,7 +126,7 @@ class WorkOfExtensionPolicy {
         }
 
         // Solo el propietario puede eliminar su trabajo
-        if ($workOfExtension->getAttribute('primary_responsible_user_id') !== $user->getKey()) {
+        if ((int) $workOfExtension->getAttribute('primary_responsible_user_id') !== (int) $user->getKey()) {
             return false;
         }
 
