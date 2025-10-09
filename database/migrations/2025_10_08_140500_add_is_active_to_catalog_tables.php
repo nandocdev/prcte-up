@@ -33,7 +33,7 @@ return new class extends Migration {
                 ->default('1')
                 ->comment('Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)')
                 ->after('description');
-            $table->index('is_active', 'institutional_project_types_is_active_idx');
+            $table->index('is_active', 'ipt_is_active_idx');
         });
     }
 
@@ -53,7 +53,7 @@ return new class extends Migration {
         });
 
         Schema::table('institutional_project_types', function (Blueprint $table): void {
-            $table->dropIndex('institutional_project_types_is_active_idx');
+            $table->dropIndex('ipt_is_active_idx');
             $table->dropColumn('is_active');
         });
     }

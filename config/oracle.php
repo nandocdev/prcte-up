@@ -16,7 +16,7 @@ return [
         'edition' => env('DB_EDITION', 'ora$base'),
         'server_version' => env('DB_SERVER_VERSION', '11g'),
         'load_balance' => env('DB_LOAD_BALANCE', 'yes'),
-        'max_name_len' => env('ORA_MAX_NAME_LEN', 64),
+        'max_name_len' => env('ORA_MAX_NAME_LEN', 30),
         'dynamic' => [],
         // 'sessionVars' => [
         //     'NLS_TIME_FORMAT' => 'HH24:MI:SS',

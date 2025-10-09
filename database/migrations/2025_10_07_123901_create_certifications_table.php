@@ -12,14 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('certifications', function (Blueprint $table) {
-            $table->id()->index('cert_id_idx');
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions');
+            $table->id();
+            $table->unsignedBigInteger('work_of_extension_id');
             $table->string('certification_number', 50)->unique('cert_number_uq');
             $table->date('issue_date');
             $table->date('valid_until');
-            $table->foreignId('issued_by_user_id')->constrained('users');
+            $table->unsignedBigInteger('issued_by_user_id');
             $table->text('comments')->nullable();
             $table->timestamps();
+
+            $table->primary(['id'], 'cert_pk');
+            $table->index('work_of_extension_id', 'cert_work_idx');
+            $table->index('issued_by_user_id', 'cert_issued_idx');
+            $table->foreign('work_of_extension_id', 'cert_work_fk')
+                ->references('id')
+                ->on('work_of_extensions');
+            $table->foreign('issued_by_user_id', 'cert_issued_fk')
+                ->references('id')
+                ->on('users');
         });
     }
 

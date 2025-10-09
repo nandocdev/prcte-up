@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('publication_details', function (Blueprint $table) {
-            $table->id()->index('pubd_id_idx');
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('pub_details_pk');
+            $table->id();
+            $table->unsignedBigInteger('work_of_extension_id');
             $table->string('publication_type', 50);
             $table->string('editorial')->nullable();
             $table->string('isbn_issn', 50)->nullable();
@@ -26,7 +26,11 @@ return new class extends Migration
             $table->string('media_nature', 100)->nullable();
             $table->timestamps();
 
-            // $table->primary(['work_of_extension_id'], 'pub_details_pk');
+            $table->primary(['id'], 'pubd_pk');
+            $table->index('work_of_extension_id', 'pubd_work_idx');
+            $table->foreign('work_of_extension_id', 'pubd_work_fk')
+                ->references('id')
+                ->on('work_of_extensions');
         });
     }
 

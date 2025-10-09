@@ -22,17 +22,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evaluation_details', function (Blueprint $table) {
-            $table->id()->index('ed_id_idx');
-            
+            $table->id();
+
             // Relaciones
-            $table->foreignId('work_evaluation_id')
-                ->constrained('work_evaluations')
-                ->cascadeOnDelete()
+            $table->unsignedBigInteger('work_evaluation_id')
                 ->comment('Evaluación global a la que pertenece este detalle');
-                
-            $table->foreignId('evaluation_criteria_id')
-                ->constrained('evaluation_criteria')
-                ->cascadeOnDelete()
+
+            $table->unsignedBigInteger('evaluation_criteria_id')
                 ->comment('Criterio que se está evaluando');
             
             // Puntuación y comentarios
@@ -55,13 +51,22 @@ return new class extends Migration
             // Auditoría
             $table->timestamps();
 
-            // Índices
-            $table->index('work_evaluation_id', 'ed_work_eval_idx');
-            $table->index('evaluation_criteria_id', 'ed_criteria_idx');
-            $table->index(['work_evaluation_id', 'evaluation_criteria_id'], 'ed_work_criteria_idx');
+            // Índices y constraints
+            $table->primary(['id'], 'evd_pk');
+            $table->index('work_evaluation_id', 'evd_work_idx');
+            $table->index('evaluation_criteria_id', 'evd_criteria_idx');
+            $table->index(['work_evaluation_id', 'evaluation_criteria_id'], 'evd_work_criteria_idx');
 
             // Constraint único: un criterio solo puede evaluarse una vez por evaluación
-            $table->unique(['work_evaluation_id', 'evaluation_criteria_id'], 'ed_work_criteria_uq');
+            $table->unique(['work_evaluation_id', 'evaluation_criteria_id'], 'evd_work_criteria_uq');
+            $table->foreign('work_evaluation_id', 'evd_work_fk')
+                ->references('id')
+                ->on('work_evaluations')
+                ->cascadeOnDelete();
+            $table->foreign('evaluation_criteria_id', 'evd_criteria_fk')
+                ->references('id')
+                ->on('evaluation_criteria')
+                ->cascadeOnDelete();
         });
         
         // Comentario en la tabla

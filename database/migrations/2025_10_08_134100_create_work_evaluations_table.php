@@ -23,23 +23,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_evaluations', function (Blueprint $table) {
-            $table->id()->index('we_id_idx');
-            
+            $table->id();
+
             // Relaciones
-            $table->foreignId('work_of_extension_id')
-                ->constrained('work_of_extensions')
-                ->cascadeOnDelete()
+            $table->unsignedBigInteger('work_of_extension_id')
                 ->comment('Trabajo que se está evaluando');
-                
-            $table->foreignId('evaluator_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete()
+
+            $table->unsignedBigInteger('evaluator_user_id')
                 ->comment('Usuario que realiza la evaluación');
-                
-            $table->foreignId('work_evaluator_id')
+
+            $table->unsignedBigInteger('work_evaluator_id')
                 ->nullable()
-                ->constrained('work_evaluators')
-                ->nullOnDelete()
                 ->comment('Referencia a la asignación del evaluador');
             
             // Contenido de la evaluación
@@ -86,14 +80,27 @@ return new class extends Migration
             $table->softDeletes();
 
             // Índices
-            $table->index('work_of_extension_id', 'we_work_idx');
-            $table->index('evaluator_user_id', 'we_eval_idx');
-            $table->index('status', 'we_status_idx');
-            $table->index('final_decision', 'we_decision_idx');
-            $table->index('submitted_at', 'we_submitted_idx');
+            $table->primary(['id'], 'wev_pk');
+            $table->index('work_of_extension_id', 'wev_work_idx');
+            $table->index('evaluator_user_id', 'wev_eval_idx');
+            $table->index('status', 'wev_status_idx');
+            $table->index('final_decision', 'wev_decision_idx');
+            $table->index('submitted_at', 'wev_submitted_idx');
 
             // Constraint único: un evaluador solo puede tener una evaluación por trabajo
-            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'we_work_eval_uq');
+            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'wev_work_eval_uq');
+            $table->foreign('work_of_extension_id', 'wev_work_fk')
+                ->references('id')
+                ->on('work_of_extensions')
+                ->cascadeOnDelete();
+            $table->foreign('evaluator_user_id', 'wev_eval_fk')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnDelete();
+            $table->foreign('work_evaluator_id', 'wev_assign_fk')
+                ->references('id')
+                ->on('work_evaluators')
+                ->nullOnDelete();
         });
         
         // Comentario en la tabla

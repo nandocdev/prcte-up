@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('project_details', function (Blueprint $table) {
-            $table->id()->index('pd_id_idx');
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('proj_details_work_idx');
+            $table->id();
+            $table->unsignedBigInteger('work_of_extension_id');
             $table->string('project_category', 50);
-            $table->foreignId('institutional_project_type_id')->nullable()->constrained('institutional_project_types');
+            $table->unsignedBigInteger('institutional_project_type_id')->nullable();
             $table->text('objectives')->nullable();
             $table->text('methodology')->nullable();
             $table->integer('direct_beneficiaries')->nullable();
@@ -25,9 +25,23 @@ return new class extends Migration
             $table->text('schedule_json')->nullable();
             $table->text('resources_json')->nullable();
             $table->text('costs_json')->nullable();
-            $table->foreignId('ss_tutor_user_id')->nullable()->constrained('users');
+            $table->unsignedBigInteger('ss_tutor_user_id')->nullable();
             $table->text('ss_intervention_summary')->nullable();
             $table->timestamps();
+
+            $table->primary(['id'], 'pd_pk');
+            $table->index('work_of_extension_id', 'pd_work_idx');
+            $table->index('institutional_project_type_id', 'pd_inst_type_idx');
+            $table->index('ss_tutor_user_id', 'pd_ss_tutor_idx');
+            $table->foreign('work_of_extension_id', 'pd_work_fk')
+                ->references('id')
+                ->on('work_of_extensions');
+            $table->foreign('institutional_project_type_id', 'pd_inst_type_fk')
+                ->references('id')
+                ->on('institutional_project_types');
+            $table->foreign('ss_tutor_user_id', 'pd_ss_tutor_fk')
+                ->references('id')
+                ->on('users');
         });
     }
 

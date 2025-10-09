@@ -28,6 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['name', 'guard_name'], 'perm_name_guard_uq');
+            $table->primary(['id'], 'perm_pk');
         });
 
         Schema::create($tableNames['roles'], static function (Blueprint $table) use ($teams, $columnNames) {
@@ -45,6 +46,7 @@ return new class extends Migration
             } else {
                 $table->unique(['name', 'guard_name'], 'role_name_guard_uq');
             }
+            $table->primary(['id'], 'role_pk');
         });
 
         Schema::create($tableNames['model_has_permissions'], static function (Blueprint $table) use ($tableNames, $columnNames, $pivotPermission, $teams) {
@@ -54,7 +56,7 @@ return new class extends Migration
             $table->unsignedBigInteger($columnNames['model_morph_key']);
             $table->index([$columnNames['model_morph_key'], 'model_type'], 'mhp_model_idx');
 
-            $table->foreign($pivotPermission)
+            $table->foreign($pivotPermission, 'mhp_perm_fk')
                 ->references('id') // permission id
                 ->on($tableNames['permissions'])
                 ->onDelete('cascade');
@@ -81,7 +83,7 @@ return new class extends Migration
             $table->unsignedBigInteger($columnNames['model_morph_key']);
             $table->index([$columnNames['model_morph_key'], 'model_type'], 'mhr_model_idx');
 
-            $table->foreign($pivotRole)
+            $table->foreign($pivotRole, 'mhr_role_fk')
                 ->references('id') // role id
                 ->on($tableNames['roles'])
                 ->onDelete('cascade');
@@ -105,12 +107,12 @@ return new class extends Migration
             $table->unsignedBigInteger($pivotPermission);
             $table->unsignedBigInteger($pivotRole);
 
-            $table->foreign($pivotPermission)
+            $table->foreign($pivotPermission, 'rhp_perm_fk')
                 ->references('id') // permission id
                 ->on($tableNames['permissions'])
                 ->onDelete('cascade');
 
-            $table->foreign($pivotRole)
+            $table->foreign($pivotRole, 'rhp_role_fk')
                 ->references('id') // role id
                 ->on($tableNames['roles'])
                 ->onDelete('cascade');

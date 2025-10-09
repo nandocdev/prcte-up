@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('work_statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 50)->unique('work_status_name_uq')->index('work_status_name_idx');
+            $table->string('name', 50)->unique('ws_name_uq')->index('ws_name_idx');
             $table->text('description')->nullable();
             $table->timestamps();
+
+            $table->primary(['id'], 'ws_pk');
         });
     }
 

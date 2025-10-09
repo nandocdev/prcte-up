@@ -21,7 +21,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evaluation_criteria', function (Blueprint $table) {
-            $table->id()->index('ec_id_idx');
+            $table->id();
             
             // Información del criterio
             $table->string('name', 200)->comment('Nombre del criterio de evaluación');
@@ -42,8 +42,9 @@ return new class extends Migration
             $table->softDeletes();
 
             // Índices
-            // $table->index('is_active', 'ec_active_idx');
-            // $table->index(['is_active', 'order'], 'ec_active_order_idx');
+            $table->primary(['id'], 'evc_pk');
+            $table->index('is_active', 'evc_active_idx');
+            $table->index(['is_active', 'order'], 'evc_active_order_idx');
         });
         
         // Comentario en la tabla

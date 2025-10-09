@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_type', function (Blueprint $table) {
-            $table->id()->index('wt_id_idx');
-            $table->string('name', 100)->unique('work_type_name_uq')->index('work_type_name_idx');
+            $table->id();
+            $table->string('name', 100)->unique('wt_name_uq')->index('wt_name_idx');
             $table->text('description')->nullable();
             $table->timestamps();
+
+            $table->primary(['id'], 'wt_pk');
         });
     }
 

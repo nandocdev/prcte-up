@@ -1,0 +1,219 @@
+
+   INFO  Running migrations.  
+
+  0001_01_01_000001_create_cache_table .........................................................................................  
+  ⇂ create table "CACHE" ( "KEY" varchar2(255) not null, "VALUE" clob not null, "EXPIRATION" number(10,0) not null, constraint cache_pk primary key ( "KEY" ) )  
+  ⇂ create table "CACHE_LOCKS" ( "KEY" varchar2(255) not null, "OWNER" varchar2(255) not null, "EXPIRATION" number(10,0) not null, constraint cache_lock_pk primary key ( "KEY" ) )  
+  0001_01_01_000002_create_jobs_table ..........................................................................................  
+  ⇂ create table "JOBS" ( "ID" number(19,0) not null, "QUEUE" varchar2(255) not null, "PAYLOAD" clob not null, "ATTEMPTS" number(3,0) not null, "RESERVED_AT" number(10,0) null, "AVAILABLE_AT" number(10,0) not null, "CREATED_AT" number(10,0) not null, constraint jobs_pk primary key ( "ID" ) )  
+  ⇂ create index jobs_queue_idx on "JOBS" ( "QUEUE" )  
+  ⇂ create sequence "JOBS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "JOBS_ID_TRG" before insert on "JOBS" for each row begin if :new."ID" is null then select "JOBS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  ⇂ create table "JOB_BATCHES" ( "ID" varchar2(255) not null, "NAME" varchar2(255) not null, "TOTAL_JOBS" number(10,0) not null, "PENDING_JOBS" number(10,0) not null, "FAILED_JOBS" number(10,0) not null, "FAILED_JOB_IDS" clob not null, "OPTIONS" clob null, "CANCELLED_AT" number(10,0) null, "CREATED_AT" number(10,0) not null, "FINISHED_AT" number(10,0) null, constraint jobbt_pk primary key ( "ID" ) )  
+  ⇂ create table "FAILED_JOBS" ( "ID" number(19,0) not null, "UUID" varchar2(255) not null, "CONNECTION" clob not null, "QUEUE" clob not null, "PAYLOAD" clob not null, "EXCEPTION" clob not null, "FAILED_AT" timestamp not null, constraint fjobs_pk primary key ( "ID" ) )  
+  ⇂ alter table "FAILED_JOBS" add constraint failed_jobs_uuid_uq unique ( "UUID" )  
+  ⇂ create sequence "FAILED_JOBS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "FAILED_JOBS_ID_TRG" before insert on "FAILED_JOBS" for each row begin if :new."ID" is null then select "FAILED_JOBS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_122827_create_work_type_table .....................................................................................  
+  ⇂ create table "WORK_TYPE" ( "ID" number(19,0) not null, "NAME" varchar2(100) not null, "DESCRIPTION" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint wt_pk primary key ( "ID" ) )  
+  ⇂ alter table "WORK_TYPE" add constraint wt_name_uq unique ( "NAME" )  
+  ⇂ create sequence "WORK_TYPE_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_TYPE_ID_TRG" before insert on "WORK_TYPE" for each row begin if :new."ID" is null then select "WORK_TYPE_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_122839_create_work_statuses_table .................................................................................  
+  ⇂ create table "WORK_STATUSES" ( "ID" number(19,0) not null, "NAME" varchar2(50) not null, "DESCRIPTION" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint ws_pk primary key ( "ID" ) )  
+  ⇂ alter table "WORK_STATUSES" add constraint ws_name_uq unique ( "NAME" )  
+  ⇂ create sequence "WORK_STATUSES_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_STATUSES_ID_TRG" before insert on "WORK_STATUSES" for each row begin if :new."ID" is null then select "WORK_STATUSES_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_122849_create_institutional_project_types_table ...................................................................  
+  ⇂ create table "INSTITUTIONAL_PROJECT_TYPES" ( "ID" number(19,0) not null, "NAME" varchar2(255) not null, "DESCRIPTION" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint ipt_pk primary key ( "ID" ) )  
+  ⇂ alter table "INSTITUTIONAL_PROJECT_TYPES" add constraint ipt_name_uq unique ( "NAME" )  
+  ⇂ create sequence "INSTITUTIONAL_PROJECT_TYPES_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "INSTITUTIONAL_PROJECT_TYPES_ID_TRG" before insert on "INSTITUTIONAL_PROJECT_TYPES" for each row begin if :new."ID" is null then select "INSTITUTIONAL_PROJECT_TYPES_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123309_create_organizational_units_table ..........................................................................  
+  ⇂ create table "ORGANIZATIONAL_UNITS" ( "ID" number(19,0) not null, "NAME" varchar2(255) not null, "TYPE" varchar2(50) not null, "PARENT_ID" number(19,0) null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint ou_parent_fk foreign key ( "PARENT_ID" ) references "ORGANIZATIONAL_UNITS" ( "ID" ), constraint ou_pk primary key ( "ID" ) )  
+  ⇂ create index ou_parent_idx on "ORGANIZATIONAL_UNITS" ( "PARENT_ID" )  
+  ⇂ create sequence "ORGANIZATIONAL_UNITS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "ORGANIZATIONAL_UNITS_ID_TRG" before insert on "ORGANIZATIONAL_UNITS" for each row begin if :new."ID" is null then select "ORGANIZATIONAL_UNITS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123315_create_users_table .........................................................................................  
+  ⇂ create table "USERS" ( "ID" number(19,0) not null, "NAME" varchar2(255) not null, "EMAIL" varchar2(100) not null, "PASSWORD" varchar2(255) not null, "CEDULA" varchar2(20) not null, "PROFESSOR_CODE" varchar2(20) null, "MAIN_ORGANIZATIONAL_UNIT_ID" number(19,0) null, "EMAIL_VERIFIED_AT" timestamp null, "IS_ACTIVE" char(1) default '1' not null, "REMEMBER_TOKEN" varchar2(100) null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint usr_main_unit_fk foreign key ( "MAIN_ORGANIZATIONAL_UNIT_ID" ) references "ORGANIZATIONAL_UNITS" ( "ID" ), constraint usr_pk primary key ( "ID" ) )  
+  ⇂ create index usr_main_unit_idx on "USERS" ( "MAIN_ORGANIZATIONAL_UNIT_ID" )  
+  ⇂ alter table "USERS" add constraint users_email_uq unique ( "EMAIL" )  
+  ⇂ alter table "USERS" add constraint users_cedula_uq unique ( "CEDULA" )  
+  ⇂ alter table "USERS" add constraint users_prof_code_uq unique ( "PROFESSOR_CODE" )  
+  ⇂ create sequence "USERS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "USERS_ID_TRG" before insert on "USERS" for each row begin if :new."ID" is null then select "USERS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123510_create_work_of_extensions_table ............................................................................  
+  ⇂ create table "WORK_OF_EXTENSIONS" ( "ID" number(19,0) not null, "TITLE" varchar2(255) not null, "DESCRIPTION" clob null, "WORK_TYPE_ID" number(19,0) not null, "PRIMARY_RESPONSIBLE_USER_ID" number(19,0) not null, "ORGANIZATIONAL_UNIT_ID" number(19,0) not null, "CURRENT_STATUS_ID" number(19,0) not null, "START_DATE" date null, "END_DATE" date null, "ACADEMIC_PERIOD" varchar2(100) null, "RESPONSIBLE_PHONE" varchar2(20) null, "PUBLICATION_CONSENT" char(1) default '0' not null, "IS_DRAFT" char(1) default '1' not null, "SUBMITTED_AT" date null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint woe_work_type_fk foreign key ( "WORK_TYPE_ID" ) references "WORK_TYPE" ( "ID" ), constraint woe_main_user_fk foreign key ( "PRIMARY_RESPONSIBLE_USER_ID" ) references "USERS" ( "ID" ), constraint woe_org_unit_fk foreign key ( "ORGANIZATIONAL_UNIT_ID" ) references "ORGANIZATIONAL_UNITS" ( "ID" ), constraint woe_status_fk foreign key ( "CURRENT_STATUS_ID" ) references "WORK_STATUSES" ( "ID" ), constraint woe_pk primary key ( "ID" ) )  
+  ⇂ create index woe_work_type_idx on "WORK_OF_EXTENSIONS" ( "WORK_TYPE_ID" )  
+  ⇂ create index woe_main_user_idx on "WORK_OF_EXTENSIONS" ( "PRIMARY_RESPONSIBLE_USER_ID" )  
+  ⇂ create index woe_org_unit_idx on "WORK_OF_EXTENSIONS" ( "ORGANIZATIONAL_UNIT_ID" )  
+  ⇂ create index woe_status_idx on "WORK_OF_EXTENSIONS" ( "CURRENT_STATUS_ID" )  
+  ⇂ create sequence "WORK_OF_EXTENSIONS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_OF_EXTENSIONS_ID_TRG" before insert on "WORK_OF_EXTENSIONS" for each row begin if :new."ID" is null then select "WORK_OF_EXTENSIONS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123547_create_work_status_history_table ...........................................................................  
+  ⇂ create table "WORK_STATUS_HISTORY" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "FROM_STATUS_ID" number(19,0) null, "TO_STATUS_ID" number(19,0) not null, "CHANGED_BY_USER_ID" number(19,0) not null, "COMMENTS" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint wsh_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint wsh_from_status_fk foreign key ( "FROM_STATUS_ID" ) references "WORK_STATUSES" ( "ID" ), constraint wsh_to_status_fk foreign key ( "TO_STATUS_ID" ) references "WORK_STATUSES" ( "ID" ), constraint wsh_user_fk foreign key ( "CHANGED_BY_USER_ID" ) references "USERS" ( "ID" ), constraint wsh_pk primary key ( "ID" ) )  
+  ⇂ create index wsh_work_idx on "WORK_STATUS_HISTORY" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index wsh_from_status_idx on "WORK_STATUS_HISTORY" ( "FROM_STATUS_ID" )  
+  ⇂ create index wsh_to_status_idx on "WORK_STATUS_HISTORY" ( "TO_STATUS_ID" )  
+  ⇂ create index wsh_user_idx on "WORK_STATUS_HISTORY" ( "CHANGED_BY_USER_ID" )  
+  ⇂ create sequence "WORK_STATUS_HISTORY_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_STATUS_HISTORY_ID_TRG" before insert on "WORK_STATUS_HISTORY" for each row begin if :new."ID" is null then select "WORK_STATUS_HISTORY_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123554_create_work_participants_table .............................................................................  
+  ⇂ create table "WORK_PARTICIPANTS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "USER_ID" number(19,0) null, "EXTERNAL_PARTICIPANT_NAME" varchar2(255) null, "ROLE" varchar2(50) not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint wp_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint wp_user_fk foreign key ( "USER_ID" ) references "USERS" ( "ID" ), constraint wp_pk primary key ( "ID" ) )  
+  ⇂ create index wp_work_idx on "WORK_PARTICIPANTS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index wp_user_idx on "WORK_PARTICIPANTS" ( "USER_ID" )  
+  ⇂ create sequence "WORK_PARTICIPANTS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_PARTICIPANTS_ID_TRG" before insert on "WORK_PARTICIPANTS" for each row begin if :new."ID" is null then select "WORK_PARTICIPANTS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123718_create_project_details_table ...............................................................................  
+  ⇂ create table "PROJECT_DETAILS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "PROJECT_CATEGORY" varchar2(50) not null, "INSTITUTIONAL_PROJECT_TYPE_ID" number(19,0) null, "OBJECTIVES" clob null, "METHODOLOGY" clob null, "DIRECT_BENEFICIARIES" number(10,0) null, "INDIRECT_BENEFICIARIES" number(10,0) null, "GEOGRAPHIC_AREA" varchar2(255) null, "DETAILS_JSON" clob not null, "SCHEDULE_JSON" clob null, "RESOURCES_JSON" clob null, "COSTS_JSON" clob null, "SS_TUTOR_USER_ID" number(19,0) null, "SS_INTERVENTION_SUMMARY" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint pd_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint pd_inst_type_fk foreign key ( "INSTITUTIONAL_PROJECT_TYPE_ID" ) references "INSTITUTIONAL_PROJECT_TYPES" ( "ID" ), constraint pd_ss_tutor_fk foreign key ( "SS_TUTOR_USER_ID" ) references "USERS" ( "ID" ), constraint pd_pk primary key ( "ID" ) )  
+  ⇂ create index pd_work_idx on "PROJECT_DETAILS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index pd_inst_type_idx on "PROJECT_DETAILS" ( "INSTITUTIONAL_PROJECT_TYPE_ID" )  
+  ⇂ create index pd_ss_tutor_idx on "PROJECT_DETAILS" ( "SS_TUTOR_USER_ID" )  
+  ⇂ create sequence "PROJECT_DETAILS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "PROJECT_DETAILS_ID_TRG" before insert on "PROJECT_DETAILS" for each row begin if :new."ID" is null then select "PROJECT_DETAILS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123728_create_activity_details_table ..............................................................................  
+  ⇂ create table "ACTIVITY_DETAILS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "ACTIVITY_TYPE" varchar2(50) null, "MODALITY" varchar2(20) null, "DURATION_HOURS" number(10,0) null, "EXPECTED_PARTICIPANTS" number(10,0) null, "PARTICIPANT_PROFILE" varchar2(255) null, "OFFERS_CERTIFICATE" char(1) default '0' not null, "DETAILS_JSON" clob not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint acdtl_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint acdtl_pk primary key ( "ID" ) )  
+  ⇂ create index acdtl_work_idx on "ACTIVITY_DETAILS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create sequence "ACTIVITY_DETAILS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "ACTIVITY_DETAILS_ID_TRG" before insert on "ACTIVITY_DETAILS" for each row begin if :new."ID" is null then select "ACTIVITY_DETAILS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123738_create_publication_details_table ...........................................................................  
+  ⇂ create table "PUBLICATION_DETAILS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "PUBLICATION_TYPE" varchar2(50) not null, "EDITORIAL" varchar2(255) null, "ISBN_ISSN" varchar2(50) null, "TARGET_AUDIENCE" clob null, "LANGUAGE" varchar2(20) default 'español' not null, "PRINT_RUN" number(10,0) null, "RELEVANCE_JUSTIFICATION" clob not null, "PUBLICATION_DATE" date not null, "MEDIA_TYPE" varchar2(100) not null, "MEDIA_NATURE" varchar2(100) null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint pubd_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint pubd_pk primary key ( "ID" ) )  
+  ⇂ create index pubd_work_idx on "PUBLICATION_DETAILS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create sequence "PUBLICATION_DETAILS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "PUBLICATION_DETAILS_ID_TRG" before insert on "PUBLICATION_DETAILS" for each row begin if :new."ID" is null then select "PUBLICATION_DETAILS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123746_create_technical_assistance_details_table ..................................................................  
+  ⇂ create table "TECHNICAL_ASSISTANCE_DETAILS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "SPECIALIZATION_AREA" varchar2(255) null, "EXPECTED_PRODUCTS" clob null, "WORK_MODALITY" varchar2(20) not null, "ESTIMATED_HOURS" number(10,0) null, "ASSISTANCE_TYPE" varchar2(100) not null, "COLLABORATING_INSTITUTION" varchar2(255) not null, "DETAILS_JSON" clob not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint tad_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint tad_pk primary key ( "ID" ) )  
+  ⇂ create index tad_work_idx on "TECHNICAL_ASSISTANCE_DETAILS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create sequence "TECHNICAL_ASSISTANCE_DETAILS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "TECHNICAL_ASSISTANCE_DETAILS_ID_TRG" before insert on "TECHNICAL_ASSISTANCE_DETAILS" for each row begin if :new."ID" is null then select "TECHNICAL_ASSISTANCE_DETAILS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123901_create_certifications_table ................................................................................  
+  ⇂ create table "CERTIFICATIONS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "CERTIFICATION_NUMBER" varchar2(50) not null, "ISSUE_DATE" date not null, "VALID_UNTIL" date not null, "ISSUED_BY_USER_ID" number(19,0) not null, "COMMENTS" clob null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint cert_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ), constraint cert_issued_fk foreign key ( "ISSUED_BY_USER_ID" ) references "USERS" ( "ID" ), constraint cert_pk primary key ( "ID" ) )  
+  ⇂ create index cert_work_idx on "CERTIFICATIONS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index cert_issued_idx on "CERTIFICATIONS" ( "ISSUED_BY_USER_ID" )  
+  ⇂ alter table "CERTIFICATIONS" add constraint cert_number_uq unique ( "CERTIFICATION_NUMBER" )  
+  ⇂ create sequence "CERTIFICATIONS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "CERTIFICATIONS_ID_TRG" before insert on "CERTIFICATIONS" for each row begin if :new."ID" is null then select "CERTIFICATIONS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_123945_create_password_reset_tokens_table .........................................................................  
+  ⇂ create table "PASSWORD_RESET_TOKENS" ( "EMAIL" varchar2(255) not null, "TOKEN" varchar2(255) not null, "CREATED_AT" timestamp null, constraint prt_email_pk primary key ( "EMAIL" ) )  
+  ⇂ create table "SESSIONS" ( "ID" varchar2(255) not null, "USER_ID" number(19,0) null, "IP_ADDRESS" varchar2(45) null, "USER_AGENT" clob null, "PAYLOAD" clob not null, "LAST_ACTIVITY" number(10,0) not null, constraint sess_user_fk foreign key ( "USER_ID" ) references "USERS" ( "ID" ) on delete set null, constraint sess_pk primary key ( "ID" ) )  
+  ⇂ create index sess_user_idx on "SESSIONS" ( "USER_ID" )  
+  ⇂ create index sess_last_idx on "SESSIONS" ( "LAST_ACTIVITY" )  
+  2025_10_07_124651_create_permission_tables ...................................................................................  
+  ⇂ create table "PERMISSIONS" ( "ID" number(19,0) not null, "NAME" varchar2(255) not null, "GUARD_NAME" varchar2(255) not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint perm_pk primary key ( "ID" ) )  
+  ⇂ alter table "PERMISSIONS" add constraint perm_name_guard_uq unique ( "NAME", "GUARD_NAME" )  
+  ⇂ create sequence "PERMISSIONS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "PERMISSIONS_ID_TRG" before insert on "PERMISSIONS" for each row begin if :new."ID" is null then select "PERMISSIONS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  ⇂ create table "ROLES" ( "ID" number(19,0) not null, "NAME" varchar2(255) not null, "GUARD_NAME" varchar2(255) not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint role_pk primary key ( "ID" ) )  
+  ⇂ alter table "ROLES" add constraint role_name_guard_uq unique ( "NAME", "GUARD_NAME" )  
+  ⇂ create sequence "ROLES_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "ROLES_ID_TRG" before insert on "ROLES" for each row begin if :new."ID" is null then select "ROLES_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  ⇂ create table "MODEL_HAS_PERMISSIONS" ( "PERMISSION_ID" number(19,0) not null, "MODEL_TYPE" varchar2(255) not null, "MODEL_ID" number(19,0) not null, constraint mhp_perm_fk foreign key ( "PERMISSION_ID" ) references "PERMISSIONS" ( "ID" ) on delete cascade, constraint mhp_perm_model_pk primary key ( "PERMISSION_ID", "MODEL_ID", "MODEL_TYPE" ) )  
+  ⇂ create index mhp_model_idx on "MODEL_HAS_PERMISSIONS" ( "MODEL_ID", "MODEL_TYPE" )  
+  ⇂ create table "MODEL_HAS_ROLES" ( "ROLE_ID" number(19,0) not null, "MODEL_TYPE" varchar2(255) not null, "MODEL_ID" number(19,0) not null, constraint mhr_role_fk foreign key ( "ROLE_ID" ) references "ROLES" ( "ID" ) on delete cascade, constraint mhr_role_model_pk primary key ( "ROLE_ID", "MODEL_ID", "MODEL_TYPE" ) )  
+  ⇂ create index mhr_model_idx on "MODEL_HAS_ROLES" ( "MODEL_ID", "MODEL_TYPE" )  
+  ⇂ create table "ROLE_HAS_PERMISSIONS" ( "PERMISSION_ID" number(19,0) not null, "ROLE_ID" number(19,0) not null, constraint rhp_perm_fk foreign key ( "PERMISSION_ID" ) references "PERMISSIONS" ( "ID" ) on delete cascade, constraint rhp_role_fk foreign key ( "ROLE_ID" ) references "ROLES" ( "ID" ) on delete cascade, constraint rhp_perm_role_pk primary key ( "PERMISSION_ID", "ROLE_ID" ) )  
+  ⇂ delete from "CACHE" where "KEY" in ('viex-cache-spatie.permission.cache', 'viex-cache-illuminate:cache:flexible:created:spatie.permission.cache')  
+  2025_10_07_124735_create_media_table .........................................................................................  
+  ⇂ create table "MEDIA" ( "ID" number(19,0) not null, "MODEL_TYPE" varchar2(255) not null, "MODEL_ID" number(19,0) not null, "UUID" char(36) null, "COLLECTION_NAME" varchar2(255) not null, "NAME" varchar2(255) not null, "FILE_NAME" varchar2(255) not null, "MIME_TYPE" varchar2(255) null, "DISK" varchar2(255) not null, "CONVERSIONS_DISK" varchar2(255) null, "SIZE" number(19,0) not null, "MANIPULATIONS" clob not null, "CUSTOM_PROPERTIES" clob not null, "GENERATED_CONVERSIONS" clob not null, "RESPONSIVE_IMAGES" clob not null, "ORDER_COLUMN" number(10,0) null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint media_pk primary key ( "ID" ) )  
+  ⇂ create index media_model_idx on "MEDIA" ( "MODEL_TYPE", "MODEL_ID" )  
+  ⇂ alter table "MEDIA" add constraint media_uuid_uq unique ( "UUID" )  
+  ⇂ create index media_order_idx on "MEDIA" ( "ORDER_COLUMN" )  
+  ⇂ create sequence "MEDIA_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "MEDIA_ID_TRG" before insert on "MEDIA" for each row begin if :new."ID" is null then select "MEDIA_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_07_125450_create_notifications_table .................................................................................  
+  ⇂ create table "NOTIFICATIONS" ( "ID" char(36) not null, "TYPE" varchar2(255) not null, "NOTIFIABLE_TYPE" varchar2(255) not null, "NOTIFIABLE_ID" number(19,0) not null, "DATA" clob not null, "READ_AT" timestamp null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint notif_pk primary key ( "ID" ) )  
+  ⇂ create index notif_notifiable_idx on "NOTIFICATIONS" ( "NOTIFIABLE_TYPE", "NOTIFIABLE_ID" )  
+  2025_10_07_145052_update_work_statuses_for_new_workflow ......................................................................  
+  ⇂ truncate table "WORK_STATUSES"  
+  ⇂ insert into "WORK_STATUSES" ("CREATED_AT", "DESCRIPTION", "NAME", "UPDATED_AT") select '2025-10-09 13:25:46', 'Trabajo en edición por el profesor', 'Borrador', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Pendiente de revisión por el Coordinador de Extensión', 'En Revisión Coordinador', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Devuelto al profesor para correcciones (estado transitorio)', 'En Corrección', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Pendiente de aprobación por Decano/Director', 'Pendiente Decano', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Pendiente de evaluación por VIEX', 'Pendiente VIEX', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Aprobado por VIEX, listo para certificación', 'Aprobado Internamente', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Trabajo certificado oficialmente', 'Certificado', '2025-10-09 13:25:46' from dual union all select '2025-10-09 13:25:46', 'Trabajo rechazado definitivamente', 'Rechazado', '2025-10-09 13:25:46' from dual  
+  2025_10_08_133900_create_evaluation_criteria_table ...........................................................................  
+  ⇂ create table "EVALUATION_CRITERIA" ( "ID" number(19,0) not null, "NAME" varchar2(200) not null, "DESCRIPTION" clob not null, "CATEGORY" varchar2(100) null, "MAX_SCORE" number(10,0) default '10' not null, "WEIGHT" number(10,0) default '1' not null, "ORDER" number(10,0) default '0' not null, "IS_ACTIVE" char(1) default '1' not null, "IS_REQUIRED" char(1) default '1' not null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, "DELETED_AT" timestamp null, constraint evc_pk primary key ( "ID" ) )  
+  ⇂ create index evc_active_idx on "EVALUATION_CRITERIA" ( "IS_ACTIVE" )  
+  ⇂ create index evc_active_order_idx on "EVALUATION_CRITERIA" ( "IS_ACTIVE", "ORDER" )  
+  ⇂ comment on column evaluation_criteria.name is 'Nombre del criterio de evaluación'  
+  ⇂ comment on column evaluation_criteria.description is 'Descripción detallada del criterio'  
+  ⇂ comment on column evaluation_criteria.category is 'Categoría del criterio (metodología, impacto, etc.)'  
+  ⇂ comment on column evaluation_criteria.max_score is 'Puntuación máxima posible'  
+  ⇂ comment on column evaluation_criteria.weight is 'Peso del criterio en la evaluación final'  
+  ⇂ comment on column evaluation_criteria."order" is 'Orden de visualización'  
+  ⇂ comment on column evaluation_criteria.is_active is 'Si el criterio está activo'  
+  ⇂ comment on column evaluation_criteria.is_required is 'Si es obligatorio evaluar este criterio'  
+  ⇂ create sequence "EVALUATION_CRITERIA_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "EVALUATION_CRITERIA_ID_TRG" before insert on "EVALUATION_CRITERIA" for each row begin if :new."ID" is null then select "EVALUATION_CRITERIA_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_08_134000_create_work_evaluators_table ...............................................................................  
+  ⇂ create table "WORK_EVALUATORS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "EVALUATOR_USER_ID" number(19,0) not null, "ASSIGNED_BY_USER_ID" number(19,0) not null, "ROLE" varchar2(255) default 'evaluator' not null check ("ROLE" in ('lead_evaluator', 'evaluator')), "ASSIGNMENT_NOTES" clob null, "ASSIGNED_AT" timestamp not null, "NOTIFIED_AT" timestamp null, "ACCEPTED_AT" timestamp null, "COMPLETED_AT" timestamp null, "STATUS" varchar2(255) default 'pending' not null check ("STATUS" in ('pending', 'accepted', 'in_progress', 'completed', 'declined')), "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint wevl_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ) on delete cascade, constraint wevl_eval_fk foreign key ( "EVALUATOR_USER_ID" ) references "USERS" ( "ID" ) on delete cascade, constraint wevl_assigned_fk foreign key ( "ASSIGNED_BY_USER_ID" ) references "USERS" ( "ID" ), constraint wevl_pk primary key ( "ID" ) )  
+  ⇂ create index wevl_work_idx on "WORK_EVALUATORS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index wevl_eval_idx on "WORK_EVALUATORS" ( "EVALUATOR_USER_ID" )  
+  ⇂ create index wevl_status_idx on "WORK_EVALUATORS" ( "STATUS" )  
+  ⇂ create index wevl_assigned_idx on "WORK_EVALUATORS" ( "ASSIGNED_AT" )  
+  ⇂ alter table "WORK_EVALUATORS" add constraint wevl_work_eval_uq unique ( "WORK_OF_EXTENSION_ID", "EVALUATOR_USER_ID" )  
+  ⇂ comment on column work_evaluators.work_of_extension_id is 'Trabajo al que se asigna el evaluador'  
+  ⇂ comment on column work_evaluators.evaluator_user_id is 'Usuario que actúa como evaluador'  
+  ⇂ comment on column work_evaluators.assigned_by_user_id is 'Usuario de VIEX que realizó la asignación'  
+  ⇂ comment on column work_evaluators."role" is 'Rol del evaluador: lead_evaluator (principal) o evaluator (secundario)'  
+  ⇂ comment on column work_evaluators.assignment_notes is 'Notas sobre la asignación'  
+  ⇂ comment on column work_evaluators.assigned_at is 'Fecha y hora de asignación'  
+  ⇂ comment on column work_evaluators.notified_at is 'Fecha y hora en que se notificó al evaluador'  
+  ⇂ comment on column work_evaluators.accepted_at is 'Fecha y hora en que el evaluador aceptó la asignación'  
+  ⇂ comment on column work_evaluators.completed_at is 'Fecha y hora en que completó la evaluación'  
+  ⇂ comment on column work_evaluators.status is 'Estado de la asignación'  
+  ⇂ create sequence "WORK_EVALUATORS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_EVALUATORS_ID_TRG" before insert on "WORK_EVALUATORS" for each row begin if :new."ID" is null then select "WORK_EVALUATORS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_08_134100_create_work_evaluations_table ..............................................................................  
+  ⇂ create table "WORK_EVALUATIONS" ( "ID" number(19,0) not null, "WORK_OF_EXTENSION_ID" number(19,0) not null, "EVALUATOR_USER_ID" number(19,0) not null, "WORK_EVALUATOR_ID" number(19,0) null, "GENERAL_COMMENTS" clob null, "STRENGTHS" clob null, "WEAKNESSES" clob null, "RECOMMENDATIONS" clob null, "TOTAL_SCORE" number(8, 2) null, "WEIGHTED_SCORE" number(8, 2) null, "FINAL_DECISION" varchar2(255) default 'pending' not null check ("FINAL_DECISION" in ('approve', 'approve_with_conditions', 'reject', 'pending')), "DECISION_JUSTIFICATION" clob null, "STARTED_AT" timestamp null, "SUBMITTED_AT" timestamp null, "STATUS" varchar2(255) default 'draft' not null check ("STATUS" in ('draft', 'in_progress', 'submitted', 'reviewed')), "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, "DELETED_AT" timestamp null, constraint wev_work_fk foreign key ( "WORK_OF_EXTENSION_ID" ) references "WORK_OF_EXTENSIONS" ( "ID" ) on delete cascade, constraint wev_eval_fk foreign key ( "EVALUATOR_USER_ID" ) references "USERS" ( "ID" ) on delete cascade, constraint wev_assign_fk foreign key ( "WORK_EVALUATOR_ID" ) references "WORK_EVALUATORS" ( "ID" ) on delete set null, constraint wev_pk primary key ( "ID" ) )  
+  ⇂ create index wev_work_idx on "WORK_EVALUATIONS" ( "WORK_OF_EXTENSION_ID" )  
+  ⇂ create index wev_eval_idx on "WORK_EVALUATIONS" ( "EVALUATOR_USER_ID" )  
+  ⇂ create index wev_status_idx on "WORK_EVALUATIONS" ( "STATUS" )  
+  ⇂ create index wev_decision_idx on "WORK_EVALUATIONS" ( "FINAL_DECISION" )  
+  ⇂ create index wev_submitted_idx on "WORK_EVALUATIONS" ( "SUBMITTED_AT" )  
+  ⇂ alter table "WORK_EVALUATIONS" add constraint wev_work_eval_uq unique ( "WORK_OF_EXTENSION_ID", "EVALUATOR_USER_ID" )  
+  ⇂ comment on column work_evaluations.work_of_extension_id is 'Trabajo que se está evaluando'  
+  ⇂ comment on column work_evaluations.evaluator_user_id is 'Usuario que realiza la evaluación'  
+  ⇂ comment on column work_evaluations.work_evaluator_id is 'Referencia a la asignación del evaluador'  
+  ⇂ comment on column work_evaluations.general_comments is 'Comentarios generales sobre el trabajo'  
+  ⇂ comment on column work_evaluations.strengths is 'Fortalezas identificadas'  
+  ⇂ comment on column work_evaluations.weaknesses is 'Debilidades identificadas'  
+  ⇂ comment on column work_evaluations.recommendations is 'Recomendaciones para el trabajo'  
+  ⇂ comment on column work_evaluations.total_score is 'Puntuación total calculada'  
+  ⇂ comment on column work_evaluations.weighted_score is 'Puntuación ponderada final'  
+  ⇂ comment on column work_evaluations.final_decision is 'Decisión final del evaluador'  
+  ⇂ comment on column work_evaluations.decision_justification is 'Justificación de la decisión'  
+  ⇂ comment on column work_evaluations.started_at is 'Fecha y hora en que inició la evaluación'  
+  ⇂ comment on column work_evaluations.submitted_at is 'Fecha y hora en que se envió la evaluación'  
+  ⇂ comment on column work_evaluations.status is 'Estado de la evaluación'  
+  ⇂ create sequence "WORK_EVALUATIONS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "WORK_EVALUATIONS_ID_TRG" before insert on "WORK_EVALUATIONS" for each row begin if :new."ID" is null then select "WORK_EVALUATIONS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_08_134200_create_evaluation_details_table ............................................................................  
+  ⇂ create table "EVALUATION_DETAILS" ( "ID" number(19,0) not null, "WORK_EVALUATION_ID" number(19,0) not null, "EVALUATION_CRITERIA_ID" number(19,0) not null, "SCORE" number(10,0) not null, "COMMENTS" clob null, "EVIDENCE" clob null, "NORMALIZED_SCORE" number(8, 2) null, "WEIGHTED_SCORE" number(8, 2) null, "CREATED_AT" timestamp null, "UPDATED_AT" timestamp null, constraint evd_work_fk foreign key ( "WORK_EVALUATION_ID" ) references "WORK_EVALUATIONS" ( "ID" ) on delete cascade, constraint evd_criteria_fk foreign key ( "EVALUATION_CRITERIA_ID" ) references "EVALUATION_CRITERIA" ( "ID" ) on delete cascade, constraint evd_pk primary key ( "ID" ) )  
+  ⇂ create index evd_work_idx on "EVALUATION_DETAILS" ( "WORK_EVALUATION_ID" )  
+  ⇂ create index evd_criteria_idx on "EVALUATION_DETAILS" ( "EVALUATION_CRITERIA_ID" )  
+  ⇂ create index evd_work_criteria_idx on "EVALUATION_DETAILS" ( "WORK_EVALUATION_ID", "EVALUATION_CRITERIA_ID" )  
+  ⇂ alter table "EVALUATION_DETAILS" add constraint evd_work_criteria_uq unique ( "WORK_EVALUATION_ID", "EVALUATION_CRITERIA_ID" )  
+  ⇂ comment on column evaluation_details.work_evaluation_id is 'Evaluación global a la que pertenece este detalle'  
+  ⇂ comment on column evaluation_details.evaluation_criteria_id is 'Criterio que se está evaluando'  
+  ⇂ comment on column evaluation_details.score is 'Puntuación otorgada (de 0 a max_score del criterio)'  
+  ⇂ comment on column evaluation_details.comments is 'Comentarios específicos sobre este criterio'  
+  ⇂ comment on column evaluation_details.evidence is 'Evidencia o justificación de la puntuación'  
+  ⇂ comment on column evaluation_details.normalized_score is 'Puntuación normalizada (0-100)'  
+  ⇂ comment on column evaluation_details.weighted_score is 'Puntuación aplicando el peso del criterio'  
+  ⇂ create sequence "EVALUATION_DETAILS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "EVALUATION_DETAILS_ID_TRG" before insert on "EVALUATION_DETAILS" for each row begin if :new."ID" is null then select "EVALUATION_DETAILS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+  2025_10_08_140500_add_is_active_to_catalog_tables ............................................................................  
+  ⇂ alter table "WORK_TYPE" add ( "IS_ACTIVE" char(1) default '1' not null )  
+  ⇂ create index work_type_is_active_idx on "WORK_TYPE" ( "IS_ACTIVE" )  
+  ⇂ comment on column work_type.is_active is 'Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)'  
+  ⇂ alter table "WORK_STATUSES" add ( "IS_ACTIVE" char(1) default '1' not null )  
+  ⇂ create index work_statuses_is_active_idx on "WORK_STATUSES" ( "IS_ACTIVE" )  
+  ⇂ comment on column work_statuses.is_active is 'Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)'  
+  ⇂ alter table "INSTITUTIONAL_PROJECT_TYPES" add ( "IS_ACTIVE" char(1) default '1' not null )  
+  ⇂ create index institutional_project_types_is_active_idx on "INSTITUTIONAL_PROJECT_TYPES" ( "IS_ACTIVE" )  
+  ⇂ comment on column institutional_project_types.is_active is 'Indicador de disponibilidad en el catalogo (1 activo, 0 inactivo)'  
+  2025_10_08_150000_create_audits_table ........................................................................................  
+  ⇂ create table "AUDITS" ( "ID" number(19,0) not null, "USER_ID" number(19,0) null, "EVENT" varchar2(100) not null, "AUDITABLE_TYPE" varchar2(150) null, "AUDITABLE_ID" number(19,0) null, "OLD_VALUES" clob null, "NEW_VALUES" clob null, "IP_ADDRESS" varchar2(45) null, "USER_AGENT" varchar2(255) null, "URL" varchar2(255) null, "CREATED_AT" timestamp not null, constraint aud_user_fk foreign key ( "USER_ID" ) references "USERS" ( "ID" ) on delete set null, constraint aud_pk primary key ( "ID" ) )  
+  ⇂ create index aud_user_idx on "AUDITS" ( "USER_ID" )  
+  ⇂ create index aud_event_idx on "AUDITS" ( "EVENT" )  
+  ⇂ create index aud_created_idx on "AUDITS" ( "CREATED_AT" )  
+  ⇂ create index aud_auditable_idx on "AUDITS" ( "AUDITABLE_TYPE", "AUDITABLE_ID" )  
+  ⇂ create sequence "AUDITS_ID_SEQ" minvalue 1 start with 1 increment by 1  
+  ⇂ create trigger "AUDITS_ID_TRG" before insert on "AUDITS" for each row begin if :new."ID" is null then select "AUDITS_ID_SEQ".nextval into :new."ID" from dual; end if; end;  
+

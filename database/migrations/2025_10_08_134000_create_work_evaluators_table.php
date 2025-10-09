@@ -22,21 +22,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_evaluators', function (Blueprint $table) {
-            $table->id()->index('weval_id_idx');
-            
+            $table->id();
+
             // Relaciones
-            $table->foreignId('work_of_extension_id')
-                ->constrained('work_of_extensions')
-                ->cascadeOnDelete()
+            $table->unsignedBigInteger('work_of_extension_id')
                 ->comment('Trabajo al que se asigna el evaluador');
-                
-            $table->foreignId('evaluator_user_id')
-                ->constrained('users')
-                ->cascadeOnDelete()
+
+            $table->unsignedBigInteger('evaluator_user_id')
                 ->comment('Usuario que actúa como evaluador');
-                
-            $table->foreignId('assigned_by_user_id')
-                ->constrained('users')
+
+            $table->unsignedBigInteger('assigned_by_user_id')
                 ->comment('Usuario de VIEX que realizó la asignación');
             
             // Información de la asignación
@@ -68,14 +63,26 @@ return new class extends Migration
             // Auditoría
             $table->timestamps();
 
-            // Índices
-            $table->index('work_of_extension_id', 'weval_work_idx');
-            $table->index('evaluator_user_id', 'weval_eval_idx');
-            $table->index('status', 'weval_status_idx');
-            $table->index('assigned_at', 'weval_assigned_idx');
+            // Índices y llaves
+            $table->primary(['id'], 'wevl_pk');
+            $table->index('work_of_extension_id', 'wevl_work_idx');
+            $table->index('evaluator_user_id', 'wevl_eval_idx');
+            $table->index('status', 'wevl_status_idx');
+            $table->index('assigned_at', 'wevl_assigned_idx');
 
-            // Constraint único: un evaluador solo puede ser asignado una vez por trabajo
-            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'weval_work_eval_uq');
+            // Constraints
+            $table->unique(['work_of_extension_id', 'evaluator_user_id'], 'wevl_work_eval_uq');
+            $table->foreign('work_of_extension_id', 'wevl_work_fk')
+                ->references('id')
+                ->on('work_of_extensions')
+                ->cascadeOnDelete();
+            $table->foreign('evaluator_user_id', 'wevl_eval_fk')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnDelete();
+            $table->foreign('assigned_by_user_id', 'wevl_assigned_fk')
+                ->references('id')
+                ->on('users');
         });
         
         // Comentario en la tabla

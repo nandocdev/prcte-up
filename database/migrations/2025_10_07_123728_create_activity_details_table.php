@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activity_details', function (Blueprint $table) {
-            $table->id()->index('acdtl_id_idx');
-            $table->foreignId('work_of_extension_id')->constrained('work_of_extensions')->index('act_details_pk');
+            $table->id();
+            $table->unsignedBigInteger('work_of_extension_id');
             $table->string('activity_type', 50)->nullable();
             $table->string('modality', 20)->nullable();
             $table->integer('duration_hours')->nullable();
@@ -23,7 +23,11 @@ return new class extends Migration
             $table->text('details_json');
             $table->timestamps();
 
-            // $table->primary(['work_of_extension_id'], 'act_details_pk');
+            $table->primary(['id'], 'acdtl_pk');
+            $table->index('work_of_extension_id', 'acdtl_work_idx');
+            $table->foreign('work_of_extension_id', 'acdtl_work_fk')
+                ->references('id')
+                ->on('work_of_extensions');
         });
     }
 

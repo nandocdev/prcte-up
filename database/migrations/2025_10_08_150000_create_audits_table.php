@@ -10,8 +10,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('audits', function (Blueprint $table): void {
-            $table->id()->index('audits_id_idx');
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->id();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('event', 100);
             $table->string('auditable_type', 150)->nullable();
             $table->unsignedBigInteger('auditable_id')->nullable();
@@ -22,9 +22,15 @@ return new class extends Migration {
             $table->string('url')->nullable();
             $table->timestamp('created_at')->useCurrent();
 
-            $table->index('event', 'audits_event_idx');
-            $table->index('created_at', 'audits_created_idx');
-            $table->index(['auditable_type', 'auditable_id'], 'audits_audit_idx');
+            $table->primary(['id'], 'aud_pk');
+            $table->index('user_id', 'aud_user_idx');
+            $table->index('event', 'aud_event_idx');
+            $table->index('created_at', 'aud_created_idx');
+            $table->index(['auditable_type', 'auditable_id'], 'aud_auditable_idx');
+            $table->foreign('user_id', 'aud_user_fk')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete();
         });
     }
 

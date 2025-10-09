@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('work_of_extensions', function (Blueprint $table) {
-            $table->id()->index('woe_id_idx');
+            $table->id();
             $table->string('title', 255);
             $table->text('description')->nullable();
-            $table->foreignId('work_type_id')->constrained('work_type');
-            $table->foreignId('primary_responsible_user_id')->constrained('users');
-            $table->foreignId('organizational_unit_id')->constrained('organizational_units');
-            $table->foreignId('current_status_id')->constrained('work_statuses');
+            $table->unsignedBigInteger('work_type_id');
+            $table->unsignedBigInteger('primary_responsible_user_id');
+            $table->unsignedBigInteger('organizational_unit_id');
+            $table->unsignedBigInteger('current_status_id');
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('academic_period', 100)->nullable();
@@ -27,6 +27,24 @@ return new class extends Migration
             $table->char('is_draft', 1)->default('1');
             $table->date('submitted_at')->nullable();
             $table->timestamps();
+
+            $table->primary(['id'], 'woe_pk');
+            $table->index('work_type_id', 'woe_work_type_idx');
+            $table->index('primary_responsible_user_id', 'woe_main_user_idx');
+            $table->index('organizational_unit_id', 'woe_org_unit_idx');
+            $table->index('current_status_id', 'woe_status_idx');
+            $table->foreign('work_type_id', 'woe_work_type_fk')
+                ->references('id')
+                ->on('work_type');
+            $table->foreign('primary_responsible_user_id', 'woe_main_user_fk')
+                ->references('id')
+                ->on('users');
+            $table->foreign('organizational_unit_id', 'woe_org_unit_fk')
+                ->references('id')
+                ->on('organizational_units');
+            $table->foreign('current_status_id', 'woe_status_fk')
+                ->references('id')
+                ->on('work_statuses');
         });
     }
 

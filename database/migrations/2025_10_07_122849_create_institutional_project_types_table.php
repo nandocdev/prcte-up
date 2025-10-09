@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name', 255)->unique('ipt_name_uq');
             $table->text('description')->nullable();
             $table->timestamps();
+
+            // $table->primary(['id'], 'ipt_pk');
         });
     }
 
