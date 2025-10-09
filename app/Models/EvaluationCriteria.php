@@ -113,6 +113,26 @@ class EvaluationCriteria extends Model
     }
 
     /**
+     * Determinar si el criterio posee evaluaciones asociadas.
+     */
+    public function hasEvaluationDetails(): bool
+    {
+        if (property_exists($this, 'evaluation_details_count')) {
+            return $this->evaluation_details_count > 0;
+        }
+
+        return $this->evaluationDetails()->exists();
+    }
+
+    /**
+     * Obtener la suma de pesos de los criterios activos.
+     */
+    public static function totalActiveWeight(): int
+    {
+        return (int) static::query()->where('is_active', true)->sum('weight');
+    }
+
+    /**
      * Calcular el peso porcentual de este criterio respecto al total
      *
      * @return float

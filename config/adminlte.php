@@ -407,9 +407,9 @@ return [
                     'icon' => 'fas fa-chart-bar',
                     'submenu' => [
                         [
-                            'text' => 'Reporte de Trabajo',
-                            'url' => '#',
-                            'icon' => 'fas fa-file-pdf',
+                            'text' => 'Reportes del Sistema',
+                            'route' => 'admin.reports.index',
+                            'icon' => 'fas fa-chart-pie',
                             'shift' => 'ml-3',
                             'can' => 'works.generate-report',
                         ],

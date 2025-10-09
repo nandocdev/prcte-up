@@ -11,6 +11,7 @@ use App\Http\Controllers\WorkOfExtensionController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleManagementController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
+use App\Http\Controllers\Admin\SystemReportsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -163,6 +164,16 @@ Route::middleware('auth')->group(function () {
             Route::resource('work-types', \App\Http\Controllers\Admin\WorkTypesController::class);
             Route::resource('work-statuses', \App\Http\Controllers\Admin\WorkStatusesController::class);
             Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
+            Route::post('evaluation-criteria/sync', [\App\Http\Controllers\Admin\EvaluationCriteriaController::class, 'sync'])
+                ->name('evaluation-criteria.sync');
+            Route::resource('evaluation-criteria', \App\Http\Controllers\Admin\EvaluationCriteriaController::class)
+                ->parameters([
+                    'evaluation-criteria' => 'evaluationCriteria',
+                ]);
+
+            Route::get('reports', [SystemReportsController::class, 'index'])->name('reports.index');
+            Route::get('reports/{report}/download', [SystemReportsController::class, 'download'])->name('reports.download');
+            Route::get('reports/{report}', [SystemReportsController::class, 'show'])->name('reports.show');
         });
     });
 });
