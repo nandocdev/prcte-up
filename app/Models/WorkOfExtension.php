@@ -1018,7 +1018,7 @@ class WorkOfExtension extends Model implements HasMedia {
             'reason' => $comments
         ]);
 
-        // TODO: Disparar evento para notificar al profesor del rechazo definitivo
+        \App\Events\WorkRejectedByDeanDirector::dispatch($this, $user, $comments);
     }
 
     /**

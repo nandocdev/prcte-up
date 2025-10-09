@@ -8,6 +8,7 @@ use App\Events\WorkPublicationAuthorized;
 use App\Events\WorkApprovedByCoordinator;
 use App\Events\WorkChangesRequestedByCoordinator;
 use App\Events\WorkRejectedByCoordinator;
+use App\Events\WorkRejectedByDeanDirector;
 use App\Events\WorkReceivedInViex;
 use App\Events\EvaluatorAssigned;
 use App\Events\EvaluationSubmitted;
@@ -18,6 +19,7 @@ use App\Listeners\SendPublicationAuthorizedNotification;
 use App\Listeners\SendWorkApprovedByCoordinatorNotification;
 use App\Listeners\SendWorkChangesRequestedByCoordinatorNotification;
 use App\Listeners\SendWorkRejectedByCoordinatorNotification;
+use App\Listeners\SendWorkRejectedByDeanDirectorNotification;
 use App\Listeners\SendWorkReceivedInViexNotification;
 use App\Listeners\SendEvaluatorAssignedNotification;
 use App\Listeners\SendEvaluationSubmittedNotification;
@@ -54,6 +56,11 @@ class EventServiceProvider extends ServiceProvider {
         ],
         WorkRejectedByCoordinator::class => [
             SendWorkRejectedByCoordinatorNotification::class,
+        ],
+
+        // CU11: Rechazar Trabajo para Subsanación (Decano/Director)
+        WorkRejectedByDeanDirector::class => [
+            SendWorkRejectedByDeanDirectorNotification::class,
         ],
 
         // CU9: Evaluación VIEX

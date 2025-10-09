@@ -19,18 +19,30 @@ class WorkRejectedByViexNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    protected WorkOfExtension $work;
+
+    protected User $rejector;
+
+    protected string $reason;
+
+    protected string $recipientType;
+
     /**
-     * Create a new notification instance.
-     *
-     * @param WorkOfExtension $work El trabajo rechazado
-     * @param User $rejector El administrador VIEX que rechaza
+     * @param WorkOfExtension $work Trabajo rechazado
+     * @param User $rejector Usuario que rechaza
      * @param string $reason Motivo del rechazo
+     * @param string $recipientType Destinatario (responsible, participant, coordinator)
      */
     public function __construct(
-        public WorkOfExtension $work,
-        public User $rejector,
-        public string $reason
+        WorkOfExtension $work,
+        User $rejector,
+        string $reason,
+        string $recipientType = 'responsible'
     ) {
+        $this->work = $work;
+        $this->rejector = $rejector;
+        $this->reason = $reason;
+        $this->recipientType = $recipientType;
     }
 
     /**
@@ -50,21 +62,23 @@ class WorkRejectedByViexNotification extends Notification implements ShouldQueue
     {
         $evaluationSummary = $this->work->getEvaluationSummary();
 
-        return (new MailMessage())
+        $mail = (new MailMessage())
             ->error()
-            ->subject(__('Trabajo No Aprobado por VIEX - ') . $this->work->title)
-            ->greeting(__('Estimado/a :name,', ['name' => $notifiable->first_name]))
-            ->line(__('Lamentamos informarle que su trabajo de extensión no ha sido aprobado por VIEX después de la evaluación.'))
+            ->subject(__('Trabajo No Aprobado por VIEX - :title', ['title' => $this->work->title]))
+            ->greeting(__('Estimado/a :name,', ['name' => $notifiable->name]))
+            ->line($this->introMessage())
             ->line(__('**Título:** :title', ['title' => $this->work->title]))
             ->line(__('**Tipo:** :type', ['type' => $this->work->workType->name]))
             ->line(__('**Evaluaciones completadas:** :count', ['count' => $evaluationSummary['completed_count']]))
             ->line(__('**Puntuación promedio:** :avg%', ['avg' => number_format($evaluationSummary['average_weighted_score'], 2)]))
             ->line(__('**Motivo del rechazo:**'))
             ->line($this->reason)
-            ->line(__('**Rechazado por:** :rejector', ['rejector' => $this->rejector->full_name]))
-            ->action(__('Ver Trabajo'), route('works.show', $this->work))
-            ->line(__('Puede corregir su trabajo y volver a enviarlo para evaluación si lo considera pertinente.'))
-            ->line(__('Para más información sobre los motivos del rechazo, puede revisar las observaciones de los evaluadores.'));
+            ->line(__('**Rechazado por:** :rejector', ['rejector' => $this->rejector->name]))
+            ->action(__('Ver Trabajo'), route('works.show', $this->work));
+
+        $mail->line($this->closingMessage());
+
+        return $mail;
     }
 
     /**
@@ -82,9 +96,54 @@ class WorkRejectedByViexNotification extends Notification implements ShouldQueue
             'work_type' => $this->work->workType->name,
             'evaluation_summary' => $evaluationSummary,
             'reason' => $this->reason,
-            'rejector' => $this->rejector->full_name,
+            'rejector' => $this->rejector->name,
+            'recipient_type' => $this->recipientType,
             'action_url' => route('works.show', $this->work),
-            'message' => __('Su trabajo no ha sido aprobado por VIEX: :title', ['title' => $this->work->title]),
+            'message' => $this->notificationMessage(),
         ];
+    }
+
+    /**
+     * Mensaje de introducción acorde al destinatario.
+     */
+    private function introMessage(): string
+    {
+        if ($this->recipientType === 'participant') {
+            return __('Se le informa que el trabajo de extensión en el que participa no fue aprobado por VIEX.');
+        }
+
+        if ($this->recipientType === 'coordinator') {
+            return __('Se le informa que el trabajo de extensión de su unidad no fue aprobado por VIEX.');
+        }
+
+        return __('Lamentamos informarle que su trabajo de extensión no ha sido aprobado por VIEX después de la evaluación.');
+    }
+
+    /**
+     * Mensaje de cierre por tipo de destinatario.
+     */
+    private function closingMessage(): string
+    {
+        if ($this->recipientType === 'coordinator') {
+            return __('Por favor coordine con el profesor responsable para atender las observaciones y reenviar el trabajo.');
+        }
+
+        return __('Puede revisar las observaciones, realizar los ajustes necesarios y reenviar el trabajo cuando esté listo.');
+    }
+
+    /**
+     * Texto breve para la notificación almacenada.
+     */
+    private function notificationMessage(): string
+    {
+        if ($this->recipientType === 'participant') {
+            return __('Trabajo no aprobado por VIEX en el que participa: :title', ['title' => $this->work->title]);
+        }
+
+        if ($this->recipientType === 'coordinator') {
+            return __('Trabajo no aprobado por VIEX en su unidad: :title', ['title' => $this->work->title]);
+        }
+
+        return __('Su trabajo no ha sido aprobado por VIEX: :title', ['title' => $this->work->title]);
     }
 }

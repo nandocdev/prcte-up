@@ -2,41 +2,38 @@
 
 namespace App\Listeners;
 
-use App\Events\WorkRejectedByViex;
+use App\Events\WorkRejectedByDeanDirector;
 use App\Models\User;
-use App\Notifications\WorkRejectedByViexNotification;
+use App\Notifications\WorkRejectedByDeanDirectorNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Listener: Send Work Rejected By Viex Notification
- *
- * Escucha el evento WorkRejectedByViex y notifica al profesor
- * responsable que su trabajo no ha sido aprobado.
+ * Listener: enviar notificación de rechazo por Decano/Director
  */
-class SendWorkRejectedByViexNotification implements ShouldQueue
+class SendWorkRejectedByDeanDirectorNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
     /**
      * Handle the event.
-     *
-     * @param WorkRejectedByViex $event
-     * @return void
      */
-    public function handle(WorkRejectedByViex $event): void
+    public function handle(WorkRejectedByDeanDirector $event): void
     {
         $work = $event->work;
+        $deanDirector = $event->deanDirector;
+        $reason = $event->reason;
+
         $responsibleUser = $work->responsibleUser;
         $coordinator = $this->findCoordinator($work);
 
         if ($responsibleUser) {
             $responsibleUser->notify(
-                new WorkRejectedByViexNotification(
+                new WorkRejectedByDeanDirectorNotification(
                     work: $work,
-                    rejector: $event->rejector,
-                    reason: $event->reason,
+                    deanDirector: $deanDirector,
+                    reason: $reason,
                     recipientType: 'responsible'
                 )
             );
@@ -58,24 +55,23 @@ class SendWorkRejectedByViexNotification implements ShouldQueue
             }
 
             $participantUser->notify(
-                new WorkRejectedByViexNotification(
+                new WorkRejectedByDeanDirectorNotification(
                     work: $work,
-                    rejector: $event->rejector,
-                    reason: $event->reason,
+                    deanDirector: $deanDirector,
+                    reason: $reason,
                     recipientType: 'participant'
                 )
             );
         }
 
-        if (
-            $coordinator
+        if ($coordinator
             && (!$responsibleUser || $coordinator->getKey() !== $responsibleUser->getKey())
         ) {
             $coordinator->notify(
-                new WorkRejectedByViexNotification(
+                new WorkRejectedByDeanDirectorNotification(
                     work: $work,
-                    rejector: $event->rejector,
-                    reason: $event->reason,
+                    deanDirector: $deanDirector,
+                    reason: $reason,
                     recipientType: 'coordinator'
                 )
             );
@@ -84,22 +80,18 @@ class SendWorkRejectedByViexNotification implements ShouldQueue
 
     /**
      * Handle a job failure.
-     *
-     * @param WorkRejectedByViex $event
-     * @param \Throwable $exception
-     * @return void
      */
-    public function failed(WorkRejectedByViex $event, \Throwable $exception): void
+    public function failed(WorkRejectedByDeanDirector $event, \Throwable $exception): void
     {
-        Log::error('Failed to send WorkRejectedByViex notification', [
-            'work_id' => $event->work->id,
-            'rejector_id' => $event->rejector->id,
+        Log::error('Failed to send WorkRejectedByDeanDirector notification', [
+            'work_id' => $event->work->getKey(),
+            'dean_director_id' => $event->deanDirector->getKey(),
             'exception' => $exception->getMessage(),
         ]);
     }
 
     /**
-     * Buscar coordinador que debe ser notificado.
+     * Buscar coordinador de la unidad asociada al trabajo.
      */
     private function findCoordinator($work): ?User
     {
