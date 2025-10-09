@@ -17,6 +17,9 @@ class WorkType extends Model
 {
     protected $table = 'work_type';
 
+    public const ACTIVE = '1';
+    public const INACTIVE = '0';
+
     protected $fillable = [
         'name',
         'description',
@@ -40,7 +43,7 @@ class WorkType extends Model
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', self::ACTIVE);
     }
 
     /**
@@ -61,7 +64,7 @@ class WorkType extends Model
     public static function getActiveTypes(): Collection
     {
         return self::query()
-            ->active()
+            // ->active()
             ->orderBy('name')
             ->get();
     }

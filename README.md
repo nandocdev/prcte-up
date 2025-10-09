@@ -1,3 +1,281 @@
+# VIEX · Sistema de Registro y Certificación de Trabajos de Extensión
+
+<div align="center">
+
+![Laravel](https://img.shields.io/badge/Laravel-11+-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Oracle](https://img.shields.io/badge/Oracle-12c+-F80000?style=for-the-badge&logo=oracle&logoColor=white)
+![AdminLTE](https://img.shields.io/badge/AdminLTE-3.x-007BFF?style=for-the-badge&logo=bootstrap&logoColor=white)
+
+Plataforma oficial de la Universidad de Panamá para gestionar el ciclo de vida completo de los trabajos de extensión.
+
+</div>
+
+---
+
+## Índice
+
+- [1. Panorama general](#1-panorama-general)
+- [2. Alcance funcional](#2-alcance-funcional)
+- [3. Roles y visibilidad](#3-roles-y-visibilidad)
+- [4. Arquitectura y componentes](#4-arquitectura-y-componentes)
+- [5. Stack tecnológico](#5-stack-tecnológico)
+- [6. Preparar el entorno local](#6-preparar-el-entorno-local)
+- [7. Configuración de base de datos](#7-configuración-de-base-de-datos)
+- [8. Ciclos de despliegue](#8-ciclos-de-despliegue)
+- [9. Pruebas y aseguramiento de calidad](#9-pruebas-y-aseguramiento-de-calidad)
+- [10. Convenciones del proyecto](#10-convenciones-del-proyecto)
+- [11. Documentación complementaria](#11-documentación-complementaria)
+- [12. Soporte interno](#12-soporte-interno)
+
+---
+
+## 1. Panorama general
+
+VIEX digitaliza el proceso establecido en el Manual de Procedimientos para Trabajos de Extensión de la Universidad de Panamá. El sistema centraliza la captura de información, flujos de revisión multinivel y emisión de certificaciones oficiales, garantizando trazabilidad y control institucional.
+
+**Objetivos clave**
+- Sustituir formularios físicos y firmas manuales por expedientes electrónicos auditables.
+- Coordinar revisiones entre profesores, coordinaciones, decanatos y VIEX.
+- Proveer reportes y estadísticas de gestión para la alta dirección.
+
+---
+
+## 2. Alcance funcional
+
+| Módulo | Descripción resumida |
+| --- | --- |
+| Registro de trabajos | Formularios específicos para Proyectos, Actividades, Publicaciones y Asistencias Técnicas. |
+| Gestión documental | Carga de evidencias y resoluciones en colecciones MediaLibrary. |
+| Flujo de aprobación | Secuencia: Borrador → Coordinador → Decano/Director → VIEX → Certificación / Rechazo. |
+| Tableros por rol | KPIs y atajos operativos diferenciados para cada actor. |
+| Reportes | Consultas filtradas por unidad organizacional, estado y período académico. |
+| Bitácora y auditoría | Historial completo de cambios de estado y comentarios. |
+
+---
+
+## 3. Roles y visibilidad
+
+La visibilidad está condicionada por el rol asignado y la unidad organizacional asociada al usuario.
+
+| Rol | Alcance organizacional | Acciones principales |
+| --- | --- | --- |
+| Profesor | Solo trabajos propios. | Crear, editar, reenviar, adjuntar evidencias. |
+| Coordinador de Extensión | Coordinación y unidades dependientes dentro de su facultad. | Revisar, aprobar, devolver o rechazar en su ámbito. |
+| Decano / Director | Facultad o centro regional completo. | Aprobar trabajos avalados por la coordinación o devolverlos. |
+| Personal VIEX | Acceso global a toda la institución. | Evaluar, certificar, emitir reportes. |
+| Super administrador | Acceso global y configuración. | Gobernanza de usuarios, catálogos y parámetros. |
+
+> Referencia ampliada: `doc/sega/DIST.md`.
+
+---
+
+## 4. Arquitectura y componentes
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ Frontend (Vite + AdminLTE + Blade)                            │
+│  - Formularios dinámicos y componentes reutilizables          │
+│  - Gráficos y tableros por rol                                │
+└───────────────▲───────────────────────────────────────────────┘
+                     │ HTTP/JSON (Laravel routes + controllers)      
+┌───────────────┴───────────────────────────────────────────────┐
+│ Backend (Laravel 11+)                                         │
+│  - Controladores delgados (Form Requests + Policies)          │
+│  - Modelos con lógica de negocio y eventos                    │
+│  - Jobs/Listeners para tareas diferidas                       │
+│  - Spatie Permission & MediaLibrary                           │
+└───────────────▲───────────────────────────────────────────────┘
+                     │ Eloquent + yajra/laravel-oci8                 
+┌───────────────┴───────────────────────────────────────────────┐
+│ Bases de datos                                                │
+│  - Oracle (producción)                                        │
+│  - SQLite en memoria (testing)                                │
+└───────────────────────────────────────────────────────────────┘
+```
+
+Servicios complementarios:
+- Cola de trabajos (database queue) para notificaciones y generación de certificados.
+- Scheduler de Laravel para tareas recurrentes (recordatorios, sincronizaciones).
+
+---
+
+## 5. Stack tecnológico
+
+| Categoría | Herramientas |
+| --- | --- |
+| Backend | Laravel 11+, PHP 8.2, Eloquent, yajra/laravel-oci8 |
+| Frontend | Vite, AdminLTE 3, Blade, jQuery, Select2 |
+| Gestión de permisos | Spatie/laravel-permission |
+| Gestión de archivos | Spatie/laravel-medialibrary |
+| Autenticación | Laravel Breeze (personalizado) |
+| Testing | PHPUnit, Laravel Testbench |
+| Calidad de código | PHP-CS-Fixer / Laravel Pint, PHPStan (nivel 6) |
+
+---
+
+## 6. Preparar el entorno local
+
+### 6.1 Prerrequisitos
+- PHP 8.2 o superior con extensiones `oci8`, `mbstring`, `xml`, `curl`, `zip`, `gd`.
+- Composer 2.x.
+- Node.js 18.x y npm 9.x.
+- Oracle Instant Client (para conexión local a Oracle) o SQLite.
+
+### 6.2 Pasos iniciales
+```bash
+# Clonar el repositorio
+git clone git@gitlab.com:viex/extension-platform.git
+cd extension-platform
+
+# Instalar dependencias PHP
+composer install --no-interaction
+
+# Instalar dependencias Frontend
+npm ci
+```
+
+### 6.3 Variables de entorno
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Configurar al menos:
+```dotenv
+APP_NAME="VIEX"
+APP_URL=http://viex.local
+APP_ENV=local
+APP_DEBUG=true
+
+QUEUE_CONNECTION=database
+FILESYSTEM_DISK=public
+MEDIA_DISK=public
+```
+
+---
+
+## 7. Configuración de base de datos
+
+### 7.1 Oracle (entorno oficial)
+```dotenv
+DB_CONNECTION=oracle
+DB_HOST=10.0.0.25
+DB_PORT=1521
+DB_DATABASE=VIEX_EXT
+DB_SERVICE_NAME=VIEXEXT
+DB_USERNAME=viex_app
+DB_PASSWORD=********
+```
+Agregar en `config/database.php` opciones de charset o schema si aplica.
+
+### 7.2 SQLite (desarrollo rápido / testing)
+```bash
+# Crear archivo vacío
+touch database/database.sqlite
+
+# Ajustar .env
+DB_CONNECTION=sqlite
+DB_DATABASE="/absolute/path/database/database.sqlite"
+```
+
+### 7.3 Migraciones y seeders
+```bash
+php artisan migrate --seed
+
+# Publicar recursos de paquetes
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider"
+```
+
+Los seeders crean estructura básica de unidades, usuarios de referencia y catálogos (`database/seeders`).
+
+---
+
+## 8. Ciclos de despliegue
+
+### 8.1 Desarrollo
+```bash
+# Servidor de aplicación
+php artisan serve
+
+# Bundler Frontend con hot reload
+npm run dev
+```
+
+### 8.2 Producción
+1. Generar build:
+    ```bash
+    npm run build
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    ```
+2. Ejecutar migraciones:
+    ```bash
+    php artisan migrate --force
+    ```
+3. Configurar supervisor/pm2 para `php artisan queue:work --tries=3`.
+4. Registrar tarea cron para scheduler: `* * * * * php /path/artisan schedule:run`.
+
+Backups: considerar `oracle expdp` para base de datos y sincronización de `storage/app/public`.
+
+---
+
+## 9. Pruebas y aseguramiento de calidad
+
+| Tipo | Comando |
+| --- | --- |
+| Suite completa | `php artisan test` |
+| Test específico | `php artisan test --filter=WorkLifecycleTest` |
+| Cobertura | `php artisan test --coverage` |
+| Linter | `./vendor/bin/pint` |
+| Análisis estático | `./vendor/bin/phpstan analyse` |
+
+Recomendaciones:
+- Ejecutar pruebas antes de cada merge hacia `develop` o `main`.
+- Mantener casos cubriendo flujos críticos: envío, reenvío, certificación, manejo de archivos.
+
+---
+
+## 10. Convenciones del proyecto
+
+- **Controladores delgados**: validación en Form Requests, lógica en modelos/servicios.
+- **Eventos y listeners** para notificaciones y tareas costosas.
+- **Policies obligatorias** para autorización; vistas usan `@can`.
+- **Conventional Commits** (feat/fix/docs/refactor/test/etc.).
+- **Ramas**: `develop` (integración), `feature/*`, `fix/*`, `hotfix/*`.
+- **Internacionalización**: textos en `resources/lang/es/*.php` usando `__('...')`.
+- **Documentación de decisiones**: anexar a `doc/` cuando se introduzcan excepciones a estas reglas.
+
+---
+
+## 11. Documentación complementaria
+
+| Archivo | Contenido |
+| --- | --- |
+| `doc/tecnica/Manual_Procedimientos.md` | Flujo normativo completo aprobado por VIEX. |
+| `doc/tecnica/Documento_Tecnico_Funcional.md` | Requerimientos funcionales y técnicos. |
+| `doc/sega/DIST.md` | Alcance de roles y unidades organizacionales. |
+| `doc/NotificationSystem.md` | Catálogo de notificaciones y plantillas de email. |
+| `doc/usuario/` | Guías operativas para cada rol. |
+
+---
+
+## 12. Soporte interno
+
+- **Contacto VIEX TI**: soporte.viex@up.ac.pa
+- **Mesa de ayuda**: ext. 2450 (horario laboral)
+- **Incidencias**: registrar tickets en Service Desk institucional (categoría "Plataforma VIEX").
+
+---
+
+<div align="center">
+
+**VIEX · Vicerrectoría de Extensión · Universidad de Panamá**
+
+</div>
+
 # VIEX - Plataforma de Registro y Certificación de Trabajos de Extensión
 
 <div align="center">

@@ -33,7 +33,7 @@ class WorkOfExtensionController extends Controller {
      */
     public function index(Request $request): View {
         // Log para debug
-        \Illuminate\Support\Facades\Log::info('Consultando trabajos de extensión', [
+        Log::info('Consultando trabajos de extensión', [
             'user_id' => $request->user()->getKey(),
             'filters' => $request->only(['status', 'work_type', 'academic_period', 'search'])
         ]);
@@ -141,6 +141,7 @@ class WorkOfExtensionController extends Controller {
 
         // Delegar obtención de datos maestros al modelo
         $workTypes = WorkType::getActiveTypes();
+        // Log::info('Tipos de trabajo obtenidos', ['works_types' => $workTypes->pluck('id', 'name')]);
         $organizationalUnits = OrganizationalUnit::getUnitsForSelection();
 
         // Obtener configuración para dropdowns

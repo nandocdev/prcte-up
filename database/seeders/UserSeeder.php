@@ -47,7 +47,7 @@ class UserSeeder extends Seeder {
                 'password' => Hash::make('dean2025'),
                 'cedula' => '8-333-3333',
                 'professor_code' => 'FI001',
-                'main_organizational_unit_id' => 115, // Facultad de Ingeniería
+                'main_organizational_unit_id' => 201, // Facultad de Ingeniería
                 'is_active' => true,
                 'role' => 'decano_director'
             ],
