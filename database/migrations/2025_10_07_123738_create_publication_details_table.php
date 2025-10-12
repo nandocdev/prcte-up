@@ -19,10 +19,10 @@ return new class extends Migration
             $table->string('isbn_issn', 50)->nullable();
             $table->text('target_audience')->nullable();
             $table->string('language', 20)->default('español');
-            $table->integer('print_run')->nullable();
-            $table->text('relevance_justification');
-            $table->date('publication_date');
-            $table->string('media_type', 100);
+            $table->integer('print_run')->nullable()->nullable();
+            $table->text('relevance_justification')->nullable();
+            $table->date('publication_date')->nullable();
+            $table->string('media_type', 100)->nullable();
             $table->string('media_nature', 100)->nullable();
             $table->timestamps();
 

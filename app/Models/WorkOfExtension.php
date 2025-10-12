@@ -423,6 +423,10 @@ class WorkOfExtension extends Model implements HasMedia {
                         'target_audience' => $specificData['target_audience'] ?? null,
                         'language' => $specificData['language'] ?? 'español',
                         'print_run' => $specificData['print_run'] ?? null,
+                        'relevance_justification' => $specificData['relevance_justification'] ?? '',
+                        'publication_date' => $specificData['publication_date'] ?? now(),
+                        'media_type' => $specificData['media_type'] ?? '',
+                        'media_nature' => $specificData['media_nature'] ?? null,
                     ]);
                     break;
 
@@ -1124,14 +1128,10 @@ class WorkOfExtension extends Model implements HasMedia {
                             'target_audience' => $specificData['target_audience'] ?? null,
                             'language' => $specificData['language'] ?? 'español',
                             'print_run' => $specificData['print_run'] ?? null,
-                            'details_json' => json_encode([
-                                'publication_type' => $specificData['publication_type'] ?? null,
-                                'editorial' => $specificData['editorial'] ?? null,
-                                'isbn_issn' => $specificData['isbn_issn'] ?? null,
-                                'target_audience' => $specificData['target_audience'] ?? null,
-                                'language' => $specificData['language'] ?? 'español',
-                                'print_run' => $specificData['print_run'] ?? null,
-                            ]),
+                            'relevance_justification' => $specificData['relevance_justification'] ?? null,
+                            'publication_date' => $specificData['publication_date'] ?? null,
+                            'media_type' => $specificData['media_type'] ?? null,
+                            'media_nature' => $specificData['media_nature'] ?? null,
                         ]
                     );
                     break;

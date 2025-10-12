@@ -26,7 +26,7 @@ class NotificationController extends Controller {
         $user = Auth::user();
 
         // Usar el método notifications() que existe por el trait Notifiable
-        // @phpstan-ignore-next-line
+        // @phpstan-ignore-next-line action_url
         $notifications = $user->notifications()
             ->orderBy('read_at', 'asc')
             ->orderBy('created_at', 'desc')

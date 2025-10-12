@@ -95,6 +95,10 @@ class StoreCompleteWorkRequest extends FormRequest {
             'target_audience' => 'nullable|string|max:1000',
             'language' => 'nullable|in:español,ingles,portugues,frances,otro',
             'print_run' => 'nullable|integer|min:1',
+            'relevance_justification' => 'required|string|min:20|max:4000',
+            'publication_date' => 'required|date',
+            'media_type' => 'required|string|max:100',
+            'media_nature' => 'nullable|string|max:100',
         ];
     }
 
@@ -127,8 +131,12 @@ class StoreCompleteWorkRequest extends FormRequest {
             'activity_type.required' => 'El tipo de actividad es obligatorio.',
             'modality.required' => 'La modalidad de la actividad es obligatoria.',
             'publication_type.required' => 'El tipo de publicación es obligatorio.',
+            'relevance_justification.required' => 'Debe justificar la relevancia de la publicación.',
+            'relevance_justification.min' => 'La justificación de relevancia debe tener al menos 20 caracteres.',
             'assistance_type.required' => 'El tipo de asistencia técnica es obligatorio.',
             'collaborating_institution.required' => 'La institución beneficiaria es obligatoria.',
+            'publication_date.required' => 'Debe indicar la fecha de publicación.',
+            'media_type.required' => 'Debe seleccionar el tipo de medio.',
         ];
     }
 
@@ -186,6 +194,10 @@ class StoreCompleteWorkRequest extends FormRequest {
                     'target_audience' => $validated['target_audience'] ?? null,
                     'language' => $validated['language'] ?? 'español',
                     'print_run' => $validated['print_run'] ?? null,
+                    'relevance_justification' => $validated['relevance_justification'] ?? null,
+                    'publication_date' => $validated['publication_date'] ?? null,
+                    'media_type' => $validated['media_type'] ?? null,
+                    'media_nature' => $validated['media_nature'] ?? null,
                 ];
                 break;
 
