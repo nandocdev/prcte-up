@@ -403,19 +403,24 @@ class ViexController extends Controller
         try {
             DB::beginTransaction();
 
-            // Aprobar el trabajo
-            $work->approveByViex(Auth::user(), $request->input('comments'), null);
+            $user = Auth::user();
 
-            // Generar certificación automáticamente
+            // Paso 1: Cambiar a estado "En VIEX - En Evaluación" si no está ya en ese estado
+            if ($work->currentStatus?->name === 'Enviado a VIEX') {
+                $work->receiveInViex($user, $request->input('comments') ?: 'Trabajo recibido en VIEX para certificación directa');
+                $work->refresh(); // Recargar el modelo con el nuevo estado
+            }
+
+            // Paso 2: Generar certificación directamente (cambiará el estado a "Certificado")
             $certification = $work->generateCertification(
-                Auth::user(),
-                2, // 2 años por defecto
+                $user,
                 null, // número automático
-                $request->input('comments')
+                $request->input('comments'), // comentarios
+                2 // 2 años por defecto
             );
 
             // Disparar eventos
-            event(new WorkApprovedByViex($work, Auth::user(), $request->input('comments')));
+            event(new WorkApprovedByViex($work, $user, $request->input('comments')));
 
             DB::commit();
 

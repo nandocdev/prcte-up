@@ -1584,8 +1584,8 @@ class WorkOfExtension extends Model implements HasMedia {
     {
         $currentStatusName = $this->currentStatus?->getAttribute('name');
 
-        if (!in_array($currentStatusName, ['En VIEX - Aprobado', 'Certificado'], true)) {
-            throw new \InvalidArgumentException('El trabajo debe estar en estado "En VIEX - Aprobado" para generar certificación oficial.');
+        if (!in_array($currentStatusName, ['En VIEX - Aprobado', 'En VIEX - En Evaluación', 'Certificado'], true)) {
+            throw new \InvalidArgumentException('El trabajo debe estar en estado "En VIEX - Aprobado" o "En VIEX - En Evaluación" para generar certificación oficial.');
         }
 
         $issueDate = now();

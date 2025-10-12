@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 /**
  * Controlador para administradores VIEX
  *
@@ -592,6 +593,68 @@ class ViexAdminController extends Controller {
             ]);
 
             return back()->withErrors(['error' => 'Error al cargar la gestión de evaluadores.']);
+        }
+    }
+
+    /**
+     * CU16: Generar reporte detallado del trabajo
+     */
+    public function generateReport(WorkOfExtension $work)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Usuario no autenticado.');
+        }
+
+        // Verificar autorización
+        $this->authorize('view', $work);
+
+        // Verificar que se puede generar reporte
+        if (!$work->canGenerateReport()) {
+            return back()->withErrors(['error' => 'No se puede generar reporte para este trabajo en su estado actual.']);
+        }
+
+        try {
+            // Cargar relaciones necesarias para el reporte
+            $work->load([
+                'workType',
+                'primaryResponsible',
+                'organizationalUnit',
+                'currentStatus',
+                'statusHistory.status',
+                'statusHistory.changedBy',
+                'participants',
+                'certification.issuedByUser',
+                'projectDetail',
+                'activityDetail',
+                'publicationDetail',
+                'technicalAssistanceDetail',
+            ]);
+
+            // Generar PDF del reporte
+            $pdf = app('dompdf.wrapper');
+            $pdf->loadView('reports.pdf', [
+                'work' => $work,
+            ]);
+            $pdf->setPaper('a4');
+
+            $fileName = sprintf('reporte-trabajo-%s.pdf', Str::slug($work->title, '_'));
+
+            Log::info('Reporte generado exitosamente', [
+                'work_id' => $work->getKey(),
+                'generated_by' => Auth::id(),
+                'file_name' => $fileName
+            ]);
+
+            return $pdf->download($fileName);
+        } catch (\Throwable $exception) {
+            Log::error('Error al generar reporte del trabajo', [
+                'work_id' => $work->getKey(),
+                'error' => $exception->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+
+            return back()->withErrors(['error' => 'Error al generar reporte: ' . $exception->getMessage()]);
         }
     }
 }
