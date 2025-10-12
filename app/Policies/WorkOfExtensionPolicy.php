@@ -424,4 +424,27 @@ class WorkOfExtensionPolicy {
 
         return $currentStatus === 'En VIEX - En Evaluación';
     }
+
+    /**
+     * Determine whether the user can request changes as VIEX.
+     *
+     * CU9 - Fase 7: Autorización para solicitar correcciones por VIEX
+     */
+    public function requestChangesAsViex(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede solicitar cambios
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX pueden solicitar cambios
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Debe estar en estado "En VIEX - En Evaluación"
+        $currentStatus = $workOfExtension->currentStatus?->name;
+
+        return $currentStatus === 'En VIEX - En Evaluación';
+    }
 }

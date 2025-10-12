@@ -11,6 +11,7 @@ use App\Events\WorkRejectedByViex;
 use App\Http\Requests\AssignEvaluatorRequest;
 use App\Http\Requests\ApproveWorkRequest;
 use App\Http\Requests\RejectWorkRequest;
+use App\Http\Requests\RequestChangesRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -431,6 +432,42 @@ class ViexController extends Controller
             return back()
                 ->withInput()
                 ->with('error', __('Error al aprobar y certificar el trabajo: ') . $e->getMessage());
+        }
+    }
+
+    /**
+     * Solicitar correcciones al profesor desde VIEX
+     *
+     * @param RequestChangesRequest $request
+     * @param WorkOfExtension $work
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function requestChanges(RequestChangesRequest $request, WorkOfExtension $work)
+    {
+        $this->authorize('requestChangesAsViex', $work);
+
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validated();
+
+            $work->requestChangesFromViex(Auth::user(), $validated['comments']);
+
+            DB::commit();
+
+            return redirect()
+                ->route('viex.show', $work)
+                ->with('success', __('Correcciones solicitadas al profesor. El trabajo ha sido devuelto para edición.'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al solicitar correcciones desde VIEX', [
+                'work_id' => $work->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', __('Error al solicitar correcciones: ') . $e->getMessage());
         }
     }
 }

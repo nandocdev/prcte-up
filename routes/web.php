@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/works/{work}/approve', [ViexController::class, 'approve'])->name('evaluation.approve');
         Route::post('/works/{work}/approve-and-certify', [ViexController::class, 'approveAndCertify'])->name('approve-and-certify');
         Route::post('/works/{work}/reject', [ViexController::class, 'reject'])->name('evaluation.reject');
+        Route::post('/works/{work}/request-changes', [ViexController::class, 'requestChanges'])->name('request-changes');
     });
 
     // Rutas para Evaluadores (CU9)

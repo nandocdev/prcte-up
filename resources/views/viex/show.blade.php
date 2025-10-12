@@ -58,7 +58,6 @@
         </div>
     </div>
 </div>
-
 <section class="content">
     <div class="container-fluid">
         <div class="row">
@@ -594,63 +593,92 @@
                     </div>
                 </div>
 
-                <!-- Historial de Estados (Resumido) -->
+                <!-- Acciones de VIEX -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('Historial de Estados') }}</h3>
+                        <h3 class="card-title">{{ __('Acciones de VIEX') }}</h3>
                     </div>
                     <div class="card-body">
-                        @if($work->statusHistory->isEmpty())
-                        <p class="text-muted">{{ __('No hay historial disponible') }}</p>
+                        @php
+                        $currentStatus = $work->currentStatus->name ?? '';
+                        @endphp
+
+                        @if(in_array($currentStatus, ['Enviado a VIEX', 'En VIEX - En Evaluación']))
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            <strong>Trabajo pendiente de evaluación</strong><br>
+                            Este trabajo requiere evaluación final por parte de VIEX.
+                        </div>
+
+                        <!-- Acciones directas de aprobación/certificación/rechazo -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success btn-block" data-toggle="modal"
+                                data-target="#approveCertifyModal">
+                                <i class="fas fa-check mr-2"></i>
+                                {{ __('Aprobar y Certificar') }}
+                            </button>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-warning btn-block" data-toggle="modal"
+                                data-target="#requestChangesModal">
+                                <i class="fas fa-edit mr-2"></i>
+                                {{ __('Devolver para Corrección') }}
+                            </button>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-danger btn-block" data-toggle="modal"
+                                data-target="#rejectModal">
+                                <i class="fas fa-times mr-2"></i>
+                                {{ __('Rechazar Trabajo') }}
+                            </button>
+                        </div>
+
+                        <hr>
+
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb mr-1"></i>
+                            <strong>Nota:</strong> La aprobación genera automáticamente la certificación oficial válida por 2 años.
+                        </small>
+
+                        @elseif($currentStatus === 'En VIEX - Aprobado')
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <strong>Trabajo aprobado</strong><br>
+                            Proceda a generar la certificación oficial.
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-block" data-toggle="modal"
+                            data-target="#certifyModal">
+                            <i class="fas fa-certificate mr-2"></i>
+                            {{ __('Generar Certificación') }}
+                        </button>
+
+                        @elseif($currentStatus === 'Certificado')
+                        <div class="alert alert-success">
+                            <i class="fas fa-certificate mr-2"></i>
+                            <strong>Trabajo certificado</strong><br>
+                            Este trabajo ha sido certificado oficialmente.
+                        </div>
+
+                        @elseif($currentStatus === 'Rechazado por VIEX')
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            <strong>Trabajo rechazado</strong><br>
+                            Este trabajo fue rechazado por VIEX.
+                        </div>
+
                         @else
-                        <div class="timeline timeline-inverse">
-                            @foreach($work->statusHistory->sortByDesc('created_at')->take(5) as $history)
-                            <div class="time-label">
-                                <span class="bg-primary">{{ $history->created_at->format('d/m/Y') }}</span>
-                            </div>
-                            <div>
-                                @php
-                                $iconClass = match ($history->toStatus->name ?? '') {
-                                'Borrador' => 'fas fa-edit bg-secondary',
-                                'Enviado a Coordinador' => 'fas fa-clock bg-warning',
-                                'Enviado a Decano/Director' => 'fas fa-arrow-up bg-success',
-                                'Enviado a VIEX' => 'fas fa-check-circle bg-primary',
-                                'Certificado' => 'fas fa-certificate bg-success',
-                                'Rechazado por VIEX' => 'fas fa-times-circle bg-danger',
-                                default => 'fas fa-circle bg-gray'
-                                };
-                                @endphp
-                                <i class="{{ $iconClass }}"></i>
-                                <div class="timeline-item">
-                                    <span class="time">
-                                        <i class="fas fa-clock"></i> {{ $history->created_at->format('H:i') }}
-                                    </span>
-                                    <h3 class="timeline-header">
-                                        <strong>{{ $history->toStatus->getAttribute('name') }}</strong>
-                                    </h3>
-                                    @if($history->comments)
-                                    <div class="timeline-body">
-                                        <p class="mt-2 small">{{ Str::limit($history->comments, 100) }}</p>
-                                    </div>
-                                    @endif
-                                    @if($history->changedBy)
-                                    <div class="timeline-footer">
-                                        <small class="text-muted">
-                                            {{ __('por') }} {{ $history->changedBy->name }}
-                                        </small>
-                                    </div>
-                                    @endif
-                                </div>
-                            </div>
-                            @endforeach
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>No requiere acción</strong><br>
+                            Este trabajo ya fue procesado.
                         </div>
-                        @if($work->statusHistory->count() > 5)
-                        <div class="text-center mt-3">
-                            <small class="text-muted">
-                                {{ __('Mostrando los últimos 5 eventos. Ver historial completo arriba.') }}
-                            </small>
-                        </div>
-                        @endif
+
+                        <p><strong>Estado actual:</strong>
+                            <span class="badge badge-info">{{ $currentStatus }}</span>
+                        </p>
                         @endif
                     </div>
                 </div>
@@ -713,7 +741,7 @@
         </div>
     </div>
 </section>
-</div>
+
 
 <!-- Modal de Aprobar y Certificar -->
 <div class="modal fade" id="approveCertifyModal" tabindex="-1" role="dialog" aria-labelledby="approveCertifyModalLabel"
@@ -816,8 +844,13 @@
             <form action="{{ route('viex.reject', $work) }}" method="POST">
                 @csrf
                 <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Atención:</strong> Esta acción rechazará el trabajo de forma definitiva.
+                    </div>
+
                     <div class="form-group">
-                        <label for="rejection_reason">{{ __('Motivo del Rechazo') }}</label>
+                        <label for="rejection_reason">{{ __('Motivo del Rechazo') }} <span class="text-danger">*</span></label>
                         <textarea name="rejection_reason" id="rejection_reason" rows="4" class="form-control" required
                             placeholder="{{ __('Especifique el motivo del rechazo...') }}"></textarea>
                     </div>
@@ -832,198 +865,348 @@
             </form>
         </div>
     </div>
+</div>
 
-    @endsection
+<!-- Modal de Solicitar Cambios -->
+<div class="modal fade" id="requestChangesModal" tabindex="-1" role="dialog" aria-labelledby="requestChangesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="requestChangesModalLabel">{{ __('Devolver para Corrección') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('viex.request-changes', $work) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-edit mr-2"></i>
+                        <strong>Devolución para corrección</strong><br>
+                        El trabajo regresará al profesor para que realice las correcciones solicitadas.
+                    </div>
 
-    @push('css')
-    <style>
-        /* Timeline mejorado */
-        .timeline {
-            position: relative;
-            margin: 0 0 30px 0;
-            padding: 0;
-            list-style: none;
+                    <div class="form-group">
+                        <label for="change_comments">{{ __('Observaciones requeridas') }} <span class="text-danger">*</span></label>
+                        <textarea name="comments" id="change_comments" rows="4" class="form-control" required
+                            placeholder="{{ __('Describa detalladamente los cambios que el profesor debe realizar...') }}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancelar') }}</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-edit mr-2"></i>
+                        {{ __('Devolver para Corrección') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Generar Certificación -->
+<div class="modal fade" id="certifyModal" tabindex="-1" role="dialog" aria-labelledby="certifyModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title" id="certifyModalLabel">{{ __('Generar Certificación') }}</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('viex.certify', $work) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-certificate mr-2"></i>
+                        <strong>Generación de Certificación Oficial</strong><br>
+                        Se generará una certificación oficial válida por el período seleccionado.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="validity_years">{{ __('Años de Vigencia') }}</label>
+                                <select name="validity_years" id="validity_years"
+                                    class="form-control @error('validity_years') is-invalid @enderror"
+                                    required>
+                                    <option value="1">{{ __('1 año') }}</option>
+                                    <option value="2" selected>{{ __('2 años') }}</option>
+                                    <option value="3">{{ __('3 años') }}</option>
+                                    <option value="5">{{ __('5 años') }}</option>
+                                </select>
+                                @error('validity_years')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="certification_number">{{ __('Número de Certificación (opcional)') }}</label>
+                                <input type="text" name="certification_number" id="certification_number"
+                                    class="form-control @error('certification_number') is-invalid @enderror"
+                                    placeholder="{{ __('Se generará automáticamente si se deja vacío') }}">
+                                @error('certification_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cert_comments">{{ __('Comentarios (opcional)') }}</label>
+                        <textarea name="comments" id="cert_comments" rows="3"
+                            class="form-control @error('comments') is-invalid @enderror"
+                            placeholder="{{ __('Comentarios sobre la certificación...') }}"></textarea>
+                        @error('comments')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancelar') }}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-certificate mr-2"></i>
+                        {{ __('Generar Certificación') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@endsection
+@push('css')
+<style>
+    /* Timeline mejorado */
+    .timeline {
+        position: relative;
+        margin: 0 0 30px 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 31px;
+        width: 4px;
+        background: #ddd;
+    }
+
+    .timeline>div {
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .timeline>div>.timeline-item {
+        box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        margin-top: 10px;
+        background: #fff;
+        color: #444;
+        margin-left: 60px;
+        margin-right: 15px;
+        padding: 10px;
+        position: relative;
+    }
+
+    .timeline>div>.fa,
+    .timeline>div>.fas,
+    .timeline>div>.far,
+    .timeline>div>.fab,
+    .timeline>div>.fal,
+    .timeline>div>.fad {
+        position: absolute;
+        left: 18px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-size: 15px;
+    }
+
+    .timeline>.time-label>span {
+        font-weight: 600;
+        color: #fff;
+        border-radius: 4px;
+        display: inline-block;
+        padding: 5px 10px;
+    }
+
+    .timeline-header {
+        margin-top: 0;
+        color: #555;
+    }
+
+    .timeline-body,
+    .timeline-footer {
+        padding-top: 10px;
+    }
+
+    /* Callouts personalizados */
+    .callout {
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .callout-info {
+        border-left: 4px solid #17a2b8;
+        background-color: #d1ecf1;
+    }
+
+    /* Card outline purple para participantes */
+    .card-outline.card-purple {
+        border-top: 3px solid #6f42c1;
+    }
+
+    /* Mejoras en modales */
+    .modal-lg {
+        max-width: 800px;
+    }
+
+    /* Botones de decisión más prominentes */
+    .btn-lg {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Timeline inverso para el panel lateral */
+    .timeline-inverse>div>.timeline-item {
+        margin-left: 0;
+        margin-right: 60px;
+    }
+
+    .timeline-inverse:before {
+        left: auto;
+        right: 31px;
+    }
+
+    .timeline-inverse>div>.fa {
+        left: auto;
+        right: 18px;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    const confirmMessage = "{{ __('Esta seguro de aprobar este trabajo?') }}";
+    const currentStatusName = "{{ $work->currentStatus->getAttribute('name') }}";
+
+    function confirmApproval() {
+        return confirm(confirmMessage);
+    }
+
+    $(document).ready(function() {
+        // Auto-refresh para trabajos en evaluación
+        if (currentStatusName === 'En VIEX - En Evaluación') {
+            setTimeout(function() {
+                window.location.reload();
+            }, 300000); // 5 minutos
         }
 
-        .timeline:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 31px;
-            width: 4px;
-            background: #ddd;
-        }
+        // Validación del modal de aprobación y certificación
+        $('#approveCertifyModal form').on('submit', function(e) {
+            const checkbox = $('#confirm_approve_certify');
 
-        .timeline > div {
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .timeline > div > .timeline-item {
-            box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-            margin-top: 10px;
-            background: #fff;
-            color: #444;
-            margin-left: 60px;
-            margin-right: 15px;
-            padding: 10px;
-            position: relative;
-        }
-
-        .timeline > div > .fa,
-        .timeline > div > .fas,
-        .timeline > div > .far,
-        .timeline > div > .fab,
-        .timeline > div > .fal,
-        .timeline > div > .fad {
-            position: absolute;
-            left: 18px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            font-size: 15px;
-        }
-
-        .timeline > .time-label > span {
-            font-weight: 600;
-            color: #fff;
-            border-radius: 4px;
-            display: inline-block;
-            padding: 5px 10px;
-        }
-
-        .timeline-header {
-            margin-top: 0;
-            color: #555;
-        }
-
-        .timeline-body,
-        .timeline-footer {
-            padding-top: 10px;
-        }
-
-        /* Callouts personalizados */
-        .callout {
-            border-radius: 0.25rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .callout-info {
-            border-left: 4px solid #17a2b8;
-            background-color: #d1ecf1;
-        }
-
-        /* Card outline purple para participantes */
-        .card-outline.card-purple {
-            border-top: 3px solid #6f42c1;
-        }
-
-        /* Mejoras en modales */
-        .modal-lg {
-            max-width: 800px;
-        }
-
-        /* Botones de decisión más prominentes */
-        .btn-lg {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        /* Timeline inverso para el panel lateral */
-        .timeline-inverse > div > .timeline-item {
-            margin-left: 0;
-            margin-right: 60px;
-        }
-
-        .timeline-inverse:before {
-            left: auto;
-            right: 31px;
-        }
-
-        .timeline-inverse > div > .fa {
-            left: auto;
-            right: 18px;
-        }
-    </style>
-    @endpush
-
-    @push('scripts')
-    <script>
-        const confirmMessage = "{{ __('Esta seguro de aprobar este trabajo?') }}";
-        const currentStatusName = "{{ $work->currentStatus->getAttribute('name') }}";
-
-        function confirmApproval() {
-            return confirm(confirmMessage);
-        }
-
-        $(document).ready(function() {
-            // Auto-refresh para trabajos en evaluación
-            if (currentStatusName === 'En VIEX - En Evaluación') {
-                setTimeout(function() {
-                    window.location.reload();
-                }, 300000); // 5 minutos
+            if (!checkbox.is(':checked')) {
+                e.preventDefault();
+                alert('Debe confirmar que ha revisado completamente el trabajo antes de aprobar y certificar.');
+                return false;
             }
 
-            // Validación del modal de aprobación y certificación
-            $('#approveCertifyModal form').on('submit', function(e) {
-                const checkbox = $('#confirm_approve_certify');
+            // Deshabilitar botón para evitar doble-clic
+            const $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
 
-                if (!checkbox.is(':checked')) {
-                    e.preventDefault();
-                    alert('Debe confirmar que ha revisado completamente el trabajo antes de aprobar y certificar.');
-                    return false;
+            // Si falla, restaurar después de 5 segundos
+            setTimeout(function() {
+                if ($submitBtn.prop('disabled')) {
+                    $submitBtn.prop('disabled', false);
+                    $submitBtn.html('<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación');
                 }
+            }, 5000);
+        });
 
-                // Deshabilitar botón para evitar doble-clic
-                const $submitBtn = $(this).find('button[type="submit"]');
-                $submitBtn.prop('disabled', true);
-                $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+        // Validación del modal de rechazo
+        $('#rejectModal form').on('submit', function(e) {
+            const reason = $('#rejection_reason').val().trim();
 
-                // Si falla, restaurar después de 5 segundos
-                setTimeout(function() {
-                    if ($submitBtn.prop('disabled')) {
-                        $submitBtn.prop('disabled', false);
-                        $submitBtn.html('<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación');
-                    }
-                }, 5000);
-            });
+            if (reason.length < 20) {
+                e.preventDefault();
+                alert('Por favor, proporcione una razón detallada del rechazo (mínimo 20 caracteres).');
+                return false;
+            }
 
-            // Validación del modal de rechazo
-            $('#rejectModal form').on('submit', function(e) {
-                const reason = $('#rejection_reason').val().trim();
+            if (!confirm('⚠️ ATENCIÓN: ¿Está completamente seguro de que desea RECHAZAR este trabajo? Esta es una acción seria.')) {
+                e.preventDefault();
+                return false;
+            }
 
-                if (reason.length < 20) {
-                    e.preventDefault();
-                    alert('Por favor, proporcione una razón detallada del rechazo (mínimo 20 caracteres).');
-                    return false;
+            // Deshabilitar botón
+            const $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+        });
+
+        // Validación del modal de solicitar cambios
+        $('#requestChangesModal form').on('submit', function(e) {
+            const comments = $('#change_comments').val().trim();
+
+            if (comments.length < 10) {
+                e.preventDefault();
+                alert('Por favor, especifique las correcciones con al menos 10 caracteres para orientar al profesor.');
+                return false;
+            }
+
+            if (!confirm('¿Está seguro de que desea devolver este trabajo para corrección?')) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Deshabilitar botón
+            const $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+        });
+
+        // Validación del modal de certificación
+        $('#certifyModal form').on('submit', function(e) {
+            if (!confirm('¿Está seguro de que desea generar la certificación oficial?')) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Deshabilitar botón
+            const $submitBtn = $(this).find('button[type="submit"]');
+            $submitBtn.prop('disabled', true);
+            $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+        });
+
+        // Cerrar modales al hacer clic en cancelar
+        $('.modal').on('hidden.bs.modal', function() {
+            $(this).find('form')[0]?.reset();
+            $(this).find('button[type="submit"]').prop('disabled', false);
+            $(this).find('button[type="submit"]').html(function() {
+                if ($(this).hasClass('btn-success')) {
+                    return '<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación';
+                } else if ($(this).hasClass('btn-warning')) {
+                    return '<i class="fas fa-edit mr-2"></i>Devolver para Corrección';
+                } else if ($(this).hasClass('btn-danger')) {
+                    return '<i class="fas fa-times mr-2"></i>Rechazar Trabajo';
+                } else if ($(this).hasClass('btn-primary')) {
+                    return '<i class="fas fa-certificate mr-2"></i>Generar Certificación';
                 }
-
-                if (!confirm('⚠️ ATENCIÓN: ¿Está completamente seguro de que desea RECHAZAR este trabajo? Esta es una acción seria.')) {
-                    e.preventDefault();
-                    return false;
-                }
-
-                // Deshabilitar botón
-                const $submitBtn = $(this).find('button[type="submit"]');
-                $submitBtn.prop('disabled', true);
-                $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
-            });
-
-            // Cerrar modales al hacer clic en cancelar
-            $('.modal').on('hidden.bs.modal', function() {
-                $(this).find('form')[0]?.reset();
-                $(this).find('button[type="submit"]').prop('disabled', false);
-                $(this).find('button[type="submit"]').html(function() {
-                    return $(this).hasClass('btn-success') ?
-                        '<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación' :
-                        '<i class="fas fa-times mr-2"></i>Rechazar Trabajo';
-                });
             });
         });
-    </script>
-    @endpush
+    });
+</script>
+@endpush

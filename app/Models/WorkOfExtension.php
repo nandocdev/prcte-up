@@ -1745,4 +1745,40 @@ class WorkOfExtension extends Model implements HasMedia {
             'Rechazado por VIEX'
         ]);
     }
+
+    /**
+     * CU14: Solicitar correcciones desde VIEX
+     *
+     * @param User $viexAdmin Usuario de VIEX
+     * @param string $comments Comentarios con las correcciones solicitadas
+     * @return void
+     */
+    public function requestChangesFromViex(User $viexAdmin, string $comments): void
+    {
+        if ($this->statusIsNot('En VIEX - En Evaluación')) {
+            throw new \InvalidArgumentException('El trabajo debe estar "En VIEX - En Evaluación" para solicitar correcciones.');
+        }
+
+        // Cambiar a estado "Devuelto para Corrección"
+        $changesStatus = WorkStatus::where('name', 'Devuelto para Corrección')->first();
+
+        if (!$changesStatus) {
+            throw new \InvalidArgumentException('No se encontró el estado "Devuelto para Corrección".');
+        }
+
+        // Marcar como borrador para que el profesor pueda editar
+        $this->is_draft = '1';
+        $this->save();
+
+        $this->changeStatus($changesStatus, $viexAdmin, $comments);
+
+        Log::info('Correcciones solicitadas por VIEX', [
+            'work_id' => $this->getKey(),
+            'viex_admin_id' => $viexAdmin->getKey(),
+            'comments' => $comments,
+        ]);
+
+        // TODO: Disparar evento para notificar al profesor
+        \App\Events\WorkChangesRequestedByViex::dispatch($this, $viexAdmin, $comments);
+    }
 }
