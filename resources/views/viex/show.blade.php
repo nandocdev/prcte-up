@@ -63,10 +63,14 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Información Principal -->
-            <div class="col-md-8">
+            <div class="col-lg-8">
+                <!-- Información General del Trabajo -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ $work->title }}</h3>
+                        <h3 class="card-title">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            {{ $work->title }}
+                        </h3>
                         <div class="card-tools">
                             @php
                             $statusColors = [
@@ -83,69 +87,314 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>{{ __('Tipo de Trabajo:') }}</strong>
-                                <p>{{ $work->workType->name }}</p>
+                        <dl class="row">
+                            <dt class="col-sm-4">{{ __('Tipo de Trabajo:') }}</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge badge-info">{{ $work->workType->name }}</span>
+                            </dd>
 
-                                <strong>{{ __('Profesor Responsable:') }}</strong>
-                                <p>{{ $work->primaryResponsible->getAttribute('name') }}</p>
+                            <dt class="col-sm-4">{{ __('Descripción:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->description ?? __('No especificada') }}</dd>
 
-                                <strong>{{ __('Código de Profesor:') }}</strong>
-                                <p>{{ $work->primaryResponsible->getAttribute('professor_code') }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <strong>{{ __('Unidad Académica:') }}</strong>
-                                <p>{{ $work->organizationalUnit->getAttribute('name') }}</p>
+                            <dt class="col-sm-4">{{ __('Unidad Académica:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->organizationalUnit->getAttribute('name') }}</dd>
 
-                                <strong>{{ __('Período de Ejecución:') }}</strong>
-                                <p>
-                                    @if($work->start_date && $work->end_date)
-                                    {{ $work->start_date->format('d/m/Y') }} -
-                                    {{ $work->end_date->format('d/m/Y') }}
-                                    @else
-                                    {{ __('No especificado') }}
-                                    @endif
-                                </p>
+                            <dt class="col-sm-4">{{ __('Fecha de Inicio:') }}</dt>
+                            <dd class="col-sm-8">
+                                {{ $work->start_date ? $work->start_date->format('d/m/Y') : __('No especificada') }}
+                            </dd>
 
-                                <strong>{{ __('Fecha de Envío a VIEX:') }}</strong>
-                                <p>{{ $work->submitted_at?->format('d/m/Y H:i') ?? __('No especificado') }}</p>
-                            </div>
-                        </div>
+                            <dt class="col-sm-4">{{ __('Fecha de Fin:') }}</dt>
+                            <dd class="col-sm-8">
+                                {{ $work->end_date ? $work->end_date->format('d/m/Y') : __('No especificada') }}
+                            </dd>
 
-                        @if($work->description)
-                        <div class="mt-3">
-                            <strong>{{ __('Descripción:') }}</strong>
-                            <p>{{ $work->description }}</p>
-                        </div>
-                        @endif
+                            @if($work->objectives)
+                            <dt class="col-sm-4">{{ __('Objetivos:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->objectives }}</dd>
+                            @endif
 
-                        <!-- Archivos Adjuntos -->
-                        @if($work->getMedia()->isNotEmpty())
-                        <div class="mt-4">
-                            <strong>{{ __('Documentos Adjuntos:') }}</strong>
-                            <div class="list-group mt-2">
-                                @foreach($work->getMedia() as $media)
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="fas fa-file-alt text-info mr-2"></i>
-                                        {{ $media->name }}
-                                        <small class="text-muted d-block">
-                                            {{ $media->human_readable_size }} -
-                                            {{ $media->created_at->format('d/m/Y H:i') }}
-                                        </small>
-                                    </div>
-                                    <a href="{{ $media->getUrl() }}" class="btn btn-sm btn-outline-primary"
-                                        target="_blank">
-                                        <i class="fas fa-download"></i>
-                                    </a>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
+                            @if($work->methodology)
+                            <dt class="col-sm-4">{{ __('Metodología:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->methodology }}</dd>
+                            @endif
+
+                            @if($work->expected_results)
+                            <dt class="col-sm-4">{{ __('Resultados Esperados:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->expected_results }}</dd>
+                            @endif
+
+                            <dt class="col-sm-4">{{ __('Fecha de Envío a VIEX:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->submitted_at?->format('d/m/Y H:i') ?? __('No especificado') }}</dd>
+                        </dl>
                     </div>
                 </div>
+
+                <!-- Información del Profesor Responsable -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-tie mr-2"></i>
+                            {{ __('Profesor Responsable') }}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">{{ __('Nombre:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->primaryResponsible->getAttribute('name') }}</dd>
+
+                            <dt class="col-sm-4">{{ __('Código de Profesor:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->primaryResponsible->getAttribute('professor_code') }}</dd>
+
+                            <dt class="col-sm-4">{{ __('Email:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->primaryResponsible->getAttribute('email') }}</dd>
+
+                            <dt class="col-sm-4">{{ __('Unidad:') }}</dt>
+                            <dd class="col-sm-8">{{ $work->organizationalUnit->getAttribute('name') }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {{-- Lista de Participantes --}}
+                @if($work->participants && $work->participants->count() > 0)
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-users mr-2"></i>
+                            {{ __('Participantes del Trabajo') }}
+                            <span class="badge badge-info ml-2">{{ $work->participants->count() }}</span>
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10px">#</th>
+                                    <th>{{ __('Nombre Completo') }}</th>
+                                    <th>{{ __('Rol') }}</th>
+                                    <th>{{ __('Email') }}</th>
+                                    <th>{{ __('Institución') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($work->participants as $index => $participant)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>
+                                        <strong>{{ $participant->getAttribute('name') }}</strong>
+                                        @if($participant->getAttribute('is_primary'))
+                                        <span class="badge badge-primary ml-1">{{ __('Coordinador') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-secondary">
+                                            {{ $participant->getAttribute('role') ?? __('Participante') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($participant->getAttribute('email'))
+                                        <a href="mailto:{{ $participant->getAttribute('email') }}">
+                                            <i class="fas fa-envelope"></i>
+                                            {{ $participant->getAttribute('email') }}
+                                        </a>
+                                        @else
+                                        <span class="text-muted">{{ __('N/A') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $participant->getAttribute('institution') ?? __('N/A') }}
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Archivos y Evidencias --}}
+                @if($work->getMedia('attachments')->count() > 0)
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-paperclip mr-2"></i>
+                            {{ __('Evidencias y Documentos') }}
+                            <span class="badge badge-success ml-2">{{ $work->getMedia('attachments')->count() }}</span>
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach($work->getMedia('attachments') as $media)
+                            <div class="col-md-6 mb-3">
+                                <div class="card card-outline card-info">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="mr-3">
+                                                @php
+                                                $extension = pathinfo($media->name, PATHINFO_EXTENSION);
+                                                $iconClass = match (strtolower($extension)) {
+                                                'pdf' => 'fas fa-file-pdf text-danger',
+                                                'doc', 'docx' => 'fas fa-file-word text-primary',
+                                                'xls', 'xlsx' => 'fas fa-file-excel text-success',
+                                                'jpg', 'jpeg', 'png', 'gif', 'svg' => 'fas fa-file-image text-warning',
+                                                'zip', 'rar' => 'fas fa-file-archive text-secondary',
+                                                default => 'fas fa-file text-secondary'
+                                                };
+                                                @endphp
+                                                <i class="{{ $iconClass }} fa-3x"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-1 font-weight-bold">
+                                                    {{ Str::limit($media->name, 35) }}
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-weight"></i>
+                                                    {{ number_format($media->size / 1024, 1) }} KB
+                                                    <br>
+                                                    <i class="fas fa-clock"></i>
+                                                    {{ $media->created_at->format('d/m/Y H:i') }}
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <a href="{{ $media->getUrl() }}"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    title="{{ __('Descargar') }} {{ $media->name }}">
+                                                    <i class="fas fa-download"></i>
+                                                    {{ __('Descargar') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Resumen de Archivos --}}
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>{{ __('Total de archivos:') }}</strong> {{ $work->getMedia('attachments')->count() }}
+                            <br>
+                            <strong>{{ __('Tamaño total:') }}</strong>
+                            {{ number_format($work->getMedia('attachments')->sum('size') / 1024 / 1024, 2) }} MB
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-paperclip fa-3x mb-3"></i>
+                            <p>{{ __('No se han adjuntado evidencias o documentos a este trabajo.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Historial Completo del Trabajo --}}
+                @if($work->statusHistory && $work->statusHistory->count() > 0)
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history mr-2"></i>
+                            {{ __('Historial del Trabajo') }}
+                            <span class="badge badge-secondary ml-2">{{ $work->statusHistory->count() }} {{ __('eventos') }}</span>
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            @foreach($work->statusHistory->sortByDesc('created_at') as $history)
+                            {{-- Time Label --}}
+                            <div class="time-label">
+                                <span class="bg-{{ $loop->first ? 'primary' : 'gray' }}">
+                                    <i class="fas fa-calendar-day"></i>
+                                    {{ $history->created_at->format('d/m/Y') }}
+                                </span>
+                            </div>
+
+                            {{-- Timeline Item --}}
+                            <div>
+                                @php
+                                $iconClass = match ($history->status->name ?? '') {
+                                'Borrador' => 'fas fa-edit bg-secondary',
+                                'Enviado a Coordinador', 'En Revisión Coordinador' => 'fas fa-clock bg-warning',
+                                'Enviado a Decano/Director' => 'fas fa-arrow-up bg-success',
+                                'Enviado a VIEX' => 'fas fa-check-circle bg-primary',
+                                'Aprobado', 'Certificado' => 'fas fa-check-double bg-success',
+                                'Devuelto para Corrección' => 'fas fa-redo bg-info',
+                                'Rechazado por Coordinador', 'Rechazado por Decano', 'Rechazado por VIEX' => 'fas fa-times-circle bg-danger',
+                                default => 'fas fa-circle bg-gray'
+                                };
+                                @endphp
+                                <i class="{{ $iconClass }}"></i>
+
+                                <div class="timeline-item">
+                                    <span class="time">
+                                        <i class="fas fa-clock"></i>
+                                        {{ $history->created_at->format('H:i') }}
+                                    </span>
+
+                                    <h3 class="timeline-header">
+                                        <strong>{{ $history->status->name ?? __('Estado desconocido') }}</strong>
+                                    </h3>
+
+                                    @if($history->comments)
+                                    <div class="timeline-body">
+                                        <div class="callout callout-info">
+                                            <p class="mb-0" style="white-space: pre-wrap;">{{ $history->comments }}</p>
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    <div class="timeline-footer">
+                                        @if($history->changedBy)
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i>
+                                            <strong>{{ __('Por:') }}</strong> {{ $history->changedBy->name }}
+                                        </small>
+                                        @endif
+                                        <small class="text-muted ml-3">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ $history->created_at->diffForHumans() }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+
+                            {{-- End of Timeline --}}
+                            <div>
+                                <i class="fas fa-flag-checkered bg-gray"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="card">
+                    <div class="card-body">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-history fa-3x mb-3"></i>
+                            <p>{{ __('No hay historial de estados disponible para este trabajo.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Panel de Evaluación (solo si está en estado adecuado) -->
                 @php
@@ -317,7 +566,35 @@
 
             <!-- Panel Lateral -->
             <div class="col-md-4">
-                <!-- Historial de Estados -->
+                <!-- Información del Sistema -->
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info mr-2"></i>
+                            {{ __('Información del Sistema') }}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-6">{{ __('Creado:') }}</dt>
+                            <dd class="col-6">{{ $work->created_at->format('d/m/Y H:i') }}</dd>
+
+                            <dt class="col-6">{{ __('Última actualización:') }}</dt>
+                            <dd class="col-6">{{ $work->updated_at->format('d/m/Y H:i') }}</dd>
+
+                            @if($work->updated_at->diffInDays(now()) > 0)
+                            <dt class="col-6">{{ __('Días pendiente:') }}</dt>
+                            <dd class="col-6">
+                                <span class="badge badge-warning">
+                                    {{ $work->updated_at->diffInDays(now()) }} {{ __('días') }}
+                                </span>
+                            </dd>
+                            @endif
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Historial de Estados (Resumido) -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">{{ __('Historial de Estados') }}</h3>
@@ -326,23 +603,54 @@
                         @if($work->statusHistory->isEmpty())
                         <p class="text-muted">{{ __('No hay historial disponible') }}</p>
                         @else
-                        <div class="timeline">
-                            @foreach($work->statusHistory->sortByDesc('created_at') as $history)
-                            <div class="timeline-item mb-3">
-                                <strong>{{ $history->toStatus->getAttribute('name') }}</strong>
-                                <br>
-                                <small class="text-muted">
-                                    {{ $history->created_at->format('d/m/Y H:i') }}
-                                    @if($history->changedByUser)
-                                    <br>{{ __('por') }} {{ $history->changedByUser->getAttribute('name') }}
+                        <div class="timeline timeline-inverse">
+                            @foreach($work->statusHistory->sortByDesc('created_at')->take(5) as $history)
+                            <div class="time-label">
+                                <span class="bg-primary">{{ $history->created_at->format('d/m/Y') }}</span>
+                            </div>
+                            <div>
+                                @php
+                                $iconClass = match ($history->toStatus->name ?? '') {
+                                'Borrador' => 'fas fa-edit bg-secondary',
+                                'Enviado a Coordinador' => 'fas fa-clock bg-warning',
+                                'Enviado a Decano/Director' => 'fas fa-arrow-up bg-success',
+                                'Enviado a VIEX' => 'fas fa-check-circle bg-primary',
+                                'Certificado' => 'fas fa-certificate bg-success',
+                                'Rechazado por VIEX' => 'fas fa-times-circle bg-danger',
+                                default => 'fas fa-circle bg-gray'
+                                };
+                                @endphp
+                                <i class="{{ $iconClass }}"></i>
+                                <div class="timeline-item">
+                                    <span class="time">
+                                        <i class="fas fa-clock"></i> {{ $history->created_at->format('H:i') }}
+                                    </span>
+                                    <h3 class="timeline-header">
+                                        <strong>{{ $history->toStatus->getAttribute('name') }}</strong>
+                                    </h3>
+                                    @if($history->comments)
+                                    <div class="timeline-body">
+                                        <p class="mt-2 small">{{ Str::limit($history->comments, 100) }}</p>
+                                    </div>
                                     @endif
-                                </small>
-                                @if($history->comments)
-                                <p class="mt-2 small">{{ $history->comments }}</p>
-                                @endif
+                                    @if($history->changedBy)
+                                    <div class="timeline-footer">
+                                        <small class="text-muted">
+                                            {{ __('por') }} {{ $history->changedBy->name }}
+                                        </small>
+                                    </div>
+                                    @endif
+                                </div>
                             </div>
                             @endforeach
                         </div>
+                        @if($work->statusHistory->count() > 5)
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                {{ __('Mostrando los últimos 5 eventos. Ver historial completo arriba.') }}
+                            </small>
+                        </div>
+                        @endif
                         @endif
                     </div>
                 </div>
@@ -526,6 +834,123 @@
     </div>
 
     @endsection
+
+    @push('css')
+    <style>
+        /* Timeline mejorado */
+        .timeline {
+            position: relative;
+            margin: 0 0 30px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .timeline:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 31px;
+            width: 4px;
+            background: #ddd;
+        }
+
+        .timeline > div {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .timeline > div > .timeline-item {
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            margin-top: 10px;
+            background: #fff;
+            color: #444;
+            margin-left: 60px;
+            margin-right: 15px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .timeline > div > .fa,
+        .timeline > div > .fas,
+        .timeline > div > .far,
+        .timeline > div > .fab,
+        .timeline > div > .fal,
+        .timeline > div > .fad {
+            position: absolute;
+            left: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-size: 15px;
+        }
+
+        .timeline > .time-label > span {
+            font-weight: 600;
+            color: #fff;
+            border-radius: 4px;
+            display: inline-block;
+            padding: 5px 10px;
+        }
+
+        .timeline-header {
+            margin-top: 0;
+            color: #555;
+        }
+
+        .timeline-body,
+        .timeline-footer {
+            padding-top: 10px;
+        }
+
+        /* Callouts personalizados */
+        .callout {
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .callout-info {
+            border-left: 4px solid #17a2b8;
+            background-color: #d1ecf1;
+        }
+
+        /* Card outline purple para participantes */
+        .card-outline.card-purple {
+            border-top: 3px solid #6f42c1;
+        }
+
+        /* Mejoras en modales */
+        .modal-lg {
+            max-width: 800px;
+        }
+
+        /* Botones de decisión más prominentes */
+        .btn-lg {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Timeline inverso para el panel lateral */
+        .timeline-inverse > div > .timeline-item {
+            margin-left: 0;
+            margin-right: 60px;
+        }
+
+        .timeline-inverse:before {
+            left: auto;
+            right: 31px;
+        }
+
+        .timeline-inverse > div > .fa {
+            left: auto;
+            right: 18px;
+        }
+    </style>
+    @endpush
 
     @push('scripts')
     <script>
