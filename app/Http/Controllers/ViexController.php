@@ -394,7 +394,7 @@ class ViexController extends Controller
      */
     public function approveAndCertify(Request $request, WorkOfExtension $work)
     {
-        $this->authorize('approveAsViex', $work);
+        $this->authorize('approveAndCertifyAsViex', $work);
 
         $request->validate([
             'comments' => 'nullable|string|max:1000',

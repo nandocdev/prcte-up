@@ -442,9 +442,40 @@ class WorkOfExtensionPolicy {
             return false;
         }
 
-        // Debe estar en estado "En VIEX - En Evaluación"
+        // Debe estar en estados que permitan solicitud de cambios
         $currentStatus = $workOfExtension->currentStatus?->name;
+        $allowedStatuses = [
+            'Enviado a VIEX',
+            'En VIEX - En Evaluación',
+        ];
 
-        return $currentStatus === 'En VIEX - En Evaluación';
+        return in_array($currentStatus, $allowedStatuses, true);
+    }
+
+    /**
+     * Determine whether the user can approve and certify work directly as VIEX (without evaluators).
+     *
+     * CU9 - Fase 7: Autorización para aprobación y certificación directa por VIEX
+     */
+    public function approveAndCertifyAsViex(User $user, WorkOfExtension $workOfExtension): bool
+    {
+        // Super admin siempre puede aprobar y certificar
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Solo administradores VIEX pueden aprobar y certificar directamente
+        if (!$user->hasRole('viex_admin')) {
+            return false;
+        }
+
+        // Debe estar en estados que permitan aprobación directa
+        $currentStatus = $workOfExtension->currentStatus?->name;
+        $allowedStatuses = [
+            'Enviado a VIEX',
+            'En VIEX - En Evaluación',
+        ];
+
+        return in_array($currentStatus, $allowedStatuses, true);
     }
 }
