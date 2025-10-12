@@ -88,6 +88,11 @@ Route::middleware('auth')->group(function () {
         // Rutas adicionales para reportes y certificados
         Route::get('/works/{work}/report', [ViexAdminController::class, 'generateReport'])->name('report');
         Route::get('/certificates/{certification}/download', [ViexAdminController::class, 'downloadCertificate'])->name('certificate.download');
+
+        // Rutas del nuevo sistema de evaluación (sin evaluadores)
+        Route::post('/works/{work}/receive', [ViexController::class, 'receive'])->name('receive');
+        Route::post('/works/{work}/approve-and-certify', [ViexController::class, 'approveAndCertify'])->name('approve-and-certify');
+        Route::post('/works/{work}/request-changes', [ViexController::class, 'requestChanges'])->name('request-changes');
     });
 
     // Rutas para VIEX - Nuevo Sistema de Evaluación (CU9)
@@ -95,9 +100,6 @@ Route::middleware('auth')->group(function () {
         // Dashboard y listados
         Route::get('/', [ViexController::class, 'index'])->name('evaluation.index');
         Route::get('/works/{work}', [ViexController::class, 'show'])->name('evaluation.show');
-
-        // Recibir trabajo en VIEX
-        Route::post('/works/{work}/receive', [ViexController::class, 'receive'])->name('receive');
 
         // Asignación de evaluadores
         Route::get('/works/{work}/assign-evaluators', [ViexController::class, 'showAssignEvaluatorsForm'])->name('assign-evaluators');
@@ -109,9 +111,7 @@ Route::middleware('auth')->group(function () {
         // Revisión y decisión final
         Route::get('/works/{work}/review-evaluations', [ViexController::class, 'reviewEvaluations'])->name('review-evaluations');
         Route::post('/works/{work}/approve', [ViexController::class, 'approve'])->name('evaluation.approve');
-        Route::post('/works/{work}/approve-and-certify', [ViexController::class, 'approveAndCertify'])->name('approve-and-certify');
         Route::post('/works/{work}/reject', [ViexController::class, 'reject'])->name('evaluation.reject');
-        Route::post('/works/{work}/request-changes', [ViexController::class, 'requestChanges'])->name('request-changes');
     });
 
     // Rutas para Evaluadores (CU9)

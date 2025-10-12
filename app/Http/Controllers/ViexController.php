@@ -33,7 +33,7 @@ class ViexController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'role:viex_admin']);
+        $this->middleware(['auth']);
     }
 
     /**
