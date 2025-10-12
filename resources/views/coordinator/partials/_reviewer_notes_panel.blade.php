@@ -22,7 +22,7 @@
                 placeholder="Escribe aquí tus observaciones durante la revisión del trabajo...&#10;&#10;Estas notas se guardan automáticamente en tu navegador."></textarea>
             <small class="form-text text-muted">
                 <i class="fas fa-info-circle"></i>
-                Las notas se guardan automáticamente cada 2 segundos
+                Las notas se guardan automáticamente cada 5 segundos. También puedes guardar manualmente usando el botón "Guardar Ahora".
             </small>
         </div>
 
@@ -78,12 +78,22 @@
             </div>
         </div>
 
-        {{-- Botón para Limpiar Notas --}}
+        {{-- Botones de Acción --}}
         <div class="mt-3">
-            <button type="button" class="btn btn-sm btn-outline-secondary btn-block" onclick="clearReviewNotes()">
-                <i class="fas fa-eraser"></i>
-                Limpiar Notas
-            </button>
+            <div class="row">
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-primary btn-block" onclick="saveReviewNotes()">
+                        <i class="fas fa-save"></i>
+                        Guardar Ahora
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-sm btn-outline-secondary btn-block" onclick="clearReviewNotes()">
+                        <i class="fas fa-eraser"></i>
+                        Limpiar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
