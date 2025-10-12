@@ -47,7 +47,7 @@
                                                 onchange="document.getElementById('filterForm').submit();">
                                                 <option value="">{{ __('Todos los estados') }}</option>
                                                 <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
-                                                    {{ __('Pendientes de Asignación') }}
+                                                    {{ __('Pendientes de Evaluación') }}
                                                 </option>
                                                 <option value="evaluation" {{ request('status') === 'evaluation' ? 'selected' : '' }}>
                                                     {{ __('En Evaluación') }}
@@ -218,13 +218,13 @@
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
 
-                                                                @if($work->currentStatus->name === 'En VIEX - Pendiente Asignación')
-                                                                    <button type="button" class="btn btn-sm btn-warning"
-                                                                        data-toggle="modal" data-target="#assignModal"
+                                                                @if($work->currentStatus->name === 'En VIEX - En Evaluación')
+                                                                    <button type="button" class="btn btn-sm btn-success"
+                                                                        data-toggle="modal" data-target="#approveModal"
                                                                         data-work-id="{{ $work->id }}"
                                                                         data-work-title="{{ $work->title }}"
-                                                                        title="{{ __('Asignar evaluador') }}">
-                                                                        <i class="fas fa-user-plus"></i>
+                                                                        title="{{ __('Aprobar y certificar') }}">
+                                                                        <i class="fas fa-check"></i>
                                                                     </button>
                                                                 @endif
 
@@ -269,46 +269,64 @@
         </section>
     </div>
 
-    <!-- Modal de Asignación Rápida -->
-    <div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel"
+    <!-- Modal de Aprobación Rápida -->
+    <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignModalLabel">{{ __('Asignar Evaluador') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title" id="approveModalLabel">{{ __('Aprobar y Certificar Trabajo') }}</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="assignForm" method="POST">
+                <form id="approveForm" method="POST">
                     @csrf
                     <div class="modal-body">
+                        <div class="alert alert-success">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Confirmación de Aprobación y Certificación</strong>
+                            <p class="mb-0 mt-2">
+                                Al aprobar y certificar este trabajo, se completará el proceso de evaluación y se generará automáticamente una certificación oficial válida por 2 años.
+                            </p>
+                        </div>
+
+                        {{-- Resumen del Trabajo --}}
                         <div class="mb-3">
                             <strong>{{ __('Trabajo:') }}</strong>
-                            <span id="workTitle"></span>
+                            <span id="modalWorkTitle"></span>
                         </div>
+
+                        {{-- Comentarios Opcionales --}}
                         <div class="form-group">
-                            <label for="modal_evaluator_id">{{ __('Seleccionar Evaluador') }}</label>
-                            <select name="evaluator_id" id="modal_evaluator_id" class="form-control" required>
-                                <option value="">{{ __('-- Seleccione un evaluador --') }}</option>
-                                @foreach($evaluators as $evaluator)
-                                    <option value="{{ $evaluator->id }}">
-                                        {{ $evaluator->full_name }} - {{ $evaluator->organizationalUnit->name ?? '' }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <label for="modal_comments">
+                                <i class="fas fa-comment-alt"></i>
+                                Comentarios de Certificación (opcional)
+                            </label>
+                            <textarea
+                                name="comments"
+                                id="modal_comments"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Puede agregar comentarios sobre la certificación, observaciones finales, o recomendaciones..."></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="modal_comments">{{ __('Comentarios (opcional)') }}</label>
-                            <textarea name="comments" id="modal_comments" rows="3" class="form-control"
-                                placeholder="{{ __('Comentarios sobre la asignación...') }}"></textarea>
+
+                        {{-- Confirmación --}}
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="modal_confirm_approve" required>
+                            <label class="custom-control-label" for="modal_confirm_approve">
+                                <strong>Confirmo que he revisado completamente este trabajo y apruebo su certificación oficial.</strong>
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancelar') }}</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            {{ __('Asignar Evaluador') }}
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-certificate mr-1"></i>
+                            Confirmar Aprobación y Certificación
                         </button>
                     </div>
                 </form>
@@ -320,19 +338,19 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
-            // Configurar modal de asignación
-            $('#assignModal').on('show.bs.modal', function (event) {
+            // Configurar modal de aprobación
+            $('#approveModal').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget);
                 var workId = button.data('work-id');
                 var workTitle = button.data('work-title');
 
                 var modal = $(this);
-                modal.find('#workTitle').text(workTitle);
-                modal.find('#assignForm').attr('action', '/viex/works/' + workId + '/assign-evaluator');
+                modal.find('#modalWorkTitle').text(workTitle);
+                modal.find('#approveForm').attr('action', '/viex-evaluation/works/' + workId + '/approve-and-certify');
             });
 
             // Limpiar formulario al cerrar modal
-            $('#assignModal').on('hidden.bs.modal', function () {
+            $('#approveModal').on('hidden.bs.modal', function () {
                 $(this).find('form')[0].reset();
             });
 

@@ -1309,8 +1309,8 @@ class WorkOfExtension extends Model implements HasMedia {
             throw new \InvalidArgumentException('El trabajo debe estar "Enviado a VIEX" para ser recibido.');
         }
 
-        $status = WorkStatus::where('name', 'En VIEX - Pendiente Asignación')->firstOrFail();
-        $this->changeStatus($status, $viexAdmin, $comments ?: 'Trabajo recibido en VIEX, pendiente asignación de evaluadores');
+        $status = WorkStatus::where('name', 'En VIEX - En Evaluación')->firstOrFail();
+        $this->changeStatus($status, $viexAdmin, $comments ?: 'Trabajo recibido en VIEX y listo para evaluación directa');
 
         Log::info('Trabajo recibido en VIEX', [
             'work_id' => $this->getKey(),

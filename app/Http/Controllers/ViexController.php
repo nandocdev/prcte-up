@@ -45,17 +45,10 @@ class ViexController extends Controller
         $user = Auth::user();
 
         // Trabajos recibidos en VIEX (diferentes estados)
-        $pendingAssignment = WorkOfExtension::whereHas('currentStatus', function ($query) {
-            $query->where('name', 'En VIEX - Pendiente Asignación');
-        })
-        ->with(['responsibleUser', 'organizationalUnit', 'workType', 'currentStatus'])
-        ->orderBy('submitted_at', 'desc')
-        ->get();
-
-        $inEvaluation = WorkOfExtension::whereHas('currentStatus', function ($query) {
+        $pendingEvaluation = WorkOfExtension::whereHas('currentStatus', function ($query) {
             $query->where('name', 'En VIEX - En Evaluación');
         })
-        ->with(['responsibleUser', 'organizationalUnit', 'workType', 'currentStatus', 'workEvaluators.evaluator'])
+        ->with(['responsibleUser', 'organizationalUnit', 'workType', 'currentStatus'])
         ->orderBy('submitted_at', 'desc')
         ->get();
 
@@ -69,8 +62,7 @@ class ViexController extends Controller
 
         // Estadísticas
         $stats = [
-            'pending_assignment' => $pendingAssignment->count(),
-            'in_evaluation' => $inEvaluation->count(),
+            'pending_evaluation' => $pendingEvaluation->count(),
             'approved_this_month' => WorkOfExtension::whereHas('currentStatus', function ($query) {
                 $query->where('name', 'En VIEX - Aprobado');
             })
@@ -84,8 +76,7 @@ class ViexController extends Controller
         ];
 
         return view('viex.index', compact(
-            'pendingAssignment',
-            'inEvaluation',
+            'pendingEvaluation',
             'approved',
             'stats'
         ));
@@ -390,6 +381,56 @@ class ViexController extends Controller
             return back()
                 ->withInput()
                 ->with('error', __('Error al rechazar el trabajo: ') . $e->getMessage());
+        }
+    }
+
+    /**
+     * Aprobar y certificar trabajo directamente (sin evaluadores)
+     *
+     * @param Request $request
+     * @param WorkOfExtension $work
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function approveAndCertify(Request $request, WorkOfExtension $work)
+    {
+        $this->authorize('approveAsViex', $work);
+
+        $request->validate([
+            'comments' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Aprobar el trabajo
+            $work->approveByViex(Auth::user(), $request->input('comments'), null);
+
+            // Generar certificación automáticamente
+            $certification = $work->generateCertification(
+                Auth::user(),
+                2, // 2 años por defecto
+                null, // número automático
+                $request->input('comments')
+            );
+
+            // Disparar eventos
+            event(new WorkApprovedByViex($work, Auth::user(), $request->input('comments')));
+
+            DB::commit();
+
+            return redirect()
+                ->route('viex.show', $work)
+                ->with('success', __('Trabajo aprobado y certificado exitosamente.'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al aprobar y certificar trabajo en VIEX', [
+                'work_id' => $work->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', __('Error al aprobar y certificar el trabajo: ') . $e->getMessage());
         }
     }
 }

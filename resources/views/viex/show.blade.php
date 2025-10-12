@@ -152,91 +152,58 @@
                 $currentStatus = $work->currentStatus->name ?? '';
                 @endphp
 
-                @if(in_array($currentStatus, ['Enviado a VIEX', 'En VIEX - Pendiente Asignación', 'En VIEX - En Evaluación', 'En VIEX - Aprobado']))
+                @if(in_array($currentStatus, ['Enviado a VIEX', 'En VIEX - En Evaluación']))
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">{{ __('Panel de Evaluación VIEX') }}</h3>
                     </div>
                     <div class="card-body">
-                        @if($currentStatus === 'Enviado a VIEX' || $currentStatus === 'En VIEX - Pendiente Asignación')
-                        <!-- Formulario de Asignación de Evaluador -->
+                        @if($currentStatus === 'Enviado a VIEX')
+                        <!-- Formulario de recepción en VIEX -->
                         <div class="evaluation-panel">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-clock"></i>
-                                <strong>Trabajo pendiente de asignación</strong><br>
-                                Debe asignar un evaluador para proceder con la evaluación.
+                            <div class="alert alert-info">
+                                <i class="fas fa-inbox"></i>
+                                <strong>Trabajo pendiente de recepción</strong><br>
+                                Debe recibir el trabajo en VIEX para proceder con la evaluación directa.
                             </div>
 
-                            <h5>{{ __('Asignar Evaluador') }}</h5>
-                            <form action="{{ route('viex.assign-evaluator', $work) }}" method="POST">
+                            <h5>{{ __('Recibir Trabajo en VIEX') }}</h5>
+                            <form action="{{ route('viex.receive', $work) }}" method="POST">
                                 @csrf
-                                <div class="form-group">
-                                    <label for="evaluator_id">{{ __('Seleccionar Evaluador') }}</label>
-                                    <select name="evaluator_id" id="evaluator_id"
-                                        class="form-control @error('evaluator_id') is-invalid @enderror" required>
-                                        <option value="">{{ __('-- Seleccione un evaluador --') }}</option>
-                                        @foreach($availableEvaluators as $evaluator)
-                                        <option value="{{ $evaluator->getAttribute('id') }}">
-                                            {{ $evaluator->getAttribute('name') }} -
-                                            {{ $evaluator->organizationalUnit->getAttribute('name') ?? '' }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                    @error('evaluator_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
                                 <div class="form-group">
                                     <label for="comments">{{ __('Comentarios (opcional)') }}</label>
                                     <textarea name="comments" id="comments" rows="3"
                                         class="form-control @error('comments') is-invalid @enderror"
-                                        placeholder="{{ __('Comentarios sobre la asignación...') }}"></textarea>
+                                        placeholder="{{ __('Comentarios sobre la recepción...') }}"></textarea>
                                     @error('comments')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-user-plus mr-2"></i>
-                                    {{ __('Asignar Evaluador') }}
+                                    <i class="fas fa-inbox mr-2"></i>
+                                    {{ __('Recibir Trabajo') }}
                                 </button>
                             </form>
                         </div>
 
                         @elseif($currentStatus === 'En VIEX - En Evaluación')
-                        <!-- Información del Evaluador Asignado -->
+                        <!-- Panel de evaluación directa -->
                         <div class="evaluation-panel">
-                            <div class="alert alert-info">
-                                <i class="fas fa-user-check"></i>
-                                <strong>Evaluación en progreso</strong><br>
-                                El trabajo ha sido asignado a un evaluador especializado.
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i>
+                                <strong>Evaluación lista</strong><br>
+                                El trabajo está listo para evaluación directa por parte del administrador VIEX.
                             </div>
-
-                            @if($work->assignedEvaluator)
-                            <div class="evaluator-card">
-                                <strong>{{ __('Evaluador Asignado:') }}</strong>
-                                {{ $work->assignedEvaluator->getAttribute('name') }}
-                                <br>
-                                <strong>{{ __('Unidad:') }}</strong>
-                                {{ $work->assignedEvaluator->organizationalUnit->getAttribute('name') ?? __('No especificada') }}
-                                <br>
-                                <strong>{{ __('Fecha de Asignación:') }}</strong>
-                                {{ $work->getEvaluationAssignmentDate()?->format('d/m/Y H:i') }}
-                            </div>
-                            @endif
 
                             <!-- Acciones directas de aprobación/rechazo -->
                             <div class="mt-4">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <form action="{{ route('viex.approve', $work) }}" method="POST"
-                                            class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-success btn-block"
-                                                onclick="return confirmApproval()">
-                                                <i class="fas fa-check mr-2"></i>
-                                                {{ __('Aprobar Trabajo') }}
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-success btn-block" data-toggle="modal"
+                                            data-target="#approveCertifyModal">
+                                            <i class="fas fa-check mr-2"></i>
+                                            {{ __('Aprobar y Certificar') }}
+                                        </button>
                                     </div>
                                     <div class="col-md-6">
                                         <button type="button" class="btn btn-danger btn-block" data-toggle="modal"
@@ -440,6 +407,93 @@
 </section>
 </div>
 
+<!-- Modal de Aprobar y Certificar -->
+<div class="modal fade" id="approveCertifyModal" tabindex="-1" role="dialog" aria-labelledby="approveCertifyModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title" id="approveCertifyModalLabel">{{ __('Aprobar y Certificar Trabajo') }}</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('viex.approve-and-certify', $work) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Confirmación de Aprobación y Certificación</strong>
+                        <p class="mb-0 mt-2">
+                            Al aprobar y certificar este trabajo, se completará el proceso de evaluación y se generará automáticamente una certificación oficial válida por 2 años.
+                        </p>
+                    </div>
+
+                    {{-- Resumen del Trabajo --}}
+                    <div class="card card-outline card-success">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-file-alt"></i>
+                                Resumen del Trabajo
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">Título:</dt>
+                                <dd class="col-sm-8">{{ $work->title }}</dd>
+
+                                <dt class="col-sm-4">Tipo:</dt>
+                                <dd class="col-sm-8">{{ $work->workType->name ?? 'N/A' }}</dd>
+
+                                <dt class="col-sm-4">Profesor:</dt>
+                                <dd class="col-sm-8">{{ $work->responsibleUser->name ?? 'N/A' }}</dd>
+
+                                <dt class="col-sm-4">Unidad:</dt>
+                                <dd class="col-sm-8">{{ $work->organizationalUnit->name ?? 'N/A' }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    {{-- Comentarios Opcionales --}}
+                    <div class="form-group">
+                        <label for="certification_comments">
+                            <i class="fas fa-comment-alt"></i>
+                            Comentarios de Certificación (opcional)
+                        </label>
+                        <textarea
+                            name="comments"
+                            id="certification_comments"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Puede agregar comentarios sobre la certificación, observaciones finales, o recomendaciones..."></textarea>
+                        <small class="form-text text-muted">
+                            Estos comentarios serán incluidos en la certificación y visibles para el profesor.
+                        </small>
+                    </div>
+
+                    {{-- Confirmación --}}
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="confirm_approve_certify" required>
+                        <label class="custom-control-label" for="confirm_approve_certify">
+                            <strong>Confirmo que he revisado completamente este trabajo y apruebo su certificación oficial.</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-certificate mr-1"></i>
+                        Confirmar Aprobación y Certificación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Rechazo -->
 <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel"
     aria-hidden="true">
@@ -489,6 +543,62 @@
                     window.location.reload();
                 }, 300000); // 5 minutos
             }
+
+            // Validación del modal de aprobación y certificación
+            $('#approveCertifyModal form').on('submit', function(e) {
+                const checkbox = $('#confirm_approve_certify');
+
+                if (!checkbox.is(':checked')) {
+                    e.preventDefault();
+                    alert('Debe confirmar que ha revisado completamente el trabajo antes de aprobar y certificar.');
+                    return false;
+                }
+
+                // Deshabilitar botón para evitar doble-clic
+                const $submitBtn = $(this).find('button[type="submit"]');
+                $submitBtn.prop('disabled', true);
+                $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+
+                // Si falla, restaurar después de 5 segundos
+                setTimeout(function() {
+                    if ($submitBtn.prop('disabled')) {
+                        $submitBtn.prop('disabled', false);
+                        $submitBtn.html('<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación');
+                    }
+                }, 5000);
+            });
+
+            // Validación del modal de rechazo
+            $('#rejectModal form').on('submit', function(e) {
+                const reason = $('#rejection_reason').val().trim();
+
+                if (reason.length < 20) {
+                    e.preventDefault();
+                    alert('Por favor, proporcione una razón detallada del rechazo (mínimo 20 caracteres).');
+                    return false;
+                }
+
+                if (!confirm('⚠️ ATENCIÓN: ¿Está completamente seguro de que desea RECHAZAR este trabajo? Esta es una acción seria.')) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Deshabilitar botón
+                const $submitBtn = $(this).find('button[type="submit"]');
+                $submitBtn.prop('disabled', true);
+                $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
+            });
+
+            // Cerrar modales al hacer clic en cancelar
+            $('.modal').on('hidden.bs.modal', function() {
+                $(this).find('form')[0]?.reset();
+                $(this).find('button[type="submit"]').prop('disabled', false);
+                $(this).find('button[type="submit"]').html(function() {
+                    return $(this).hasClass('btn-success') ?
+                        '<i class="fas fa-certificate mr-1"></i>Confirmar Aprobación y Certificación' :
+                        '<i class="fas fa-times mr-2"></i>Rechazar Trabajo';
+                });
+            });
         });
     </script>
     @endpush

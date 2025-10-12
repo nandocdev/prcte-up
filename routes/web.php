@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
         // Revisión y decisión final
         Route::get('/works/{work}/review-evaluations', [ViexController::class, 'reviewEvaluations'])->name('review-evaluations');
         Route::post('/works/{work}/approve', [ViexController::class, 'approve'])->name('evaluation.approve');
+        Route::post('/works/{work}/approve-and-certify', [ViexController::class, 'approveAndCertify'])->name('approve-and-certify');
         Route::post('/works/{work}/reject', [ViexController::class, 'reject'])->name('evaluation.reject');
     });
 
