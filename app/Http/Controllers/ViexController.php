@@ -6,7 +6,7 @@ use App\Models\WorkOfExtension;
 use App\Models\User;
 use App\Events\WorkReceivedInViex;
 use App\Events\EvaluatorAssigned;
-use App\Events\WorkApprovedByViex;
+use App\Events\WorkCertifiedByViex;
 use App\Events\WorkRejectedByViex;
 use App\Http\Requests\AssignEvaluatorRequest;
 use App\Http\Requests\ApproveWorkRequest;
@@ -420,7 +420,7 @@ class ViexController extends Controller
             );
 
             // Disparar eventos
-            event(new WorkApprovedByViex($work, $user, $request->input('comments')));
+            event(new WorkCertifiedByViex($work, $user, $request->input('comments')));
 
             DB::commit();
 

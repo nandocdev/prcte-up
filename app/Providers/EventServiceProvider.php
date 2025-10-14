@@ -15,6 +15,7 @@ use App\Events\EvaluationSubmitted;
 use App\Events\WorkApprovedByViex;
 use App\Events\WorkRejectedByViex;
 use App\Events\WorkChangesRequestedByViex;
+use App\Events\WorkCertifiedByViex;
 use App\Listeners\SendWorkSubmittedNotification;
 use App\Listeners\SendPublicationAuthorizedNotification;
 use App\Listeners\SendWorkApprovedByCoordinatorNotification;
@@ -27,6 +28,7 @@ use App\Listeners\SendEvaluationSubmittedNotification;
 use App\Listeners\SendWorkApprovedByViexNotification;
 use App\Listeners\SendWorkRejectedByViexNotification;
 use App\Listeners\SendWorkChangesRequestedByViexNotification;
+use App\Listeners\SendWorkCertifiedByViexNotification;
 
 /**
  * Proveedor de servicios de eventos
@@ -83,6 +85,9 @@ class EventServiceProvider extends ServiceProvider {
         ],
         WorkChangesRequestedByViex::class => [
             SendWorkChangesRequestedByViexNotification::class,
+        ],
+        WorkCertifiedByViex::class => [
+            SendWorkCertifiedByViexNotification::class,
         ],
     ];
 
