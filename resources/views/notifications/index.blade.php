@@ -9,10 +9,10 @@
         {{ __('Notificaciones') }}
     </h1>
     @if($unreadCount > 0)
-        <button class="btn btn-outline-primary btn-sm" id="markAllAsRead">
-            <i class="fas fa-check-double mr-1"></i>
-            {{ __('Marcar todas como leídas') }}
-        </button>
+    <button class="btn btn-outline-primary btn-sm" id="markAllAsRead">
+        <i class="fas fa-check-double mr-1"></i>
+        {{ __('Marcar todas como leídas') }}
+    </button>
     @endif
 </div>
 @stop
@@ -26,75 +26,75 @@
                     <i class="fas fa-inbox mr-2"></i>
                     {{ __('Mis Notificaciones') }}
                     @if($unreadCount > 0)
-                        <span class="badge badge-warning ml-2">{{ $unreadCount }} {{ __('sin leer') }}</span>
+                    <span class="badge badge-warning ml-2">{{ $unreadCount }} {{ __('sin leer') }}</span>
                     @endif
                 </h3>
             </div>
             <div class="card-body p-0">
                 @forelse($notifications as $notification)
-                    <div class="notification-item {{ is_null($notification->read_at) ? 'unread' : 'read' }}"
-                        data-notification-id="{{ $notification->id }}">
-                        <div class="d-flex p-3 border-bottom">
-                            <!-- Icono de estado -->
-                            <div class="mr-3">
-                                @if(is_null($notification->read_at))
-                                    <span class="badge badge-warning badge-pill">
-                                        <i class="fas fa-circle" style="font-size: 8px;"></i>
-                                    </span>
-                                @else
-                                    <span class="text-muted">
-                                        <i class="fas fa-check-circle"></i>
-                                    </span>
-                                @endif
+                <div class="notification-item {{ is_null($notification->read_at) ? 'unread' : 'read' }}"
+                    data-notification-id="{{ $notification->id }}">
+                    <div class="d-flex p-3 border-bottom">
+                        <!-- Icono de estado -->
+                        <div class="mr-3">
+                            @if(is_null($notification->read_at))
+                            <span class="badge badge-warning badge-pill">
+                                <i class="fas fa-circle" style="font-size: 8px;"></i>
+                            </span>
+                            @else
+                            <span class="text-muted">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                            @endif
+                        </div>
+
+                        <!-- Contenido de la notificación -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 {{ is_null($notification->read_at) ? 'font-weight-bold' : '' }}">
+                                    {{ $notification->data['title'] ?? __('Notificación del Sistema') }}
+                                </h6>
+                                <small class="text-muted">
+                                    {{ $notification->created_at->diffForHumans() }}
+                                </small>
                             </div>
 
-                            <!-- Contenido de la notificación -->
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h6 class="mb-0 {{ is_null($notification->read_at) ? 'font-weight-bold' : '' }}">
-                                        {{ $notification->data['title'] ?? __('Notificación del Sistema') }}
-                                    </h6>
-                                    <small class="text-muted">
-                                        {{ $notification->created_at->diffForHumans() }}
-                                    </small>
-                                </div>
+                            <p class="mb-1 text-muted">
+                                {{ $notification->data['message'] ?? __('Sin mensaje') }}
+                            </p>
 
-                                <p class="mb-1 text-muted">
-                                    {{ $notification->data['message'] ?? __('Sin mensaje') }}
-                                </p>
+                            @if(isset( $notification->data['action_url']))
+                            <a href="{{ $notification->data['action_url'] }}"
+                                class="btn btn-sm btn-outline-primary notification-action"
+                                data-notification-id="{{ $notification->id }}">
+                                <i class="fas fa-external-link-alt mr-1"></i>
+                                {{ $notification->data['action_text'] ?? __('Ver detalles') }}
+                            </a>
+                            @endif
 
-                                @if(isset($notification->data['action_url']))
-                                    <a href="{{ $notification->data['action_url'] }}"
-                                        class="btn btn-sm btn-outline-primary notification-action"
-                                        data-notification-id="{{ $notification->id }}">
-                                        <i class="fas fa-external-link-alt mr-1"></i>
-                                        {{ $notification->data['action_text'] ?? __('Ver detalles') }}
-                                    </a>
-                                @endif
-
-                                @if(is_null($notification->read_at))
-                                    <button class="btn btn-sm btn-outline-secondary ml-2 mark-as-read-btn"
-                                        data-notification-id="{{ $notification->id }}">
-                                        <i class="fas fa-check mr-1"></i>
-                                        {{ __('Marcar como leída') }}
-                                    </button>
-                                @endif
-                            </div>
+                            @if(is_null($notification->read_at))
+                            <button class="btn btn-sm btn-outline-secondary ml-2 mark-as-read-btn"
+                                data-notification-id="{{ $notification->id }}">
+                                <i class="fas fa-check mr-1"></i>
+                                {{ __('Marcar como leída') }}
+                            </button>
+                            @endif
                         </div>
                     </div>
+                </div>
                 @empty
-                    <div class="text-center p-4">
-                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">{{ __('No tienes notificaciones') }}</h5>
-                        <p class="text-muted">{{ __('Todas las notificaciones del sistema aparecerán aquí.') }}</p>
-                    </div>
+                <div class="text-center p-4">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">{{ __('No tienes notificaciones') }}</h5>
+                    <p class="text-muted">{{ __('Todas las notificaciones del sistema aparecerán aquí.') }}</p>
+                </div>
                 @endforelse
             </div>
 
             @if($notifications->hasPages())
-                <div class="card-footer">
-                    {{ $notifications->links() }}
-                </div>
+            <div class="card-footer">
+                {{ $notifications->links() }}
+            </div>
             @endif
         </div>
     </div>
@@ -126,17 +126,17 @@
 
 @section('js')
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Marcar notificación individual como leída
-        $('.mark-as-read-btn').on('click', function () {
+        $('.mark-as-read-btn').on('click', function() {
             const notificationId = $(this).data('notification-id');
             const button = $(this);
             const notificationItem = button.closest('.notification-item');
 
             $.post(`/notifications/${notificationId}/mark-as-read`, {
-                _token: '{{ csrf_token() }}'
-            })
-                .done(function () {
+                    _token: '{{ csrf_token() }}'
+                })
+                .done(function() {
                     // Actualizar visualmente la notificación
                     notificationItem.removeClass('unread').addClass('read');
                     button.fadeOut();
@@ -147,19 +147,19 @@
                     // Mostrar mensaje de éxito
                     toastr.success('{{ __("Notificación marcada como leída") }}');
                 })
-                .fail(function () {
+                .fail(function() {
                     toastr.error('{{ __("Error al marcar notificación como leída") }}');
                 });
         });
 
         // Marcar todas como leídas
-        $('#markAllAsRead').on('click', function () {
+        $('#markAllAsRead').on('click', function() {
             const button = $(this);
 
             $.post('/notifications/mark-all-as-read', {
-                _token: '{{ csrf_token() }}'
-            })
-                .done(function (data) {
+                    _token: '{{ csrf_token() }}'
+                })
+                .done(function(data) {
                     // Actualizar visualmente todas las notificaciones
                     $('.notification-item.unread').removeClass('unread').addClass('read');
                     $('.mark-as-read-btn').fadeOut();
@@ -171,13 +171,13 @@
                     // Mostrar mensaje de éxito
                     toastr.success(data.message);
                 })
-                .fail(function () {
+                .fail(function() {
                     toastr.error('{{ __("Error al marcar todas las notificaciones como leídas") }}');
                 });
         });
 
         // Marcar como leída al hacer clic en acción
-        $('.notification-action').on('click', function () {
+        $('.notification-action').on('click', function() {
             const notificationId = $(this).data('notification-id');
 
             $.post(`/notifications/${notificationId}/mark-as-read`, {

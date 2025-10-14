@@ -2,43 +2,6 @@
 
 @section('title', 'Trabajo de Extensión - VIEX')
 
-@push('styles')
-<style>
-    .timeline-item {
-        border-left: 3px solid #007bff;
-        margin-left: 20px;
-        padding-left: 20px;
-        position: relative;
-    }
-
-    .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 10px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #007bff;
-    }
-
-    .evaluation-panel {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-
-    .evaluator-card {
-        background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-</style>
-@endpush
-
 @section('content')
 <div class="content-header">
     <div class="container-fluid">
@@ -604,11 +567,9 @@
                         @endphp
 
                         @if(in_array($currentStatus, ['Enviado a VIEX', 'En VIEX - En Evaluación']))
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                            <strong>Trabajo pendiente de evaluación</strong><br>
+                        <x-adminlte-alert theme="warning" icon="fa-exclamation-triangle" title="Trabajo pendiente de evaluación">
                             Este trabajo requiere evaluación final por parte de VIEX.
-                        </div>
+                        </x-adminlte-alert>
 
                         <!-- Acciones directas de aprobación/certificación/rechazo -->
                         <div class="mb-3">
@@ -656,11 +617,9 @@
                         </button>
 
                         @elseif($currentStatus === 'Certificado')
-                        <div class="alert alert-success">
-                            <i class="fas fa-certificate mr-2"></i>
-                            <strong>Trabajo certificado</strong><br>
+                        <x-adminlte-alert theme="success" icon="fa-certificate" title="Trabajo certificado">
                             Este trabajo ha sido certificado oficialmente.
-                        </div>
+                        </x-adminlte-alert>
 
                         @elseif($currentStatus === 'Rechazado por VIEX')
                         <div class="alert alert-danger">
@@ -978,122 +937,7 @@
 </div>
 
 @endsection
-@push('css')
-<style>
-    /* Timeline mejorado */
-    .timeline {
-        position: relative;
-        margin: 0 0 30px 0;
-        padding: 0;
-        list-style: none;
-    }
 
-    .timeline:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 31px;
-        width: 4px;
-        background: #ddd;
-    }
-
-    .timeline>div {
-        margin-bottom: 15px;
-        position: relative;
-    }
-
-    .timeline>div>.timeline-item {
-        box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
-        border-radius: 3px;
-        margin-top: 10px;
-        background: #fff;
-        color: #444;
-        margin-left: 60px;
-        margin-right: 15px;
-        padding: 10px;
-        position: relative;
-    }
-
-    .timeline>div>.fa,
-    .timeline>div>.fas,
-    .timeline>div>.far,
-    .timeline>div>.fab,
-    .timeline>div>.fal,
-    .timeline>div>.fad {
-        position: absolute;
-        left: 18px;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 30px;
-        font-size: 15px;
-    }
-
-    .timeline>.time-label>span {
-        font-weight: 600;
-        color: #fff;
-        border-radius: 4px;
-        display: inline-block;
-        padding: 5px 10px;
-    }
-
-    .timeline-header {
-        margin-top: 0;
-        color: #555;
-    }
-
-    .timeline-body,
-    .timeline-footer {
-        padding-top: 10px;
-    }
-
-    /* Callouts personalizados */
-    .callout {
-        border-radius: 0.25rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .callout-info {
-        border-left: 4px solid #17a2b8;
-        background-color: #d1ecf1;
-    }
-
-    /* Card outline purple para participantes */
-    .card-outline.card-purple {
-        border-top: 3px solid #6f42c1;
-    }
-
-    /* Mejoras en modales */
-    .modal-lg {
-        max-width: 800px;
-    }
-
-    /* Botones de decisión más prominentes */
-    .btn-lg {
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    /* Timeline inverso para el panel lateral */
-    .timeline-inverse>div>.timeline-item {
-        margin-left: 0;
-        margin-right: 60px;
-    }
-
-    .timeline-inverse:before {
-        left: auto;
-        right: 31px;
-    }
-
-    .timeline-inverse>div>.fa {
-        left: auto;
-        right: 18px;
-    }
-</style>
-@endpush
 
 @push('scripts')
 <script>

@@ -35,6 +35,7 @@ class NotificationController extends Controller {
         // @phpstan-ignore-next-line
         $unreadCount = $user->unreadNotifications()->count();
 
+
         return view('notifications.index', compact('notifications', 'unreadCount'));
     }
 
