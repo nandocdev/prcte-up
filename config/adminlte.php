@@ -553,10 +553,10 @@ return [
         ['header' => 'AYUDA Y SOPORTE'],
 
         [
-            'text' => 'Manual de Usuario',
-            'url' => '#',
-            'icon' => 'fas fa-question-circle',
-            'target' => '_blank',
+            'text' => 'Documentación',
+            'route' => 'documentation.index',
+            'icon' => 'fas fa-book',
+            'active' => ['documentation.*'],
         ],
 
         [

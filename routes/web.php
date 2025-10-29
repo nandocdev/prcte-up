@@ -178,6 +178,13 @@ Route::middleware('auth')->group(function () {
             Route::get('reports/{report}', [SystemReportsController::class, 'show'])->name('reports.show');
         });
     });
+
+    // Rutas de Documentación
+    Route::prefix('documentation')->name('documentation.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\DocumentationController::class, 'index'])->name('index');
+        Route::get('/search', [\App\Http\Controllers\DocumentationController::class, 'search'])->name('search');
+        Route::get('/{section}', [\App\Http\Controllers\DocumentationController::class, 'show'])->name('show');
+    });
 });
 
 require __DIR__ . '/auth.php';

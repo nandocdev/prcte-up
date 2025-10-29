@@ -1,5 +1,19 @@
 # 📚 Manual de Usuario - Sistema VIEX
 
+> **🆕 NUEVA DOCUMENTACIÓN WEB DISPONIBLE**  
+> Este manual ahora está disponible como un sistema de documentación web interactivo dentro de la aplicación VIEX.  
+> **Accede desde:** Menú → Ayuda y Soporte → Documentación  
+> **URL directa:** `/documentation`  
+> 
+> La versión web incluye:
+> - 📱 Navegación interactiva entre secciones
+> - 🔍 Búsqueda avanzada de contenidos  
+> - 🎯 Contenido específico por rol de usuario
+> - 🔗 Enlaces directos a funciones del sistema
+> - 📊 Contenido siempre actualizado
+
+---
+
 **Sistema de Registro y Certificación de Trabajos de Extensión**  
 *Universidad de Panamá - Vicerrectoría de Extensión*
 
