@@ -207,15 +207,23 @@ class DocumentationController extends Controller
                 ]
             ],
             'administration' => [
-                'title' => 'Administración',
-                'description' => 'Configuración del sistema',
+                'title' => 'Administración del Sistema',
+                'description' => 'Panel administrativo y gestión de catálogos',
                 'icon' => 'fas fa-cogs',
                 'order' => 11,
                 'subsections' => [
+                    'admin-dashboard' => 'Dashboard administrativo',
+                    'catalog-management' => 'Gestión de catálogos',
+                    'work-types-management' => 'Tipos de trabajos',
+                    'work-statuses-management' => 'Estados de trabajo',
+                    'organizational-units-management' => 'Unidades organizacionales',
+                    'institutional-project-types' => 'Tipos de proyectos institucionales',
                     'user-management' => 'Gestión de usuarios',
                     'role-configuration' => 'Configuración de roles',
-                    'organizational-units' => 'Unidades organizacionales',
-                    'system-configuration' => 'Configuración del sistema'
+                    'system-configuration' => 'Configuración del sistema',
+                    'bulk-operations' => 'Operaciones masivas',
+                    'data-export' => 'Exportación de datos',
+                    'system-maintenance' => 'Mantenimiento del sistema'
                 ]
             ],
             'reports' => [

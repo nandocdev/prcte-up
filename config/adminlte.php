@@ -324,13 +324,15 @@ return [
             'active' => ['dashboard'],
         ],
 
-        // SECCIÓN TRABAJOS DE EXTENSIÓN
-        ['header' => 'TRABAJOS DE EXTENSIÓN', 'can' => 'works.view.own'],
+        // SECCIÓN TRABAJOS DE EXTENSIÓN (Solo para no-administradores)
+        ['header' => 'TRABAJOS DE EXTENSIÓN', 'can' => ['works.view.own'], 'cannot' => 'system.manage'],
 
-        // Para Profesores (Todos los usuarios autenticados)
+        // Para Profesores (Todos los usuarios autenticados excepto super admin)
         [
             'text' => 'Mis Trabajos',
             'icon' => 'fas fa-folder-open',
+            'can' => 'works.view.own',
+            'cannot' => 'system.manage',
             'submenu' => [
                 [
                     'text' => 'Ver Todos',
@@ -357,8 +359,8 @@ return [
             ],
         ],
 
-        // SECCIÓN COORDINACIÓN DE EXTENSIÓN
-        ['header' => 'COORDINACIÓN DE EXTENSIÓN', 'can' => 'works.coordinate'],
+        // SECCIÓN COORDINACIÓN DE EXTENSIÓN (Solo para coordinadores, no admin)
+        ['header' => 'COORDINACIÓN DE EXTENSIÓN', 'can' => 'works.coordinate', 'cannot' => 'system.manage'],
 
         // Para Coordinadores de Extensión
         [
@@ -366,11 +368,12 @@ return [
             'route' => 'coordinator.dashboard',
             'icon' => 'fas fa-user-tie',
             'can' => 'works.coordinate',
+            'cannot' => 'system.manage',
             'active' => ['coordinator.*'],
         ],
 
-        // SECCIÓN DECANATO/DIRECCIÓN
-        ['header' => 'DECANATO/DIRECCIÓN', 'can' => 'works.manage.dean'],
+        // SECCIÓN DECANATO/DIRECCIÓN (Solo para decanos, no admin)
+        ['header' => 'DECANATO/DIRECCIÓN', 'can' => 'works.manage.dean', 'cannot' => 'system.manage'],
 
         // Para Decanos/Directores
         [
@@ -378,17 +381,19 @@ return [
             'route' => 'dean.dashboard',
             'icon' => 'fas fa-university',
             'can' => 'works.manage.dean',
+            'cannot' => 'system.manage',
             'active' => ['dean.*'],
         ],
 
-        // SECCIÓN VIEX ADMIN
-        ['header' => 'VICERRECTORÍA DE EXTENSIÓN', 'can' => 'works.manage.viex'],
+        // SECCIÓN VIEX ADMIN (Solo para VIEX, no super admin)
+        ['header' => 'VICERRECTORÍA DE EXTENSIÓN', 'can' => 'works.manage.viex', 'cannot' => 'system.manage'],
 
         // Para Administradores VIEX
         [
             'text' => 'Administración VIEX',
             'icon' => 'fas fa-cogs',
             'can' => 'works.manage.viex',
+            'cannot' => 'system.manage',
             'submenu' => [
                 [
                     'text' => 'Dashboard VIEX',
@@ -425,109 +430,120 @@ return [
             ],
         ],
 
-        // SECCIÓN ADMINISTRACIÓN DEL SISTEMA
-        ['header' => 'ADMINISTRACIÓN', 'can' => 'system.manage'],
+        // SECCIÓN ADMINISTRACIÓN DEL SISTEMA (Solo para Super Administradores)
+        ['header' => 'ADMINISTRACIÓN DEL SISTEMA', 'can' => 'system.manage'],
 
-        // Para Super Administradores
+        // Dashboard Principal de Administración
+        [
+            'text' => 'Panel de Control',
+            'route' => 'admin.dashboard',
+            'icon' => 'fas fa-tachometer-alt',
+            'can' => 'system.manage',
+            'active' => ['admin.dashboard'],
+        ],
+
+        // Gestión de Usuarios y Accesos
         [
             'text' => 'Gestión de Usuarios',
             'icon' => 'fas fa-users-cog',
-            'can' => 'manage-system',
+            'can' => 'system.manage',
             'submenu' => [
+                [
+                    'text' => 'Gestión Avanzada',
+                    'route' => 'admin.users.advanced',
+                    'icon' => 'fas fa-users-cog',
+                ],
                 [
                     'text' => 'Todos los Usuarios',
                     'route' => 'admin.users.index',
                     'icon' => 'fas fa-users',
-                    'can' => 'users.view.all',
                 ],
                 [
                     'text' => 'Crear Usuario',
                     'route' => 'admin.users.create',
                     'icon' => 'fas fa-user-plus',
-                    'can' => 'users.create',
-                ],
-                [
-                    'text' => 'Roles y Permisos',
-                    'route' => 'admin.roles.index',
-                    'icon' => 'fas fa-user-shield',
-                    'can' => 'roles.manage',
-                ],
-                [
-                    'text' => 'Dashboard de Roles',
-                    'route' => 'admin.role-assignment.index',
-                    'icon' => 'fas fa-project-diagram',
-                    'can' => 'roles.manage',
                 ],
             ],
         ],
 
+        // Gestión de Roles y Permisos
         [
-            'text' => 'Configuración del Sistema',
-            'icon' => 'fas fa-cog',
-            'can' => 'manage-system',
+            'text' => 'Roles y Permisos',
+            'icon' => 'fas fa-user-shield',
+            'can' => 'system.manage',
             'submenu' => [
-                // CATÁLOGOS ORGANIZACIONALES
                 [
-                    'text' => 'Unidades Académicas',
-                    'route' => 'admin.organizational-units.index',
-                    'icon' => 'fas fa-university',
-                    'can' => 'system.manage',
-                ],
-                [
-                    'text' => 'Tipos de Proyectos Institucionales',
-                    'route' => 'admin.institutional-project-types.index',
-                    'icon' => 'fas fa-layer-group',
-                    'can' => 'system.manage',
-                ],
-
-                // CATÁLOGOS DE TRABAJOS
-                [
-                    'text' => 'Tipos de Trabajos',
-                    'route' => 'admin.work-types.index',
-                    'icon' => 'fas fa-tags',
-                    'can' => 'system.manage',
-                ],
-                [
-                    'text' => 'Estados de Trabajos',
-                    'route' => 'admin.work-statuses.index',
-                    'icon' => 'fas fa-traffic-light',
-                    'can' => 'system.manage',
-                ],
-
-                // GESTIÓN DE SEGURIDAD
-                [
-                    'text' => 'Roles del Sistema',
+                    'text' => 'Gestión de Roles',
                     'route' => 'admin.roles.index',
                     'icon' => 'fas fa-user-tag',
-                    'can' => 'roles.manage',
+                ],
+                [
+                    'text' => 'Asignación de Roles',
+                    'route' => 'admin.role-assignment.index',
+                    'icon' => 'fas fa-project-diagram',
                 ],
                 [
                     'text' => 'Permisos del Sistema',
                     'route' => 'admin.permissions.index',
                     'icon' => 'fas fa-key',
-                    'can' => 'permissions.manage',
                 ],
+            ],
+        ],
 
-                ['header' => 'MANTENIMIENTO'],
+        // Gestión de Catálogos del Sistema
+        [
+            'text' => 'Catálogos del Sistema',
+            'icon' => 'fas fa-database',
+            'can' => 'system.manage',
+            'submenu' => [
+                [
+                    'text' => 'Panel de Catálogos',
+                    'route' => 'admin.catalogs.index',
+                    'icon' => 'fas fa-th-large',
+                ],
+                [
+                    'text' => 'Unidades Organizacionales',
+                    'route' => 'admin.catalogs.organizational-units',
+                    'icon' => 'fas fa-sitemap',
+                ],
+                [
+                    'text' => 'Tipos de Trabajos',
+                    'route' => 'admin.catalogs.work-types',
+                    'icon' => 'fas fa-tags',
+                ],
+                [
+                    'text' => 'Estados de Trabajos',
+                    'route' => 'admin.catalogs.work-statuses',
+                    'icon' => 'fas fa-traffic-light',
+                ],
+                [
+                    'text' => 'Tipos Proyectos Institucionales',
+                    'route' => 'admin.catalogs.institutional-project-types',
+                    'icon' => 'fas fa-layer-group',
+                ],
+            ],
+        ],
 
-                // HERRAMIENTAS DE SISTEMA
+        // Auditoría y Mantenimiento
+        [
+            'text' => 'Auditoría y Mantenimiento',
+            'icon' => 'fas fa-tools',
+            'can' => 'system.manage',
+            'submenu' => [
+                [
+                    'text' => 'Auditoría del Sistema',
+                    'route' => 'admin.audit.index',
+                    'icon' => 'fas fa-search',
+                ],
                 [
                     'text' => 'Logs del Sistema',
-                    'url' => '#',
+                    'route' => 'admin.audit.logs',
                     'icon' => 'fas fa-file-alt',
-                    'can' => 'system.manage',
                 ],
                 [
-                    'text' => 'Backup y Mantenimiento',
-                    'url' => '#',
-                    'icon' => 'fas fa-database',
-                    'can' => 'system.manage',
-                ],
-                [
-                    'text' => 'Cache del Sistema',
-                    'url' => '#',
-                    'icon' => 'fas fa-memory',
-                    'can' => 'system.manage',
+                    'text' => 'Mantenimiento',
+                    'route' => 'admin.maintenance.index',
+                    'icon' => 'fas fa-wrench',
                 ],
             ],
         ],
@@ -549,27 +565,32 @@ return [
             'label_color' => 'warning',
         ],
 
-        // SECCIÓN AYUDA Y SOPORTE
-        ['header' => 'AYUDA Y SOPORTE'],
+        // SECCIÓN AYUDA Y SOPORTE (Solo para no-administradores)
+        ['header' => 'AYUDA Y SOPORTE', 'cannot' => 'system.manage'],
 
         [
             'text' => 'Documentación',
             'route' => 'documentation.index',
             'icon' => 'fas fa-book',
             'active' => ['documentation.*'],
+            'cannot' => 'system.manage',
         ],
 
         [
             'text' => 'Contactar Soporte',
             'url' => '#',
             'icon' => 'fas fa-envelope',
+            'cannot' => 'system.manage',
         ],
 
+        // SECCIÓN INFORMACIÓN TÉCNICA (Solo para administradores)
+        ['header' => 'INFORMACIÓN TÉCNICA', 'can' => 'system.manage'],
+
         [
-            'text' => 'Información Técnica',
+            'text' => 'Información del Sistema',
             'route' => 'testing.info',
             'icon' => 'fas fa-info-circle',
-            'can' => 'manage-system',
+            'can' => 'system.manage',
         ],
     ],
 

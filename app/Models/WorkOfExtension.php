@@ -85,7 +85,7 @@ class WorkOfExtension extends Model implements HasMedia {
      * Tipo de trabajo de extensión
      */
     public function workType() {
-        return $this->belongsTo(WorkType::class);
+        return $this->belongsTo(WorkType::class, 'work_type_id');
     }
 
     /**

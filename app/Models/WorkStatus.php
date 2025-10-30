@@ -17,11 +17,16 @@ class WorkStatus extends Model
     protected $fillable = [
         'name',
         'description',
+        'color',
+        'sort_order',
         'is_active',
+        'is_final',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_final' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     /**

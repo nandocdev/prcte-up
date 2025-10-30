@@ -23,7 +23,7 @@ class StoreInstitutionalProjectTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:institutional_project_types,name'],
+            'name' => ['required', 'string', 'max:255', 'unique:inst_project_types,name'],
             'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['required', 'boolean'],
         ];

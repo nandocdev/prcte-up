@@ -14,20 +14,21 @@ use Illuminate\Database\Eloquent\Model;
  */
 class OrganizationalUnit extends Model {
     public const TYPE_LABELS = [
-        'Main Campus' => 'Campus central',
-        'Faculty' => 'Facultad',
-        'Department' => 'Departamento',
-        'School' => 'Escuela',
-        'Regional Center' => 'Centro regional',
-        'University Extension' => 'Extension universitaria',
-        'Extension Unit' => 'Unidad de extension',
-        'Directorate' => 'Direccion',
+        'universidad' => 'Universidad',
+        'facultad' => 'Facultad',
+        'centro' => 'Centro',
+        'departamento' => 'Departamento',
+        'escuela' => 'Escuela',
+        'instituto' => 'Instituto',
     ];
 
     protected $fillable = [
         'name',
+        'code',
         'type',
         'parent_id',
+        'description',
+        'is_active',
     ];
 
     // Relaciones
@@ -102,6 +103,42 @@ class OrganizationalUnit extends Model {
             ->orderBy('name')
             ->get()
             ->groupBy('type');
+    }
+
+    /**
+     * Obtener lista jerárquica para selectores
+     */
+    public static function getHierarchicalList(): array
+    {
+        $units = self::with('parent')->orderBy('name')->get();
+        $hierarchical = [];
+
+        foreach ($units as $unit) {
+            $prefix = '';
+            if ($unit->parent) {
+                $prefix = '└── ';
+                $parent = $unit->parent;
+                while ($parent->parent) {
+                    $prefix = '    ' . $prefix;
+                    $parent = $parent->parent;
+                }
+            }
+
+            $hierarchical[] = [
+                'id' => $unit->id,
+                'display' => $prefix . $unit->name . ' (' . ucfirst($unit->type) . ')'
+            ];
+        }
+
+        return $hierarchical;
+    }
+
+    /**
+     * Obtener IDs de descendientes
+     */
+    public function getDescendantIds(): array
+    {
+        return self::descendantIds($this->id);
     }
 
     public function typeLabel(): string

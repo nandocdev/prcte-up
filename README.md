@@ -81,6 +81,45 @@ Perfecto 💪 Aquí tienes el **README final limpio, coherente e institucional**
 
 ---
 
+## 🛠️ Sistema de Administración
+
+VIEX incluye un **sistema de administración completo** para la gestión centralizada de catálogos y configuración del sistema.
+
+### 📊 Dashboard Administrativo
+- **Estadísticas en tiempo real** de todos los módulos del sistema
+- **Distribución visual** de trabajos por estado con gráficos interactivos
+- **Métricas de actividad** de usuarios y trabajos (últimos 7 días)
+- **Accesos rápidos** a todas las funcionalidades administrativas
+
+### 🗂️ Gestión de Catálogos
+El sistema permite administrar todos los catálogos de forma unificada:
+
+| Catálogo | Descripción | Funcionalidades |
+|----------|-------------|-----------------|
+| **Tipos de Trabajo** | Clasificación de trabajos de extensión | CRUD completo, activación, conteo de trabajos |
+| **Estados de Trabajo** | Flujo de aprobación con colores | Reordenamiento visual, estados finales, timeline |
+| **Unidades Organizacionales** | Estructura universitaria jerárquica | Gestión padre-hijo, códigos únicos, tipos |
+| **Tipos de Proyectos** | Clasificación de proyectos institucionales | CRUD, validaciones, conteo de proyectos |
+
+### ⚡ Características Principales
+- **Interfaz Unificada**: Todos los catálogos gestionados desde `/admin/catalogs`
+- **Operaciones AJAX**: Sin recarga de página para mejor experiencia
+- **Búsqueda en Tiempo Real**: Filtrado dinámico de todos los elementos
+- **Operaciones Masivas**: Activar, desactivar, eliminar elementos en lote
+- **Exportación de Datos**: Descarga de catálogos en Excel/CSV
+- **Validaciones Robustas**: Form Requests para integridad de datos
+- **Cache Inteligente**: Optimización automática de consultas frecuentes
+
+### 🎨 Experiencia de Usuario
+- **Diseño Moderno**: AdminLTE 3 con animaciones CSS y efectos interactivos
+- **Drag & Drop**: Reordenamiento visual de estados de trabajo
+- **Colores Dinámicos**: Estados con colores personalizables desde base de datos
+- **Responsive Design**: Optimizado para escritorio, tablet y móvil
+
+**Acceso**: Usuarios con rol `super_admin` o `viex_admin` → `/admin/catalogs`
+
+---
+
 ## 🏗️ Arquitectura del sistema
 
 ```
@@ -201,6 +240,8 @@ php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServicePr
 | -------------------------------------------- | ------------------------------------- |
 | `doc/tecnica/Manual_Procedimientos.md`       | Flujo normativo aprobado por VIEX     |
 | `doc/tecnica/Documento_Tecnico_Funcional.md` | Requerimientos funcionales y técnicos |
+| `doc/tecnica/Sistema_Administracion_VIEX.md` | Documentación técnica del sistema de administración |
+| `doc/usuario/Manual_Administrador_VIEX.md`   | Manual del usuario administrador     |
 | `doc/sega/DIST.md`                           | Alcance y jerarquía de roles/unidades |
 | `doc/usuario/`                               | Guías operativas por rol              |
 

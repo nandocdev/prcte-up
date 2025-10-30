@@ -138,9 +138,81 @@ Route::middleware('auth')->group(function () {
 
     // Rutas de Administración
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+        // Dashboard principal de administración
+        Route::get('/', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])
+            ->name('dashboard')
+            ->middleware('role:super_admin|viex_admin');
+
         Route::middleware('role:super_admin')->group(function () {
             // Gestión de Usuarios
             Route::resource('users', UserManagementController::class);
+
+            // Gestión Avanzada de Usuarios
+            Route::get('/users-advanced', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'index'])->name('users.advanced');
+            Route::post('/users/mass-assign-roles', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'massAssignRoles'])->name('users.mass-assign-roles');
+            Route::post('/users/mass-change-status', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'massChangeStatus'])->name('users.mass-change-status');
+            Route::post('/users/mass-delete', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'massDelete'])->name('users.mass-delete');
+            Route::post('/users/generate-passwords', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'generatePasswords'])->name('users.generate-passwords');
+            Route::get('/users/export', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'export'])->name('users.export');
+            Route::get('/users/import', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'importView'])->name('users.import');
+            Route::post('/users/import', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'import'])->name('users.import.process');
+
+            // Estadísticas y herramientas del sistema
+            Route::get('/system/statistics', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'userStatistics'])->name('system.statistics');
+            Route::get('/system/health', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'systemHealth'])->name('system.health');
+            Route::post('/system/clear-cache', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'clearCache'])->name('system.clear-cache');
+            Route::post('/system/optimize', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'optimizeSystem'])->name('system.optimize');
+
+            // Gestión de Catálogos
+            Route::get('/catalogs', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'index'])->name('catalogs.index');
+            Route::get('/catalogs/work-types', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'workTypes'])->name('catalogs.work-types');
+            Route::get('/catalogs/work-types/create', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'createWorkType'])->name('catalogs.work-types.create');
+            Route::post('/catalogs/work-types', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'storeWorkType'])->name('catalogs.work-types.store');
+            Route::get('/catalogs/work-types/{workType}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'showWorkType'])->name('catalogs.work-types.show');
+            Route::get('/catalogs/work-types/{workType}/edit', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'editWorkType'])->name('catalogs.work-types.edit');
+            Route::put('/catalogs/work-types/{workType}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'updateWorkType'])->name('catalogs.work-types.update');
+            Route::delete('/catalogs/work-types/{workType}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'destroyWorkType'])->name('catalogs.work-types.destroy');
+
+            Route::get('/catalogs/work-statuses', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'workStatuses'])->name('catalogs.work-statuses');
+            Route::post('/catalogs/work-statuses', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'storeWorkStatus'])->name('catalogs.work-statuses.store');
+            Route::put('/catalogs/work-statuses/{workStatus}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'updateWorkStatus'])->name('catalogs.work-statuses.update');
+            Route::post('/catalogs/work-statuses/update-order', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'updateWorkStatusOrder'])->name('catalogs.work-statuses.update-order');
+
+            Route::get('/catalogs/organizational-units', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'organizationalUnits'])->name('catalogs.organizational-units');
+            Route::get('/catalogs/organizational-units/create', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'createOrganizationalUnit'])->name('catalogs.organizational-units.create');
+            Route::post('/catalogs/organizational-units', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'storeOrganizationalUnit'])->name('catalogs.organizational-units.store');
+            Route::get('/catalogs/organizational-units/{organizationalUnit}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'showOrganizationalUnit'])->name('catalogs.organizational-units.show');
+            Route::get('/catalogs/organizational-units/{organizationalUnit}/edit', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'editOrganizationalUnit'])->name('catalogs.organizational-units.edit');
+            Route::put('/catalogs/organizational-units/{organizationalUnit}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'updateOrganizationalUnit'])->name('catalogs.organizational-units.update');
+            Route::delete('/catalogs/organizational-units/{organizationalUnit}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'destroyOrganizationalUnit'])->name('catalogs.organizational-units.destroy');
+
+            Route::get('/catalogs/institutional-project-types', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'institutionalProjectTypes'])->name('catalogs.institutional-project-types');
+            Route::post('/catalogs/institutional-project-types', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'storeInstitutionalProjectType'])->name('catalogs.institutional-project-types.store');
+            Route::put('/catalogs/institutional-project-types/{institutionalProjectType}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'updateInstitutionalProjectType'])->name('catalogs.institutional-project-types.update');
+            Route::delete('/catalogs/institutional-project-types/{institutionalProjectType}', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'destroyInstitutionalProjectType'])->name('catalogs.institutional-project-types.destroy');
+
+            Route::post('/catalogs/bulk-update', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'bulkUpdate'])->name('catalogs.bulk-update');
+            Route::get('/catalogs/{catalogType}/export', [\App\Http\Controllers\Admin\CatalogManagementController::class, 'exportCatalog'])->name('catalogs.export');
+
+            // Sistema de Auditoría y Mantenimiento
+            Route::get('/audit', [\App\Http\Controllers\Admin\SystemAuditController::class, 'index'])->name('audit.index');
+            Route::get('/audit/logs', [\App\Http\Controllers\Admin\SystemAuditController::class, 'logs'])->name('audit.logs');
+            Route::get('/audit/logs/{logFile}', [\App\Http\Controllers\Admin\SystemAuditController::class, 'viewLog'])->name('audit.logs.view');
+            Route::delete('/audit/logs/{logFile}', [\App\Http\Controllers\Admin\SystemAuditController::class, 'deleteLog'])->name('audit.logs.delete');
+            Route::get('/audit/export', [\App\Http\Controllers\Admin\SystemAuditController::class, 'export'])->name('audit.export');
+            Route::get('/audit/activity', [\App\Http\Controllers\Admin\SystemAuditController::class, 'activityLog'])->name('audit.activity');
+
+            Route::get('/maintenance', [\App\Http\Controllers\Admin\SystemAuditController::class, 'maintenance'])->name('maintenance.index');
+            Route::post('/maintenance/clear-logs', [\App\Http\Controllers\Admin\SystemAuditController::class, 'clearLogs'])->name('maintenance.clear-logs');
+            Route::post('/maintenance/clear-cache', [\App\Http\Controllers\Admin\SystemAuditController::class, 'clearCache'])->name('maintenance.clear-cache');
+            Route::post('/maintenance/optimize-database', [\App\Http\Controllers\Admin\SystemAuditController::class, 'optimizeDatabase'])->name('maintenance.optimize-database');
+            Route::post('/maintenance/backup-system', [\App\Http\Controllers\Admin\SystemAuditController::class, 'backupSystem'])->name('maintenance.backup-system');
+
+            // Estadísticas y herramientas del sistema
+            Route::get('/system/statistics', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'userStatistics'])->name('system.statistics');
+            Route::get('/system/health', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'systemHealth'])->name('system.health');
+            Route::post('/system/clear-cache', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'clearCache'])->name('system.clear-cache');
+            Route::post('/system/optimize', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'optimizeSystem'])->name('system.optimize');
             Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
             Route::delete('/users/{user}/remove-role', [UserManagementController::class, 'removeRole'])->name('users.remove-role');
             Route::post('/users/{user}/give-permission', [UserManagementController::class, 'givePermission'])->name('users.give-permission');
@@ -158,14 +230,14 @@ Route::middleware('auth')->group(function () {
 
             // Configuración exclusiva de Super Administrador
             Route::resource('organizational-units', \App\Http\Controllers\Admin\OrganizationalUnitsController::class);
-            Route::resource('roles', \App\Http\Controllers\Admin\RolesController::class);
             Route::resource('permissions', \App\Http\Controllers\Admin\PermissionsController::class);
         });
 
         Route::middleware('role:super_admin|viex_admin')->group(function () {
             Route::resource('work-types', \App\Http\Controllers\Admin\WorkTypesController::class);
             Route::resource('work-statuses', \App\Http\Controllers\Admin\WorkStatusesController::class);
-            Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
+            // Commented out - using CatalogManagementController instead
+            // Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
             Route::post('evaluation-criteria/sync', [\App\Http\Controllers\Admin\EvaluationCriteriaController::class, 'sync'])
                 ->name('evaluation-criteria.sync');
             Route::resource('evaluation-criteria', \App\Http\Controllers\Admin\EvaluationCriteriaController::class)

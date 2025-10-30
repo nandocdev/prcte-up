@@ -43,7 +43,7 @@ class UpdateInstitutionalProjectTypeRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('institutional_project_types', 'name')->ignore($typeId),
+                Rule::unique('inst_project_types', 'name')->ignore($typeId),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['required', 'boolean'],

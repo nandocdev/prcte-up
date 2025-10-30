@@ -1,6 +1,10 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
 @section('title', __('Gestión de Roles'))
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/admin_custom.css') }}">
+@endpush
 
 @section('content_header')
 <div class="row">
@@ -42,68 +46,68 @@
                         </thead>
                         <tbody>
                             @forelse($roles as $role)
-                                <tr>
-                                    <td>
-                                        <strong>{{ ucfirst(str_replace('_', ' ', $role->name)) }}</strong>
-                                        <br>
-                                        <small class="text-muted">{{ $role->name }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-primary">{{ $role->users->count() }}</span>
-                                        @if($role->users->count() > 0)
-                                            <div class="mt-1">
-                                                @foreach($role->users->take(3) as $user)
-                                                    <span class="badge badge-secondary mr-1">{{ $user->name }}</span>
-                                                @endforeach
-                                                @if($role->users->count() > 3)
-                                                    <span
-                                                        class="text-muted">{{ __('y :count más...', ['count' => $role->users->count() - 3]) }}</span>
-                                                @endif
-                                            </div>
+                            <tr>
+                                <td>
+                                    <strong>{{ ucfirst(str_replace('_', ' ', $role->name)) }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ $role->name }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary">{{ $role->users->count() }}</span>
+                                    @if($role->users->count() > 0)
+                                    <div class="mt-1">
+                                        @foreach($role->users->take(3) as $user)
+                                        <span class="badge badge-secondary mr-1">{{ $user->name }}</span>
+                                        @endforeach
+                                        @if($role->users->count() > 3)
+                                        <span
+                                            class="text-muted">{{ __('y :count más...', ['count' => $role->users->count() - 3]) }}</span>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-info">{{ $role->permissions->count() }}
-                                            {{ __('permisos') }}</span>
-                                        @if($role->permissions->count() > 0)
-                                            <div class="mt-1">
-                                                @foreach($role->permissions->take(3) as $permission)
-                                                    <span class="badge badge-outline-info mr-1" style="font-size: 0.7em;">
-                                                        {{ str_replace('.', ' › ', $permission->name) }}
-                                                    </span>
-                                                @endforeach
-                                                @if($role->permissions->count() > 3)
-                                                    <br><small
-                                                        class="text-muted">{{ __('y :count más...', ['count' => $role->permissions->count() - 3]) }}</small>
-                                                @endif
-                                            </div>
+                                    </div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ $role->permissions->count() }}
+                                        {{ __('permisos') }}</span>
+                                    @if($role->permissions->count() > 0)
+                                    <div class="mt-1">
+                                        @foreach($role->permissions->take(3) as $permission)
+                                        <span class="badge badge-outline-info mr-1" style="font-size: 0.7em;">
+                                            {{ str_replace('.', ' › ', $permission->name) }}
+                                        </span>
+                                        @endforeach
+                                        @if($role->permissions->count() > 3)
+                                        <br><small
+                                            class="text-muted">{{ __('y :count más...', ['count' => $role->permissions->count() - 3]) }}</small>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.roles.show', $role) }}" class="btn btn-info btn-sm"
-                                                title="{{ __('Ver') }}">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-primary btn-sm"
-                                                title="{{ __('Editar') }}">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            @unless(in_array($role->name, ['super_admin', 'profesor']))
-                                                <button type="button" class="btn btn-danger btn-sm"
-                                                    onclick="confirmDelete({{ $role->id }})" title="{{ __('Eliminar') }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            @endunless
-                                        </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('admin.roles.show', $role) }}" class="btn btn-info btn-sm"
+                                            title="{{ __('Ver') }}">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-primary btn-sm"
+                                            title="{{ __('Editar') }}">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @unless(in_array($role->name, ['super_admin', 'profesor']))
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                            onclick="confirmDelete({{ $role->id }})" title="{{ __('Eliminar') }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        @endunless
+                                    </div>
+                                </td>
+                            </tr>
                             @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        {{ __('No se encontraron roles.') }}
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    {{ __('No se encontraron roles.') }}
+                                </td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -173,7 +177,7 @@
 </div>
 @stop
 
-@section('js')
+@push('scripts')
 <script>
     function confirmDelete(roleId) {
         const deleteForm = document.getElementById('deleteForm');
@@ -181,4 +185,4 @@
         $('#deleteModal').modal('show');
     }
 </script>
-@stop
+@endpush

@@ -35,7 +35,7 @@ class WorkType extends Model
      */
     public function works(): HasMany
     {
-        return $this->hasMany(WorkOfExtension::class);
+        return $this->hasMany(WorkOfExtension::class, 'work_type_id');
     }
 
     /**
