@@ -116,7 +116,7 @@ class WorkChangesRequestedByViexNotification extends Notification implements Sho
             'viex_admin_id' => $this->viexAdmin->getKey(),
             'viex_admin_name' => $this->viexAdmin->getAttribute('name'),
             'comments' => $this->comments,
-            'action_url' => route('works.edit', $this->work),
+            'action_url' => url()->route('works.edit', $this->work),
             'message' => __('VIEX solicita correcciones en su trabajo: :title', [
                 'title' => $this->work->getAttribute('title'),
             ]),

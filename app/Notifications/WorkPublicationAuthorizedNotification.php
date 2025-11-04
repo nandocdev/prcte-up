@@ -91,7 +91,7 @@ class WorkPublicationAuthorizedNotification extends Notification implements Shou
             'work_title' => $this->work->getAttribute('title'),
             'is_authorized' => $this->isAuthorized,
             'responsible_name' => $this->work->responsibleUser->name ?? 'N/A',
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
         ];
     }
 }

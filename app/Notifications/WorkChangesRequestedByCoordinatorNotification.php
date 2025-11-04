@@ -116,7 +116,7 @@ class WorkChangesRequestedByCoordinatorNotification extends Notification impleme
             'coordinator_id' => $this->coordinator->getKey(),
             'coordinator_name' => $this->coordinator->getAttribute('name'),
             'comments' => $this->comments,
-            'action_url' => route('works.edit', $this->work),
+            'action_url' => url()->route('works.edit', $this->work),
             'message' => __('El coordinador solicita subsanaciones en su trabajo: :title', [
                 'title' => $this->work->getAttribute('title'),
             ]),

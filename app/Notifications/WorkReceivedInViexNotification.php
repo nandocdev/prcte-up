@@ -73,7 +73,7 @@ class WorkReceivedInViexNotification extends Notification implements ShouldQueue
             'responsible_user' => $this->work->responsibleUser->full_name,
             'organizational_unit' => $this->work->organizationalUnit->name,
             'received_by' => $this->receivedBy->full_name,
-            'action_url' => route('viex.show', $this->work),
+            'action_url' => url()->route('viex.show', $this->work),
             'message' => __('Nuevo trabajo recibido en VIEX: :title', ['title' => $this->work->title]),
         ];
     }

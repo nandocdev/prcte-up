@@ -173,8 +173,8 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
             'coordinator_comments' => $this->comments,
             'recipient_type' => $this->recipientType,
             'action_url' => $this->recipientType === 'dean'
-                ? route('dean.show', $this->work)
-                : route('works.show', $this->work),
+                ? url()->route('dean.show', $this->work)
+                : url()->route('works.show', $this->work),
             'message' => $message,
         ];
     }

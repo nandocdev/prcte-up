@@ -83,7 +83,7 @@ class WorkApprovedByViexNotification extends Notification implements ShouldQueue
             'evaluation_summary' => $evaluationSummary,
             'comments' => $this->comments,
             'approver' => $this->approver->full_name,
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
             'message' => __('¡Su trabajo ha sido aprobado por VIEX! :title', ['title' => $this->work->title]),
         ];
     }

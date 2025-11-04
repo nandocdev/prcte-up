@@ -90,7 +90,7 @@ class WorkRejectedByDeanDirectorNotification extends Notification implements Sho
             'reason' => $this->reason,
             'dean_director' => $this->deanDirector->name,
             'recipient_type' => $this->recipientType,
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
             'message' => $this->notificationMessage()
         );
     }

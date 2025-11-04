@@ -87,7 +87,7 @@ class EvaluationSubmittedNotification extends Notification implements ShouldQueu
             'total_score' => $this->evaluation->total_score,
             'weighted_score' => $this->evaluation->weighted_score,
             'final_decision' => $this->evaluation->final_decision,
-            'action_url' => route('viex.reviewEvaluations', $this->work),
+            'action_url' => url()->route('viex.reviewEvaluations', $this->work),
             'message' => __('Nueva evaluación enviada para: :title', ['title' => $this->work->title]),
         ];
     }

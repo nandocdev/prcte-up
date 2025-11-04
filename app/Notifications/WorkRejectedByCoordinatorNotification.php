@@ -119,7 +119,7 @@ class WorkRejectedByCoordinatorNotification extends Notification implements Shou
             'coordinator_id' => $this->coordinator->getKey(),
             'coordinator_name' => $this->coordinator->getAttribute('name'),
             'rejection_reason' => $this->reason,
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
             'message' => __('Su trabajo ha sido rechazado por el coordinador: :title', [
                 'title' => $this->work->getAttribute('title'),
             ]),

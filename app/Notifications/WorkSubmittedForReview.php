@@ -88,7 +88,7 @@ class WorkSubmittedForReview extends Notification implements ShouldQueue {
             'organizational_unit' => $this->work->organizationalUnit->name ?? 'N/A',
             'submitted_at' => $this->work->getAttribute('submitted_at')?->format('Y-m-d H:i:s'),
             'is_resubmission' => $this->isResubmission,
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
             'message' => $message
         ];
     }

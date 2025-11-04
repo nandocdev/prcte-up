@@ -83,8 +83,8 @@ class WorkCertifiedByViexNotification extends Notification implements ShouldQueu
             'valid_until' => optional($this->work->certification->valid_until)->format('d/m/Y'),
             'comments' => $this->comments,
             'certifier' => $this->certifier->full_name,
-            'download_url' => route('certificate.download', $this->work->certification),
-            'work_url' => route('works.show', $this->work),
+            'download_url' => url()->route('certificate.download', $this->work->certification),
+            'work_url' => url()->route('works.show', $this->work),
             'message' => __('¡Su trabajo ha sido certificado por VIEX! :title', ['title' => $this->work->title]),
         ];
     }

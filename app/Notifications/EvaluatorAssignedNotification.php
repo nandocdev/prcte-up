@@ -87,7 +87,7 @@ class EvaluatorAssignedNotification extends Notification implements ShouldQueue
                 : __('Evaluador'),
             'assignment_notes' => $this->workEvaluator->assignment_notes,
             'assigned_by' => $this->assignedBy->full_name,
-            'action_url' => route('evaluator.show', $this->work),
+            'action_url' => url()->route('evaluator.show', $this->work),
             'message' => __('Ha sido asignado para evaluar: :title', ['title' => $this->work->title]),
         ];
     }

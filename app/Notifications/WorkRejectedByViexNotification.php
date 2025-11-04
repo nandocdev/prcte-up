@@ -98,7 +98,7 @@ class WorkRejectedByViexNotification extends Notification implements ShouldQueue
             'reason' => $this->reason,
             'rejector' => $this->rejector->name,
             'recipient_type' => $this->recipientType,
-            'action_url' => route('works.show', $this->work),
+            'action_url' => url()->route('works.show', $this->work),
             'message' => $this->notificationMessage(),
         ];
     }
