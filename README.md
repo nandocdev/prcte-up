@@ -1,4 +1,3 @@
-Perfecto 💪 Aquí tienes el **README final limpio, coherente e institucional**, con una **sección nueva al final** dedicada al proceso completo de **despliegue (deploy)** —pensada para entornos de staging y producción sobre Oracle o cualquier stack LAMP/Laravel estándar.
 
 ---
 
@@ -26,6 +25,11 @@ Perfecto 💪 Aquí tienes el **README final limpio, coherente e institucional**
     - [Objetivos clave](#objetivos-clave)
   - [⚙️ Alcance funcional](#️-alcance-funcional)
   - [🧭 Roles y visibilidad](#-roles-y-visibilidad)
+  - [🛠️ Sistema de Administración](#️-sistema-de-administración)
+    - [📊 Dashboard Administrativo](#-dashboard-administrativo)
+    - [🗂️ Gestión de Catálogos](#️-gestión-de-catálogos)
+    - [⚡ Características Principales](#-características-principales)
+    - [🎨 Experiencia de Usuario](#-experiencia-de-usuario)
   - [🏗️ Arquitectura del sistema](#️-arquitectura-del-sistema)
   - [🧩 Stack tecnológico](#-stack-tecnológico)
   - [⚙️ Instalación y configuración](#️-instalación-y-configuración)

@@ -177,6 +177,7 @@ class User extends Authenticatable {
         return $this->is_active;
     }
 
+    //!TODO: Mover metodos de accion a servicios
     /**
      * Crear un nuevo usuario con roles asignados
      */
@@ -197,6 +198,7 @@ class User extends Authenticatable {
         return $user;
     }
 
+    // !TODO: Mover metodos de accion a servicios
     /**
      * Actualizar usuario con roles
      */

@@ -35,7 +35,7 @@
                     <h5>{{ __('Arrastra archivos aquí o haz clic para seleccionar') }}</h5>
                     <p class="text-muted">
                         {{ __('Formatos permitidos: PDF, DOC, DOCX, JPG, JPEG, PNG') }}<br>
-                        {{ __('Tamaño máximo por archivo: 10MB') }}
+                        {{ __('Tamaño máximo por archivo: 5MB') }}
                     </p>
                     <button type="button" class="btn btn-primary" id="selectFilesBtn">
                         <i class="fas fa-folder-open"></i> {{ __('Seleccionar Archivos') }}

@@ -522,7 +522,7 @@
         // Manejar archivos seleccionados
         function handleFiles(files) {
             const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 5 * 1024 * 1024; // 5MB
 
             Array.from(files).forEach(file => {
                 // Validar tipo de archivo
@@ -533,7 +533,7 @@
 
                 // Validar tamaño
                 if (file.size > maxSize) {
-                    toastr?.error(`{{ __("Archivo demasiado grande:") }} ${file.name} ({{ __("Máximo 10MB") }})`);
+                    toastr?.error(`{{ __("Archivo demasiado grande:") }} ${file.name} ({{ __("Máximo 5MB") }})`);
                     return;
                 }
 

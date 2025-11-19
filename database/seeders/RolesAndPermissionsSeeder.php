@@ -113,6 +113,12 @@ class RolesAndPermissionsSeeder extends Seeder {
             'works.generate-report',
         ]);
 
+        // 6. Evaluador - Puede evaluar trabajos asignados por VIEX
+        $evaluador = Role::firstOrCreate(['name' => 'evaluador']);
+        $evaluador->givePermissionTo([
+            'works.evaluate',
+        ]);
+
         $this->command->info('Roles y permisos creados exitosamente.');
     }
 }
