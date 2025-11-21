@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Admin;
+namespace Tests\Feature\Reports;
 
 use App\Models\OrganizationalUnit;
 use App\Models\User;
