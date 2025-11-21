@@ -8,9 +8,11 @@ use App\Http\Controllers\ViexAdminController;
 use App\Http\Controllers\ViexController;
 use App\Http\Controllers\EvaluatorController;
 use App\Http\Controllers\WorkMessageController;
+use App\Http\Controllers\WorkOfExtensionController;
 use App\Http\Controllers\Admin\RoleManagementController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\Admin\SystemReportsController;
+use App\Http\Controllers\Admin\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
