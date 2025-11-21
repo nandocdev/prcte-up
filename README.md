@@ -1,355 +1,665 @@
+# VIEX - Plataforma de Registro y Certificación de Trabajos de Extensión
 
----
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
+[![Oracle](https://img.shields.io/badge/Oracle-Database-orange.svg)](https://oracle.com)
 
-# VIEX · Sistema de Registro y Certificación de Trabajos de Extensión
+VIEX es una plataforma web para la Universidad de Panamá que digitaliza el proceso de registro, gestión y certificación de trabajos de extensión universitarios. Implementa el flujo establecido en el "Manual de Procedimientos Para Presentar Trabajos de Extensión".
 
-<div align="center">
+## 📋 Características Principales
 
-![Laravel](https://img.shields.io/badge/Laravel-11+-FF2D20?style=for-the-badge\&logo=laravel\&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge\&logo=php\&logoColor=white)
-![Oracle](https://img.shields.io/badge/Oracle-12c+-F80000?style=for-the-badge\&logo=oracle\&logoColor=white)
-![AdminLTE](https://img.shields.io/badge/AdminLTE-3.x-007BFF?style=for-the-badge\&logo=bootstrap\&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+- ✅ **Gestión completa del ciclo de vida** de trabajos de extensión
+- ✅ **Autenticación integrada** con sistema Oracle universitario
+- ✅ **Flujo de aprobación multi-nivel** (Profesor → Coordinador → Decano → VIEX)
+- ✅ **Sistema de roles y permisos** avanzado (Spatie Laravel Permission)
+- ✅ **Gestión documental** con Spatie Media Library
+- ✅ **Notificaciones automáticas** y comunicación interna
+- ✅ **Reportes y estadísticas** institucionales
+- ✅ **Interfaz responsiva** con AdminLTE 3
 
-**Plataforma oficial de la Universidad de Panamá para la gestión digital de trabajos de extensión universitaria.**
+## 🏗️ Arquitectura
 
-</div>
+### Stack Tecnológico
+- **Backend**: Laravel 11+ con PHP 8.2+
+- **Base de Datos**: Oracle (producción) / SQLite (desarrollo)
+- **Frontend**: Vite + AdminLTE 3 + Blade templates
+- **Autenticación**: Sistema híbrido (Oracle + Laravel Sanctum)
+- **Autorización**: Spatie/Laravel-Permission (RBAC)
+- **Archivos**: Spatie/Laravel-MediaLibrary
 
----
+### Modelo de Dominio
+El sistema maneja **4 tipos de trabajos de extensión**:
+1. **Proyectos** - Institucionales, Unidades Académicas, Servicio Social
+2. **Actividades** - Educación continua, intervenciones puntuales
+3. **Publicaciones** - Artículos, libros que generen conocimiento
+4. **Asistencias Técnicas** - Asesorías y consultorías
 
-## 📘 Índice
-
-- [VIEX · Sistema de Registro y Certificación de Trabajos de Extensión](#viex--sistema-de-registro-y-certificación-de-trabajos-de-extensión)
-  - [📘 Índice](#-índice)
-  - [🎯 Panorama general](#-panorama-general)
-    - [Objetivos clave](#objetivos-clave)
-  - [⚙️ Alcance funcional](#️-alcance-funcional)
-  - [🧭 Roles y visibilidad](#-roles-y-visibilidad)
-  - [🛠️ Sistema de Administración](#️-sistema-de-administración)
-    - [📊 Dashboard Administrativo](#-dashboard-administrativo)
-    - [🗂️ Gestión de Catálogos](#️-gestión-de-catálogos)
-    - [⚡ Características Principales](#-características-principales)
-    - [🎨 Experiencia de Usuario](#-experiencia-de-usuario)
-  - [🏗️ Arquitectura del sistema](#️-arquitectura-del-sistema)
-  - [🧩 Stack tecnológico](#-stack-tecnológico)
-  - [⚙️ Instalación y configuración](#️-instalación-y-configuración)
-    - [Prerrequisitos](#prerrequisitos)
-    - [Pasos básicos](#pasos-básicos)
-    - [Configuración rápida (.env)](#configuración-rápida-env)
-    - [Migraciones y seeders](#migraciones-y-seeders)
-  - [🧪 Pruebas y aseguramiento de calidad](#-pruebas-y-aseguramiento-de-calidad)
-  - [🧭 Convenciones del proyecto](#-convenciones-del-proyecto)
-  - [📚 Documentación complementaria](#-documentación-complementaria)
-  - [🧰 Soporte y contacto](#-soporte-y-contacto)
-  - [🚀 Despliegue y mantenimiento](#-despliegue-y-mantenimiento)
-    - [🔧 Entorno de Staging](#-entorno-de-staging)
-    - [🌐 Entorno de Producción](#-entorno-de-producción)
-    - [🩺 Monitoreo continuo](#-monitoreo-continuo)
-
----
-
-## 🎯 Panorama general
-
-**VIEX** digitaliza el proceso completo de registro, revisión, aprobación y certificación de los trabajos de extensión universitaria, de acuerdo con el *Manual de Procedimientos de la Universidad de Panamá*.
-
-### Objetivos clave
-
-* Reemplazar formularios físicos y firmas manuales por expedientes electrónicos auditables.
-* Coordinar revisiones entre profesores, coordinaciones, decanatos y VIEX.
-* Proveer trazabilidad, estadísticas e informes institucionales en tiempo real.
-
----
-
-## ⚙️ Alcance funcional
-
-| Módulo                      | Descripción                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| **Registro de trabajos**    | Formularios específicos para proyectos, actividades, publicaciones y asistencias técnicas. |
-| **Gestión documental**      | Carga de evidencias, resoluciones y certificados mediante `MediaLibrary`.                  |
-| **Flujo de aprobación**     | Secuencia: *Borrador → Coordinador → Decano/Director → VIEX → Certificado / Rechazado*.    |
-| **Tableros por rol**        | KPIs, acciones rápidas y vistas personalizadas según el tipo de usuario.                   |
-| **Reportes y estadísticas** | Filtros por unidad organizacional, estado y período académico.                             |
-| **Bitácora y auditoría**    | Historial completo de cambios, observaciones y responsables.                               |
-
----
-
-## 🧭 Roles y visibilidad
-
-| Rol                    | Alcance organizacional     | Acciones principales                         |
-| ---------------------- | -------------------------- | -------------------------------------------- |
-| **Profesor**           | Solo trabajos propios      | Crear, editar, reenviar, adjuntar evidencias |
-| **Coordinador**        | Su unidad + unidades hijas | Revisar, aprobar o devolver trabajos         |
-| **Decano/Director**    | Facultad o centro completo | Aprobar o devolver trabajos                  |
-| **Administrador VIEX** | Toda la institución        | Evaluar, certificar, emitir reportes         |
-| **Super Admin**        | Acceso total               | Gobernanza de usuarios y catálogos           |
-
----
-
-## 🛠️ Sistema de Administración
-
-VIEX incluye un **sistema de administración completo** para la gestión centralizada de catálogos y configuración del sistema.
-
-### 📊 Dashboard Administrativo
-- **Estadísticas en tiempo real** de todos los módulos del sistema
-- **Distribución visual** de trabajos por estado con gráficos interactivos
-- **Métricas de actividad** de usuarios y trabajos (últimos 7 días)
-- **Accesos rápidos** a todas las funcionalidades administrativas
-
-### 🗂️ Gestión de Catálogos
-El sistema permite administrar todos los catálogos de forma unificada:
-
-| Catálogo | Descripción | Funcionalidades |
-|----------|-------------|-----------------|
-| **Tipos de Trabajo** | Clasificación de trabajos de extensión | CRUD completo, activación, conteo de trabajos |
-| **Estados de Trabajo** | Flujo de aprobación con colores | Reordenamiento visual, estados finales, timeline |
-| **Unidades Organizacionales** | Estructura universitaria jerárquica | Gestión padre-hijo, códigos únicos, tipos |
-| **Tipos de Proyectos** | Clasificación de proyectos institucionales | CRUD, validaciones, conteo de proyectos |
-
-### ⚡ Características Principales
-- **Interfaz Unificada**: Todos los catálogos gestionados desde `/admin/catalogs`
-- **Operaciones AJAX**: Sin recarga de página para mejor experiencia
-- **Búsqueda en Tiempo Real**: Filtrado dinámico de todos los elementos
-- **Operaciones Masivas**: Activar, desactivar, eliminar elementos en lote
-- **Exportación de Datos**: Descarga de catálogos en Excel/CSV
-- **Validaciones Robustas**: Form Requests para integridad de datos
-- **Cache Inteligente**: Optimización automática de consultas frecuentes
-
-### 🎨 Experiencia de Usuario
-- **Diseño Moderno**: AdminLTE 3 con animaciones CSS y efectos interactivos
-- **Drag & Drop**: Reordenamiento visual de estados de trabajo
-- **Colores Dinámicos**: Estados con colores personalizables desde base de datos
-- **Responsive Design**: Optimizado para escritorio, tablet y móvil
-- **ODS Visuales**: Formularios de trabajos muestran iconografía propia (`public/assets/img/icons/ods`) para cada Objetivo de Desarrollo Sostenible seleccionado
-
-**Acceso**: Usuarios con rol `super_admin` o `viex_admin` → `/admin/catalogs`
-
----
-
-## 🏗️ Arquitectura del sistema
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│ Frontend (Vite + AdminLTE + Blade)                            │
-│  - Formularios dinámicos y dashboards por rol                 │
-│  - Componentes reutilizables y gráficos interactivos          │
-└───────────────▲───────────────────────────────────────────────┘
-                     │ HTTP/JSON (Laravel routes + controllers)
-┌───────────────┴───────────────────────────────────────────────┐
-│ Backend (Laravel 11+)                                         │
-│  - Controladores delgados + Policies                          │
-│  - Modelos con lógica de negocio y eventos                    │
-│  - Jobs/Listeners para tareas diferidas                       │
-│  - Spatie Permission & MediaLibrary                           │
-└───────────────▲───────────────────────────────────────────────┘
-                     │ Eloquent + yajra/laravel-oci8
-┌───────────────┴───────────────────────────────────────────────┐
-│ Bases de datos                                                │
-│  - Oracle (producción)                                        │
-│  - SQLite (testing/desarrollo)                                │
-└───────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🧩 Stack tecnológico
-
-| Categoría         | Herramientas                                       |
-| ----------------- | -------------------------------------------------- |
-| Backend           | Laravel 11+, PHP 8.2, Eloquent, yajra/laravel-oci8 |
-| Frontend          | Vite, AdminLTE 3, Blade, jQuery, Select2           |
-| Autenticación     | Laravel Breeze (personalizado)                     |
-| Permisos          | Spatie/laravel-permission                          |
-| Archivos          | Spatie/laravel-medialibrary                        |
-| Testing           | PHPUnit, Laravel Testbench                         |
-| Calidad de código | Laravel Pint, PHPStan nivel 6                      |
-
----
-
-## ⚙️ Instalación y configuración
+## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
+- PHP 8.2 o superior
+- Composer
+- Node.js 16+ y npm
+- Base de datos Oracle (producción) o SQLite (desarrollo)
 
-* PHP 8.2+ con extensiones `oci8`, `mbstring`, `xml`, `curl`, `zip`, `gd`
-* Composer 2.x
-* Node.js 18.x / npm 9.x
-* Oracle Instant Client o SQLite
+### Instalación Local
 
-### Pasos básicos
-
-```bash
-git clone git@gitlab.com:viex/extension-platform.git
-cd extension-platform
-composer install
-npm ci
-cp .env.example .env
-php artisan key:generate
-```
-
-### Configuración rápida (.env)
-
-```dotenv
-APP_NAME="VIEX"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://viex.local
-
-DB_CONNECTION=sqlite
-QUEUE_CONNECTION=database
-FILESYSTEM_DISK=public
-```
-
-Para entornos Oracle, configurar las variables `DB_HOST`, `DB_SERVICE_NAME`, `DB_USERNAME`, `DB_PASSWORD`.
-
-### Migraciones y seeders
-
-```bash
-php artisan migrate --seed
-php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
-php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider"
-```
-
----
-
-## 🧪 Pruebas y aseguramiento de calidad
-
-| Tipo              | Comando                        |
-| ----------------- | ------------------------------ |
-| Suite completa    | `php artisan test`             |
-| Cobertura         | `php artisan test --coverage`  |
-| Linter            | `./vendor/bin/pint`            |
-| Análisis estático | `./vendor/bin/phpstan analyse` |
-
-> Ejecutar pruebas antes de cada *merge* hacia `develop` o `main`.
-
----
-
-## 🧭 Convenciones del proyecto
-
-* **Controladores delgados** → validación en *Form Requests*, lógica en *Models* o *Services*.
-* **Eventos y listeners** para acciones costosas o asíncronas.
-* **Policies** obligatorias para control de acceso.
-* **Internacionalización** en `resources/lang/es/*.php`.
-* **Commits convencionales** (`feat`, `fix`, `docs`, `refactor`, `test`, etc.).
-* **Ramas**:
-
-  * `develop`: rama de integración
-  * `feature/*`: nuevas funcionalidades
-  * `fix/*`: correcciones
-  * `hotfix/*`: parches críticos
-
----
-
-## 📚 Documentación complementaria
-
-| Archivo                                      | Contenido                             |
-| -------------------------------------------- | ------------------------------------- |
-| `doc/tecnica/Manual_Procedimientos.md`       | Flujo normativo aprobado por VIEX     |
-| `doc/tecnica/Documento_Tecnico_Funcional.md` | Requerimientos funcionales y técnicos |
-| `doc/tecnica/Sistema_Administracion_VIEX.md` | Documentación técnica del sistema de administración |
-| `doc/usuario/Manual_Administrador_VIEX.md`   | Manual del usuario administrador     |
-| `doc/sega/DIST.md`                           | Alcance y jerarquía de roles/unidades |
-| `doc/usuario/`                               | Guías operativas por rol              |
-
----
-
-## 🧰 Soporte y contacto
-
-* **Soporte TI VIEX**: [soporte.viex@up.ac.pa](mailto:soporte.viex@up.ac.pa)
-* **Mesa de ayuda**: ext. 2450 (horario laboral)
-* **Incidencias**: Service Desk UP → categoría *Plataforma VIEX*
-
----
-
-## 🚀 Despliegue y mantenimiento
-
-### 🔧 Entorno de Staging
-
-1. **Sincronizar rama de desarrollo**
-
+1. **Clonar el repositorio**
    ```bash
-   git pull origin develop
+   git clone <repository-url>
+   cd vi-ex
    ```
-2. **Instalar dependencias**
 
+2. **Instalar dependencias PHP**
    ```bash
-   composer install --no-dev --optimize-autoloader
-   npm ci && npm run build
+   composer install --no-interaction --prefer-dist
    ```
-3. **Actualizar base de datos**
 
+3. **Instalar dependencias JavaScript**
+   ```bash
+   npm ci
+   ```
+
+4. **Configurar entorno**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. **Configurar base de datos**
+   - Para desarrollo (SQLite):
+     ```bash
+     touch database/database.sqlite
+     ```
+   - Para producción (Oracle): Configurar conexión en `.env`
+
+6. **Ejecutar migraciones y seeders**
    ```bash
    php artisan migrate --seed
    ```
-4. **Optimizar configuración**
 
+7. **Publicar recursos de paquetes**
    ```bash
-   php artisan config:cache
-   php artisan route:cache
-   php artisan view:cache
-   ```
-5. **Ejecutar colas y scheduler**
-
-   ```bash
-   php artisan queue:work --tries=3 &
-   php artisan schedule:run
+   php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+   php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider"
    ```
 
----
+8. **Compilar assets**
+   ```bash
+   npm run build
+   ```
 
-### 🌐 Entorno de Producción
+9. **Iniciar servidor de desarrollo**
+   ```bash
+   php artisan serve
+   ```
 
-**Paso 1 — Preparar el servidor**
+## 🔐 Autenticación
 
-* PHP 8.2+, Nginx o Apache 2.4
-* Extensiones requeridas (`oci8`, `pdo`, `gd`, etc.)
-* Configurar permisos de escritura:
+VIEX utiliza un sistema de autenticación híbrido:
 
-  ```bash
-  chmod -R 775 storage bootstrap/cache
-  chown -R www-data:www-data .
-  ```
+### Autenticación Oracle (Producción)
+- Integración con `UP_ADMSIS.PKG_VALIDA_USER`
+- Validación de 3 estamentos: Profesor, Administrativo, Estudiante
+- Campos de cédula segmentados (provincia, clase, tomo, folio)
 
-**Paso 2 — Despliegue automatizado (recomendado)**
-Usar `Git pull` o herramientas CI/CD:
+### Autenticación Laravel (Desarrollo)
+- Sistema estándar de Laravel con Sanctum
+- Para testing y desarrollo local
+
+## 👥 Roles y Permisos
+
+| Rol | Descripción | Permisos |
+|-----|-------------|----------|
+| **Super Admin** | Control total del sistema | Todos |
+| **VIEX Admin** | Administración de evaluaciones | Gestión de trabajos, reportes |
+| **Profesor** | Usuario docente | Crear/editar trabajos propios |
+| **Coordinador** | Coordinador de extensión | Aprobar trabajos de su unidad |
+| **Decano/Director** | Autoridad académica | Aprobación institucional |
+| **Evaluador** | Evaluador externo | Evaluar trabajos asignados |
+
+## 📊 Flujo de Trabajo
+
+```mermaid
+flowchart TD
+    A[Borrador] --> B[Enviado a Coordinador]
+    B --> C{Aprobación Coordinador}
+    C -->|Aprobado| D[Enviado a Decano]
+    C -->|Rechazado| A
+    D --> E{Aprobación Decano}
+    E -->|Aprobado| F[Enviado a VIEX]
+    E -->|Rechazado| A
+    F --> G{Evaluación VIEX}
+    G -->|Aprobado| H[Certificado]
+    G -->|Rechazado| A
+```
+
+## 🛠️ Comandos de Desarrollo
+
+### Base de Datos
+```bash
+# Migrar con datos de prueba
+php artisan migrate:fresh --seed
+
+# Solo migrar
+php artisan migrate
+
+# Rollback
+php artisan migrate:rollback
+```
+
+### Assets
+```bash
+# Desarrollo con hot reload
+npm run dev
+
+# Build para producción
+npm run build
+
+# Build para desarrollo
+npm run development
+```
+
+### Cache y Optimización
+```bash
+# Limpiar todos los caches
+php artisan optimize:clear
+
+# Generar cache para producción
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Testing
+```bash
+# Ejecutar tests
+php artisan test
+
+# Con coverage
+php artisan test --coverage
+```
+
+## 🚀 Despliegue a Producción
+
+### Prerrequisitos de Producción
+
+#### Servidor
+- **SO**: Linux (Ubuntu 20.04+ recomendado)
+- **Web Server**: Apache 2.4+ o Nginx 1.18+
+- **PHP**: 8.2+ con extensiones requeridas
+- **Base de Datos**: Oracle Database 19c+
+- **Node.js**: 16+ (para builds)
+
+#### Extensiones PHP Requeridas
+```
+php8.2-cli php8.2-common php8.2-mysql php8.2-zip php8.2-gd php8.2-mbstring php8.2-curl php8.2-xml php8.2-bcmath php8.2-oci8
+```
+
+#### Configuración del Servidor
+
+##### Nginx Configuration
+```nginx
+server {
+    listen 80;
+    server_name vi-ex.up.edu.pa;
+    root /var/www/vi-ex/public;
+    index index.php index.html;
+
+    # Logs
+    access_log /var/log/nginx/vi-ex_access.log;
+    error_log /var/log/nginx/vi-ex_error.log;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    # Cache static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+##### Apache Configuration (.htaccess)
+```apache
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options SAMEORIGIN
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Content-Type-Options nosniff
+    Header always set Referrer-Policy "no-referrer-when-downgrade"
+    Header always set Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+```
+
+### Proceso de Despliegue
+
+#### 1. Preparación del Servidor
 
 ```bash
-git fetch origin main
-git checkout main
-git pull origin main
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build
+# Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar PHP y extensiones
+sudo apt install php8.2 php8.2-cli php8.2-common php8.2-mysql php8.2-zip php8.2-gd php8.2-mbstring php8.2-curl php8.2-xml php8.2-bcmath php8.2-oci8 -y
+
+# Instalar Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# Instalar Node.js
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Instalar Nginx
+sudo apt install nginx -y
+```
+
+#### 2. Configuración de la Aplicación
+
+```bash
+# Clonar repositorio
+cd /var/www
+sudo git clone <repository-url> vi-ex
+cd vi-ex
+
+# Instalar dependencias
+composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+npm ci
+
+# Configurar permisos
+sudo chown -R www-data:www-data /var/www/vi-ex
+sudo chmod -R 755 /var/www/vi-ex
+sudo chmod -R 775 /var/www/vi-ex/storage
+sudo chmod -R 775 /var/www/vi-ex/bootstrap/cache
+
+# Configurar .env para producción
+cp .env.example .env
+# Editar .env con configuración de producción
+```
+
+#### 3. Configuración de Base de Datos
+
+```bash
+# Archivo .env para producción
+APP_NAME="VIEX"
+APP_ENV=production
+APP_KEY=base64:your-app-key-here
+APP_DEBUG=false
+APP_URL=https://vi-ex.up.edu.pa
+
+# Base de datos Oracle
+DB_CONNECTION=oracle
+DB_HOST=your-oracle-host
+DB_PORT=1521
+DB_DATABASE=your-database
+DB_USERNAME=your-username
+DB_PASSWORD=your-password
+
+# Cache y sesiones
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+SESSION_LIFETIME=120
+
+# Redis (opcional pero recomendado)
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# Mail
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your-email@up.edu.pa
+MAIL_PASSWORD=your-email-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="noreply@up.edu.pa"
+MAIL_FROM_NAME="${APP_NAME}"
+
+# Queue (opcional)
+QUEUE_CONNECTION=database
+```
+
+#### 4. Build y Optimización
+
+```bash
+# Generar key
+php artisan key:generate
+
+# Ejecutar migraciones
 php artisan migrate --force
+
+# Ejecutar seeders (solo en instalación inicial)
+php artisan db:seed --force
+
+# Publicar recursos de paquetes
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider" --force
+php artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --force
+
+# Crear roles y permisos iniciales
+php artisan db:seed --class=RoleSeeder --force
+php artisan db:seed --class=PermissionSeeder --force
+
+# Build assets para producción
+npm run build
+
+# Optimizar Laravel
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
 ```
 
-**Paso 3 — Optimización post-deploy**
+#### 5. Configuración de Nginx
 
 ```bash
-php artisan optimize
-php artisan queue:restart
+# Crear configuración de sitio
+sudo nano /etc/nginx/sites-available/vi-ex
+
+# Pegar configuración de Nginx mostrada arriba
+# Guardar y salir
+
+# Habilitar sitio
+sudo ln -s /etc/nginx/sites-available/vi-ex /etc/nginx/sites-enabled/
+
+# Remover configuración por defecto
+sudo rm /etc/nginx/sites-enabled/default
+
+# Probar configuración
+sudo nginx -t
+
+# Reiniciar Nginx
+sudo systemctl restart nginx
 ```
 
-**Paso 4 — Backups**
+#### 6. Configuración SSL (Let's Encrypt)
 
-* Base de datos Oracle: `expdp viex_app/viex_app@VIEXEXT ...`
-* Archivos: sincronizar `storage/app/public/` a S3 o NAS institucional
+```bash
+# Instalar Certbot
+sudo apt install snapd -y
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
 
----
+# Crear enlace simbólico
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
-### 🩺 Monitoreo continuo
+# Generar certificado
+sudo certbot --nginx -d vi-ex.up.edu.pa
 
-* **Logs del sistema**: `storage/logs/laravel.log`
-* **Colas fallidas**: `php artisan queue:failed`
-* **Jobs pendientes**: `php artisan queue:listen`
-* **Estado del sistema**: `/health` endpoint interno para supervisión
+# Configurar renovación automática
+sudo certbot renew --dry-run
+```
 
----
+#### 7. Configuración de Queue Worker (Opcional)
 
-<div align="center">
+```bash
+# Para procesamiento de colas (notificaciones, PDFs)
+sudo nano /etc/systemd/system/vi-ex-queue.service
 
-**VIEX · Vicerrectoría de Extensión · Universidad de Panamá**
-🏛️ [www.up.ac.pa](https://www.up.ac.pa) | 📧 [extension@up.ac.pa](mailto:extension@up.ac.pa)
+[Unit]
+Description=VIEX Queue Worker
+After=network.target
 
-*Digitalizando la extensión universitaria.*
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/vi-ex
+ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-jobs=1000
+Restart=always
 
-</div>
+[Install]
+WantedBy=multi-user.target
 
+# Habilitar y iniciar
+sudo systemctl enable vi-ex-queue
+sudo systemctl start vi-ex-queue
+```
+
+#### 8. Monitoreo y Logs
+
+```bash
+# Configurar logrotate para logs de Laravel
+sudo nano /etc/logrotate.d/vi-ex
+
+/var/www/vi-ex/storage/logs/*.log {
+    daily
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    create 664 www-data www-data
+    postrotate
+        /usr/bin/php /var/www/vi-ex/artisan optimize:clear
+    endscript
+}
+
+# Configurar monitoreo básico
+sudo nano /var/www/vi-ex/artisan schedule:run >> /dev/null 2>&1
+```
+
+### Monitoreo Post-Despliegue
+
+#### Comandos de Verificación
+```bash
+# Verificar estado de servicios
+sudo systemctl status nginx
+sudo systemctl status php8.2-fpm
+sudo systemctl status vi-ex-queue
+
+# Verificar logs
+tail -f /var/log/nginx/vi-ex_error.log
+tail -f /var/www/vi-ex/storage/logs/laravel.log
+
+# Verificar conectividad
+curl -I https://vi-ex.up.edu.pa
+```
+
+#### Health Checks
+```bash
+# Crear endpoint de health check
+php artisan make:command HealthCheck
+
+# En app/Console/Commands/HealthCheck.php
+public function handle()
+{
+    // Verificar base de datos
+    try {
+        DB::connection()->getPdo();
+        $this->info('Database: OK');
+    } catch (\Exception $e) {
+        $this->error('Database: FAILED');
+    }
+
+    // Verificar storage
+    if (is_writable(storage_path())) {
+        $this->info('Storage: OK');
+    } else {
+        $this->error('Storage: FAILED');
+    }
+
+    // Verificar cache
+    Cache::store('redis')->put('health_check', 'ok', 10);
+    if (Cache::store('redis')->get('health_check') === 'ok') {
+        $this->info('Redis: OK');
+    } else {
+        $this->error('Redis: FAILED');
+    }
+}
+```
+
+### Backup y Recuperación
+
+#### Configuración de Backups
+```bash
+# Instalar herramientas de backup
+sudo apt install postgresql-client mysql-client -y
+
+# Crear script de backup
+sudo nano /usr/local/bin/vi-ex-backup.sh
+
+#!/bin/bash
+BACKUP_DIR="/var/backups/vi-ex"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Crear directorio si no existe
+mkdir -p $BACKUP_DIR
+
+# Backup de base de datos
+expdp vi_ex/vi_ex_password@oracle_sid directory=backup_dir dumpfile=vi_ex_$DATE.dmp logfile=vi_ex_$DATE.log
+
+# Backup de archivos
+tar -czf $BACKUP_DIR/files_$DATE.tar.gz -C /var/www/vi-ex storage/
+
+# Backup de configuración
+cp /var/www/vi-ex/.env $BACKUP_DIR/env_$DATE.bak
+
+# Limpiar backups antiguos (mantener 30 días)
+find $BACKUP_DIR -name "*.dmp" -mtime +30 -delete
+find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
+find $BACKUP_DIR -name "*.bak" -mtime +30 -delete
+
+# Hacer ejecutable
+sudo chmod +x /usr/local/bin/vi-ex-backup.sh
+
+# Configurar cron para backup diario
+echo "0 2 * * * /usr/local/bin/vi-ex-backup.sh" | sudo crontab -
+```
+
+### Troubleshooting Común
+
+#### Problemas Frecuentes
+
+1. **Error 500 - Internal Server Error**
+   ```bash
+   # Verificar logs
+   tail -f /var/www/vi-ex/storage/logs/laravel.log
+
+   # Verificar permisos
+   sudo chown -R www-data:www-data /var/www/vi-ex
+   sudo chmod -R 755 /var/www/vi-ex
+   sudo chmod -R 775 /var/www/vi-ex/storage
+   ```
+
+2. **Error de conexión a Oracle**
+   ```bash
+   # Verificar configuración OCI8
+   php -m | grep oci8
+
+   # Probar conexión
+   php artisan tinker
+   DB::connection()->getPdo();
+   ```
+
+3. **Assets no cargan**
+   ```bash
+   # Rebuild assets
+   cd /var/www/vi-ex
+   npm run build
+
+   # Limpiar cache
+   php artisan optimize:clear
+   ```
+
+4. **Queue worker no procesa**
+   ```bash
+   # Reiniciar queue worker
+   sudo systemctl restart vi-ex-queue
+
+   # Verificar logs
+   sudo journalctl -u vi-ex-queue -f
+   ```
+
+## 📚 Documentación Adicional
+
+- [Manual de Usuario](docs/03_PROFESORES.md)
+- [Casos de Uso](docs/01_CU.md)
+- [Documentación Técnica](docs/02_INFORME.md)
+- [API Documentation](docs/api/)
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+## 📝 Licencia
+
+Este proyecto es propiedad de la Universidad de Panamá - Vicerrectoría de Extensión.
+
+## 👥 Equipo de Desarrollo
+
+- **Desarrollador Principal**: [Nombre]
+- **Arquitecto de Software**: [Nombre]
+- **Administrador de Base de Datos**: [Nombre]
+- **Equipo VIEX**: Vicerrectoría de Extensión
+
+## 📞 Soporte
+
+Para soporte técnico contactar a:
+- **Email**: soporte.vi-ex@up.edu.pa
+- **Teléfono**: [Número de contacto]
+- **Horario**: Lunes a Viernes 8:00 AM - 5:00 PM
