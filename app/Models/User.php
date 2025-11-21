@@ -26,6 +26,9 @@ class User extends Authenticatable {
         'professor_code',
         'main_organizational_unit_id',
         'is_active',
+        'oracle_id',
+        'oracle_estamento',
+        'oracle_data',
     ];
 
     /**
@@ -48,6 +51,7 @@ class User extends Authenticatable {
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'oracle_data' => 'array',
         ];
     }
 

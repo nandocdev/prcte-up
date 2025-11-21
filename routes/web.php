@@ -9,6 +9,7 @@ use App\Http\Controllers\ViexController;
 use App\Http\Controllers\EvaluatorController;
 use App\Http\Controllers\WorkMessageController;
 use App\Http\Controllers\WorkOfExtensionController;
+use App\Http\Controllers\Auth\OracleLoginController;
 use App\Http\Controllers\Admin\RoleManagementController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\Admin\SystemReportsController;
@@ -266,3 +267,9 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// Rutas de autenticación Oracle (fuera del middleware auth)
+Route::middleware('guest')->group(function () {
+    Route::get('/oracle-login', [OracleLoginController::class, 'create'])->name('oracle.login.form');
+    Route::post('/oracle-login', [OracleLoginController::class, 'store'])->name('oracle.login');
+});
