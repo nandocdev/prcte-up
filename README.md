@@ -119,6 +119,7 @@ El sistema permite administrar todos los catálogos de forma unificada:
 - **Drag & Drop**: Reordenamiento visual de estados de trabajo
 - **Colores Dinámicos**: Estados con colores personalizables desde base de datos
 - **Responsive Design**: Optimizado para escritorio, tablet y móvil
+- **ODS Visuales**: Formularios de trabajos muestran iconografía propia (`public/assets/img/icons/ods`) para cada Objetivo de Desarrollo Sostenible seleccionado
 
 **Acceso**: Usuarios con rol `super_admin` o `viex_admin` → `/admin/catalogs`
 
