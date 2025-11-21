@@ -225,6 +225,61 @@
         </div>
         @endif
 
+        {{-- Archivos Adjuntos --}}
+        @php
+        $attachments = $work->getMedia('evidencias');
+        @endphp
+        @if($attachments && $attachments->count() > 0)
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-paperclip"></i>
+                    Documentos y Evidencias
+                    <span class="badge badge-light ml-2">{{ $attachments->count() }}</span>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach($attachments as $media)
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-info">
+                            <div class="card-body text-center p-3">
+                                <div class="mb-2">
+                                    @php
+                                    $extension = pathinfo($media->name, PATHINFO_EXTENSION);
+                                    $iconClass = match (strtolower($extension)) {
+                                    'pdf' => 'fas fa-file-pdf text-danger fa-2x',
+                                    'doc', 'docx' => 'fas fa-file-word text-primary fa-2x',
+                                    'xls', 'xlsx' => 'fas fa-file-excel text-success fa-2x',
+                                    'ppt', 'pptx' => 'fas fa-file-powerpoint text-warning fa-2x',
+                                    'jpg', 'jpeg', 'png', 'gif' => 'fas fa-file-image text-info fa-2x',
+                                    'zip', 'rar' => 'fas fa-file-archive text-secondary fa-2x',
+                                    default => 'fas fa-file text-muted fa-2x'
+                                    };
+                                    @endphp
+                                    <i class="{{ $iconClass }}"></i>
+                                </div>
+
+                                <h6 class="card-title text-truncate" title="{{ $media->name }}">
+                                    {{ $media->name }}
+                                </h6>
+
+                                <p class="card-text text-muted small mb-2">
+                                    {{ number_format($media->size / 1024, 1) }} KB
+                                </p>
+
+                                <a href="{{ $media->getUrl() }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Comentarios y Retroalimentación --}}
         @php
         $comments = $work->getCommentsAndFeedback();

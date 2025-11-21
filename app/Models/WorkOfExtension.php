@@ -328,7 +328,7 @@ class WorkOfExtension extends Model implements HasMedia {
         foreach ($files as $file) {
             $this->addMedia($file)
                 ->usingFileName($file->getClientOriginalName())
-                ->toMediaCollection('attachments');
+                ->toMediaCollection('evidencias');
         }
     }
 
@@ -609,8 +609,8 @@ class WorkOfExtension extends Model implements HasMedia {
         DB::transaction(function () {
             try {
                 // Eliminar archivos relacionados
-                if ($this->hasMedia('attachments')) {
-                    $this->clearMediaCollection('attachments');
+                if ($this->hasMedia('evidencias')) {
+                    $this->clearMediaCollection('evidencias');
                     Log::info('Archivos eliminados', ['work_id' => $this->getKey()]);
                 }
 

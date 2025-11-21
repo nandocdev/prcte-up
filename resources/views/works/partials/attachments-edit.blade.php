@@ -8,7 +8,7 @@
     </div>
     <div class="card-body">
         {{-- Archivos existentes --}}
-        @if($work->getMedia('attachments')->count() > 0)
+        @if($work->getMedia('evidencias')->count() > 0)
         <div class="mb-4">
             <h5 class="text-primary">
                 <i class="fas fa-folder-open"></i>
@@ -16,7 +16,7 @@
             </h5>
 
             <div class="row">
-                @foreach($work->getMedia('attachments') as $media)
+                @foreach($work->getMedia('evidencias') as $media)
                 <div class="col-md-4 mb-3">
                     <div class="card border-info">
                         <div class="card-body text-center p-3">
