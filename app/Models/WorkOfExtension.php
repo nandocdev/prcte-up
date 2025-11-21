@@ -674,9 +674,12 @@ class WorkOfExtension extends Model implements HasMedia {
         return $this->statusHistory()
             ->with(['status', 'changedBy'])
             ->whereNotNull('comments')
-            ->where('comments', '!=', '')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->filter(function ($history) {
+                return trim((string) $history->comments) !== '';
+            })
+            ->values();
     }
 
     /**
@@ -690,7 +693,6 @@ class WorkOfExtension extends Model implements HasMedia {
         return $this->statusHistory()
             ->with(['status', 'changedBy'])
             ->whereNotNull('comments')
-            ->where('comments', '!=', '')
             ->whereHas('status', function ($query) {
                 $query->whereIn('name', [
                     'Rechazado por Coordinador',
@@ -700,6 +702,9 @@ class WorkOfExtension extends Model implements HasMedia {
                 ]);
             })
             ->orderBy('created_at', 'desc')
-            ->first();
+            ->get()
+            ->first(function ($history) {
+                return trim((string) $history->comments) !== '';
+            });
     }
 }
