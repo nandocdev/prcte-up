@@ -149,6 +149,27 @@
                         </div>
                     </div>
 
+                    {{-- Detalles específicos según tipo --}}
+                    <div class="col-md-12 mt-4">
+                        @php
+                        $workTypeId = (int) $work->work_type_id;
+                        @endphp
+                        @switch($workTypeId)
+                        @case(1)
+                        @include('works.partials.show.project-details', ['project' => $work->projectDetail])
+                        @break
+                        @case(2)
+                        @include('works.partials.show.activity-details', ['activity' => $work->activityDetail])
+                        @break
+                        @case(3)
+                        @include('works.partials.show.publication-details', ['publication' => $work->publicationDetail])
+                        @break
+                        @case(4)
+                        @include('works.partials.show.assistance-details', ['assistance' => $work->technicalAssistanceDetail])
+                        @break
+                        @endswitch
+                    </div>
+
                     {{-- Consentimiento de Publicación --}}
                     <div class="col-md-12 mt-3">
                         <div class="alert {{ $work->publication_consent ? 'alert-success' : 'alert-warning' }}">
@@ -291,8 +312,7 @@
                     @if($work->title && $work->work_type_id)
                     <form action="{{ route('works.submit', $work) }}" method="POST" id="submitWorkForm" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-primary btn-block mb-2" id="submitWorkBtn"
-                            onclick="return confirmSubmitWork()">
+                        <button type="submit" class="btn btn-primary btn-md btn-block mb-2" id="submitWorkBtn">
                             <i class="fas fa-paper-plane"></i>
                             Enviar para Revisión
                         </button>
@@ -301,11 +321,10 @@
 
                     {{-- Eliminar --}}
                     @can('delete', $work)
-                    <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline">
+                    <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline js-delete-work-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-block mb-2"
-                            onclick="return confirm('¿Está seguro de eliminar este trabajo? Esta acción no se puede deshacer.')">
+                        <button type="submit" class="btn btn-danger btn-md btn-block mb-2">
                             <i class="fas fa-trash"></i>
                             Eliminar Trabajo
                         </button>
@@ -748,10 +767,111 @@
         // Mostrar detalles completos de archivos al hacer hover
         $('[data-toggle="popover"]').popover();
 
-        // Función de confirmación simple para envío de trabajo
-        function confirmSubmitWork() {
-            return confirm('¿Está seguro de enviar este trabajo para revisión?\n\nUna vez enviado, no podrá editarlo hasta que sea revisado.');
+        const submitWorkForm = $('#submitWorkForm');
+        const submitWorkBtn = $('#submitWorkBtn');
+
+        if (submitWorkForm.length && submitWorkBtn.length) {
+            const showSubmitConfirmation = () => {
+                Swal.fire({
+                    title: '¿Enviar trabajo para revisión?',
+                    html: '<p class="mb-2">Verifica que los campos obligatorios estén completos antes de enviar.</p>' +
+                        '<p class="text-muted small mb-0">Mientras esté en revisión no podrás editarlo.</p>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#007bff',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-paper-plane"></i> Sí, enviar',
+                    cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    customClass: {
+                        confirmButton: 'btn btn-primary btn-lg',
+                        cancelButton: 'btn btn-secondary btn-lg'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Enviando trabajo...',
+                            html: 'Estamos remitiendo la solicitud al coordinador correspondiente.',
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        submitWorkForm.data('confirming', true);
+                        submitWorkForm.trigger('submit');
+                    }
+                });
+            };
+
+            submitWorkForm.on('submit', function(e) {
+                if (!submitWorkForm.data('confirming')) {
+                    e.preventDefault();
+                    showSubmitConfirmation();
+                } else {
+                    submitWorkForm.removeData('confirming');
+                }
+            });
+
+            submitWorkBtn.on('click', function(e) {
+                e.preventDefault();
+                showSubmitConfirmation();
+            });
         }
+
+        $('.js-delete-work-form').each(function() {
+            const deleteForm = $(this);
+
+            deleteForm.on('submit', function(e) {
+                if (deleteForm.data('confirming')) {
+                    deleteForm.removeData('confirming');
+                    return;
+                }
+
+                e.preventDefault();
+
+                Swal.fire({
+                    title: '¿Eliminar este trabajo?',
+                    html: '<p class="mb-2">Esta acción es irreversible y eliminará todo el historial asociado.</p>' +
+                        '<p class="text-muted small mb-0">Asegúrate de haber respaldado la información necesaria.</p>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash"></i> Sí, eliminar',
+                    cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    customClass: {
+                        confirmButton: 'btn btn-danger btn-lg',
+                        cancelButton: 'btn btn-secondary btn-lg'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Eliminando trabajo...',
+                            html: 'Estamos removiendo el registro y sus asociaciones.',
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        deleteForm.data('confirming', true);
+                        deleteForm.trigger('submit');
+                    }
+                });
+            });
+        });
 
         $('.js-resubmit-btn').on('click', function(e) {
             e.preventDefault();
