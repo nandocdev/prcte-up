@@ -165,7 +165,11 @@ class WorkOfExtensionController extends Controller {
             'participants.user',
             'statusHistory.changedBy',
             'statusHistory.status',
-            'media'
+            'media',
+            'projectDetail.institutionalProjectType',
+            'activityDetail',
+            'publicationDetail',
+            'technicalAssistanceDetail'
         ]);
 
         return view('works.show', [
