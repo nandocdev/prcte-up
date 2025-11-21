@@ -8,6 +8,9 @@ use App\Models\OrganizationalUnit;
 use App\Models\Certification;
 use App\Http\Requests\RegisterWorkRequest;
 use App\Http\Requests\StoreCompleteWorkRequest;
+use App\Services\WorkOfExtension\CreateWorkService;
+use App\Services\WorkOfExtension\UpdateWorkService;
+use App\Services\WorkOfExtension\SubmitWorkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -173,8 +176,9 @@ class WorkOfExtensionController extends Controller {
             // Log datos validados
             Log::info('Datos validados', $validated);
 
-            // Lógica de negocio delegada al modelo
-            $work = WorkOfExtension::createFromCompleteRequest($validated, $request->user());
+            // Lógica de negocio delegada al servicio
+            $service = new CreateWorkService();
+            $work = $service->execute($validated, $request->user());
 
             // Log trabajo creado
             Log::info('Trabajo creado', ['work_id' => $work->getKey()]);
@@ -333,8 +337,9 @@ class WorkOfExtensionController extends Controller {
                 }
             }
 
-            // Delegar lógica de negocio al modelo (reutilizar lógica de creación adaptada)
-            $updatedWork = $work->updateFromCompleteRequest($validatedData, $request->user());
+            // Delegar lógica de negocio al servicio
+            $service = new UpdateWorkService();
+            $updatedWork = $service->execute($work, $validatedData, $request->user());
 
             // Manejar archivos adjuntos si los hay
             if ($request->hasFile('attachments')) {
@@ -426,9 +431,10 @@ class WorkOfExtensionController extends Controller {
         // Verificar autorización
         $this->authorize('update', $work);
 
-        // Lógica de negocio delegada al modelo
+        // Lógica de negocio delegada al servicio
         try {
-            $work->submitForReview($request->user());
+            $service = new SubmitWorkService();
+            $service->execute($work, $request->user());
 
             return redirect()
                 ->route('works.show', $work)
@@ -466,7 +472,8 @@ class WorkOfExtensionController extends Controller {
             }
 
             // Reenviar con flag isResubmission=true para diferenciar notificación
-            $work->submitForReview($request->user(), isResubmission: true);
+            $service = new SubmitWorkService();
+            $service->execute($work, $request->user(), true);
 
             return redirect()
                 ->route('works.show', $work)

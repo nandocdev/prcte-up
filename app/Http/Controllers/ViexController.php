@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOfExtension;
 use App\Models\User;
+use App\Services\WorkOfExtension\EvaluateWorkService;
+use App\Services\WorkOfExtension\CertifyWorkService;
 use App\Events\WorkReceivedInViex;
 use App\Events\EvaluatorAssigned;
 use App\Events\WorkCertifiedByViex;
@@ -114,7 +116,8 @@ class ViexController extends Controller
         // Obtener resumen de evaluaciones si está en evaluación
         $evaluationSummary = null;
         if (in_array($work->currentStatus->name, ['En VIEX - En Evaluación', 'En VIEX - Aprobado'])) {
-            $evaluationSummary = $work->getEvaluationSummary();
+            $service = new EvaluateWorkService();
+            $evaluationSummary = $service->getEvaluationSummary($work);
         }
 
         return view('viex.show', compact('work', 'evaluationSummary'));
@@ -138,7 +141,8 @@ class ViexController extends Controller
         try {
             DB::beginTransaction();
 
-            $work->receiveInViex(Auth::user(), $request->input('comments'));
+            $service = new EvaluateWorkService();
+            $service->receiveInViex($work, Auth::user(), $request->input('comments'));
 
             // Disparar evento para notificar al equipo VIEX
             event(new WorkReceivedInViex($work, Auth::user()));
@@ -201,7 +205,9 @@ class ViexController extends Controller
 
             $evaluator = User::findOrFail($validated['evaluator_id']);
 
-            $workEvaluator = $work->assignEvaluator(
+            $service = new EvaluateWorkService();
+            $workEvaluator = $service->assignEvaluator(
+                $work,
                 $evaluator,
                 Auth::user(),
                 $validated['role_evaluator'],
@@ -249,7 +255,8 @@ class ViexController extends Controller
         try {
             DB::beginTransaction();
 
-            $work->startViexEvaluation(Auth::user(), $request->input('comments'));
+            $service = new EvaluateWorkService();
+            $service->startViexEvaluation($work, Auth::user(), $request->input('comments'));
 
             // TODO: Disparar evento para notificar a evaluadores (Fase 6)
             // event(new EvaluationStarted($work));
@@ -292,7 +299,8 @@ class ViexController extends Controller
             'evaluations.evaluationDetails.criteria',
         ]);
 
-        $evaluationSummary = $work->getEvaluationSummary();
+        $service = new EvaluateWorkService();
+        $evaluationSummary = $service->getEvaluationSummary($work);
 
         return view('viex.review_evaluations', compact('work', 'evaluationSummary'));
     }
@@ -313,7 +321,9 @@ class ViexController extends Controller
 
             $validated = $request->validated();
 
-            $work->approveByViex(
+            $service = new EvaluateWorkService();
+            $service->approveByViex(
+                $work,
                 Auth::user(),
                 $validated['comments'],
                 $validated['recommendations']
@@ -357,7 +367,9 @@ class ViexController extends Controller
 
             $validated = $request->validated();
 
-            $work->rejectByViex(
+            $service = new EvaluateWorkService();
+            $service->rejectByViex(
+                $work,
                 Auth::user(),
                 $validated['reason'],
                 $validated['recommendations']
@@ -407,12 +419,15 @@ class ViexController extends Controller
 
             // Paso 1: Cambiar a estado "En VIEX - En Evaluación" si no está ya en ese estado
             if ($work->currentStatus?->name === 'Enviado a VIEX') {
-                $work->receiveInViex($user, $request->input('comments') ?: 'Trabajo recibido en VIEX para certificación directa');
+                $evaluateService = new EvaluateWorkService();
+                $evaluateService->receiveInViex($work, $user, $request->input('comments') ?: 'Trabajo recibido en VIEX para certificación directa');
                 $work->refresh(); // Recargar el modelo con el nuevo estado
             }
 
             // Paso 2: Generar certificación directamente (cambiará el estado a "Certificado")
-            $certification = $work->generateCertification(
+            $certifyService = new CertifyWorkService();
+            $certification = $certifyService->generateCertification(
+                $work,
                 $user,
                 null, // número automático
                 $request->input('comments'), // comentarios
@@ -456,7 +471,8 @@ class ViexController extends Controller
 
             $validated = $request->validated();
 
-            $work->requestChangesFromViex(Auth::user(), $validated['comments']);
+            $service = new EvaluateWorkService();
+            $service->requestChangesFromViex($work, Auth::user(), $validated['comments']);
 
             DB::commit();
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOfExtension;
 use App\Models\WorkStatus;
+use App\Services\WorkOfExtension\ApproveWorkService;
+use App\Services\WorkOfExtension\RejectWorkService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -106,8 +108,9 @@ class DeanDirectorController extends Controller {
         $comments = $request->input('comments');
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->approveByDeanDirector($user, $comments);
+            // Lógica de negocio delegada al servicio
+            $service = new ApproveWorkService();
+            $service->approveByDeanDirector($work, $user, $comments);
 
             Log::info('Trabajo aprobado por decano/director', [
                 'work_id' => $work->getKey(),
@@ -168,8 +171,9 @@ class DeanDirectorController extends Controller {
         ]);
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->requestChangesFromDeanDirector($user, $request->input('comments'));
+            // Lógica de negocio delegada al servicio
+            $service = new RejectWorkService();
+            $service->requestChangesFromDeanDirector($work, $user, $request->input('comments'));
 
             Log::info('Cambios solicitados por decano/director', [
                 'work_id' => $work->getKey(),
@@ -265,8 +269,9 @@ class DeanDirectorController extends Controller {
         $comments = $request->input('comments');
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->rejectByDeanDirector($user, $comments);
+            // Lógica de negocio delegada al servicio
+            $service = new RejectWorkService();
+            $service->rejectByDeanDirector($work, $user, $comments);
 
             Log::info('Trabajo rechazado por decano/director', [
                 'work_id' => $work->getKey(),

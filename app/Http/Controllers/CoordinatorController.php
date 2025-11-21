@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkOfExtension;
 use App\Models\WorkStatus;
+use App\Services\WorkOfExtension\ApproveWorkService;
+use App\Services\WorkOfExtension\RejectWorkService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -124,8 +126,9 @@ class CoordinatorController extends Controller {
         $comments = $request->input('comments');
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->approveByCoordinator($user, $comments);
+            // Lógica de negocio delegada al servicio
+            $service = new ApproveWorkService();
+            $service->approveByCoordinator($work, $user, $comments);
 
             Log::info('Trabajo aprobado por coordinador', [
                 'work_id' => $work->getKey(),
@@ -176,8 +179,9 @@ class CoordinatorController extends Controller {
         ]);
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->requestChangesFromCoordinator($user, $request->input('comments'));
+            // Lógica de negocio delegada al servicio
+            $service = new RejectWorkService();
+            $service->requestChangesFromCoordinator($work, $user, $request->input('comments'));
 
             Log::info('Subsanaciones solicitadas por coordinador', [
                 'work_id' => $work->getKey(),
@@ -310,8 +314,9 @@ class CoordinatorController extends Controller {
         $comments = $request->input('comments');
 
         try {
-            // Lógica de negocio delegada al modelo
-            $work->rejectByCoordinator($user, $comments);
+            // Lógica de negocio delegada al servicio
+            $service = new RejectWorkService();
+            $service->rejectByCoordinator($work, $user, $comments);
 
             Log::info('Trabajo rechazado por coordinador', [
                 'work_id' => $work->getKey(),
