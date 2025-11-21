@@ -122,16 +122,40 @@ VIEX utiliza un sistema de autenticación híbrido:
 
 ```mermaid
 flowchart TD
-    A[Borrador] --> B[Enviado a Coordinador]
-    B --> C{Aprobación Coordinador}
-    C -->|Aprobado| D[Enviado a Decano]
-    C -->|Rechazado| A
-    D --> E{Aprobación Decano}
-    E -->|Aprobado| F[Enviado a VIEX]
-    E -->|Rechazado| A
-    F --> G{Evaluación VIEX}
-    G -->|Aprobado| H[Certificado]
-    G -->|Rechazado| A
+    %% --- Definición de Nodos del Flujo ---
+    Start(Inicio del Proceso)
+    A[Borrador]
+    B[Enviado]
+    C{Decisión del Coordinador}
+    D[En VIEX]
+    E{Decisión del Vicerrector VIEX}
+    F[Aprobado]
+    G[Certificado]
+    End(Fin del Proceso)
+
+    %% --- Asignación de Estilos a los Nodos ---
+    class Start,End startEnd
+    class A,B,D,F,G state
+    class C,E decision
+    class G final
+
+    %% --- Definición de Transiciones (Flujo de Procesos) ---
+    Start -- Inicia el Profesor --> A
+    A -- Envía para revisión --> B
+    B -- Es revisado por --> C
+
+    C -- Aprueba --> D
+    D -- Es revisado por --> E
+
+    C -- Devuelve para subsanación --> B
+    B -- Subsana y Envía --> C
+
+    E -- Devuelve para subsanación --> B
+    B -- Subsana y Envía --> E
+
+    E -- Aprueba --> F
+    F -- Equipo VIEX genera certificado --> G
+    G -- Descarga el Profesor --> End
 ```
 
 ## 🛠️ Comandos de Desarrollo
