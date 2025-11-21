@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('sdg_goals', function (Blueprint $table) {
             $table->id();
             $table->string('code', 5)->unique();
+         $table->string('color', 7)->nullable();
             $table->string('name', 255);
             $table->text('description')->nullable();
             $table->timestamps();
