@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Jobs\GenerateCertificationPdf;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
@@ -18,7 +19,7 @@ use App\Models\OrganizationalUnit;
  * Tabla: work_of_extensions
  */
 class WorkOfExtension extends Model implements HasMedia {
-    use InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
     public const COORDINATOR_STATUS_NAMES = [
         'Enviado a Coordinador',

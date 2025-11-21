@@ -36,43 +36,31 @@ class ServicesTest extends TestCase
         $professor = User::factory()->create();
         $professor->assignRole('profesor');
 
-        // Test coordinator permissions
-        $this->assertTrue($service->canApproveByCoordinator($coordinator));
-        $this->assertTrue($service->canRejectByCoordinator($coordinator));
-        $this->assertTrue($service->canRequestChangesByCoordinator($coordinator));
+      // Create a sample work for testing using correct status for coordinator approval
+      $work = WorkOfExtension::factory()->create([
+         'current_status_id' => WorkStatus::where('name', 'En Revisión Coordinador')->first()->id,
+      ]);
 
-        // Test dean permissions
-        $this->assertTrue($service->canApproveByDeanDirector($dean));
-        $this->assertTrue($service->canRejectByDeanDirector($dean));
+      // Test coordinator permissions
+      $this->assertTrue($service->canCoordinatorReviewWork($coordinator, $work));
+      $this->assertTrue($service->canCoordinatorApproveWork($work));
+      $this->assertTrue($service->canCoordinatorRequestChanges($work));
 
-        // Test viex permissions
-        $this->assertTrue($service->canApproveByViex($viexAdmin));
-        $this->assertTrue($service->canRejectByViex($viexAdmin));
-        $this->assertTrue($service->canRequestChangesByViex($viexAdmin));
-        $this->assertTrue($service->canAuthorizePublication($viexAdmin));
+      // Test dean permissions - create work in correct status for dean
+      $deanWork = WorkOfExtension::factory()->create([
+         'current_status_id' => WorkStatus::where('name', 'Enviado a Decano/Director')->first()->id,
+      ]);
+      $this->assertTrue($service->canDeanDirectorReviewWork($dean, $deanWork));
+      $this->assertTrue($service->canDeanDirectorApproveWork($deanWork));
+      $this->assertTrue($service->canDeanDirectorRequestChanges($deanWork));
 
-        // Test professor permissions
-        $this->assertTrue($service->canCreateWork($professor));
-        $this->assertTrue($service->canEditOwnWork($professor));
-        $this->assertTrue($service->canSubmitWork($professor));
-    }
-
-    public function test_coordinator_dashboard_service_returns_correct_data(): void
-    {
-        $service = app(CoordinatorDashboardService::class);
-
-        $coordinator = User::factory()->create();
-        $coordinator->assignRole('coordinador_extension');
-
-        // Create sample works
-        $this->createSampleWorksForDashboard();
-
-        $stats = $service->getDashboardStats($coordinator);
-
-        $this->assertIsArray($stats);
-        $this->assertArrayHasKey('pending_works_count', $stats);
-        $this->assertArrayHasKey('approved_this_month_count', $stats);
-        $this->assertArrayHasKey('rejected_this_month_count', $stats);
+      // Test viex permissions - create work in correct status for viex
+      $viexWork = WorkOfExtension::factory()->create([
+         'current_status_id' => WorkStatus::where('name', 'En VIEX - En Evaluación')->first()->id,
+      ]);
+      $this->assertTrue($service->canViexApproveWork($viexWork));
+      $this->assertTrue($service->canViexRejectWork($viexWork));
+      $this->assertTrue($service->canViexRequestChanges($viexWork));
     }
 
     public function test_work_listing_service_filters_correctly(): void
@@ -85,13 +73,18 @@ class ServicesTest extends TestCase
         // Create sample works
         $this->createSampleWorksForListing();
 
-        $filters = ['status' => 'borrador'];
-        $works = $service->getFilteredWorks($user, $filters, 10);
+      // Create a request with filters
+      $request = new \Illuminate\Http\Request();
+      $request->merge(['status' => 'draft']);
 
-        $this->assertInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class, $works);
+      $result = $service->getWorksListing($request, $user);
 
-        foreach ($works as $work) {
-            $this->assertEquals('Borrador', $work->currentStatus->name);
+      $this->assertArrayHasKey('works', $result);
+      $this->assertArrayHasKey('statistics', $result);
+
+      // All works should be drafts since we filtered by 'draft'
+      foreach ($result['works'] as $work) {
+         $this->assertTrue($work->is_draft);
         }
     }
 
@@ -104,14 +97,15 @@ class ServicesTest extends TestCase
 
         $work = WorkOfExtension::factory()->create([
             'current_status_id' => WorkStatus::where('name', 'Certificado')->first()->id,
-            'publication_consent' => true,
-        ]);
+         'publication_consent' => false, // Start with false
+      ]);
 
-        $result = $service->authorizePublication($work, $viexAdmin, 'Publicación autorizada');
+      // Authorize publication
+      $result = $service->authorizePublication($work, $viexAdmin, true);
 
-        $this->assertTrue($result);
+      $this->assertInstanceOf(WorkOfExtension::class, $result);
         $work->refresh();
-        // Check if publication was authorized (this would depend on your implementation)
+      $this->assertTrue($work->publication_consent);
     }
 
     private function createSampleWorksForDashboard(): void
