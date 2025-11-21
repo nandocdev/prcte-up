@@ -31,7 +31,8 @@ use App\Listeners\SendWorkRejectedByViexNotification;
 use App\Listeners\SendWorkChangesRequestedByViexNotification;
 use App\Listeners\SendWorkApprovedByDeanDirectorNotification;
 use App\Listeners\SendWorkChangesRequestedByDeanDirectorNotification;
-
+use App\Events\WorkCertifiedByViex;
+use App\Listeners\SendWorkCertifiedByViexNotification;
 /**
  * Proveedor de servicios de eventos
  * Registra los eventos y listeners del sistema
