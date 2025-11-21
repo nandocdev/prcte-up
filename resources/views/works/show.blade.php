@@ -312,7 +312,7 @@
                     @if($work->title && $work->work_type_id)
                     <form action="{{ route('works.submit', $work) }}" method="POST" id="submitWorkForm" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-primary btn-md btn-block mb-2" id="submitWorkBtn">
+                        <button type="submit" class="btn btn-primary btn-block mb-2" id="submitWorkBtn">
                             <i class="fas fa-paper-plane"></i>
                             Enviar para Revisión
                         </button>
@@ -324,7 +324,7 @@
                     <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline js-delete-work-form">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-md btn-block mb-2">
+                        <button type="submit" class="btn btn-danger btn-block mb-2">
                             <i class="fas fa-trash"></i>
                             Eliminar Trabajo
                         </button>
@@ -771,21 +771,41 @@
         const submitWorkBtn = $('#submitWorkBtn');
 
         if (submitWorkForm.length && submitWorkBtn.length) {
+            const missingFields = @json($work->getMissingFieldsForSubmission());
+
             const showSubmitConfirmation = () => {
+                let title = '¿Enviar trabajo para revisión?';
+                let html = '<p class="mb-2">Verifica que los campos obligatorios estén completos antes de enviar.</p>' +
+                    '<p class="text-muted small mb-0">Mientras esté en revisión no podrás editarlo.</p>';
+                let icon = 'question';
+                let confirmButtonText = '<i class="fas fa-paper-plane"></i> Sí, enviar';
+                let confirmButtonColor = '#007bff';
+
+                if (missingFields.length > 0) {
+                    title = 'Campos incompletos detectados';
+                    html = '<p class="mb-2 text-warning"><strong>Advertencia:</strong> Los siguientes campos obligatorios están vacíos o incompletos:</p>' +
+                        '<ul class="text-left mb-3" style="max-height: 150px; overflow-y: auto;">' +
+                        missingFields.map(field => `<li><i class="fas fa-exclamation-triangle text-warning"></i> ${field}</li>`).join('') +
+                        '</ul>' +
+                        '<p class="text-muted small mb-0">¿Deseas enviar de todos modos? El sistema validará nuevamente antes de procesar.</p>';
+                    icon = 'warning';
+                    confirmButtonText = '<i class="fas fa-paper-plane"></i> Enviar de todos modos';
+                    confirmButtonColor = '#fd7e14'; // Orange
+                }
+
                 Swal.fire({
-                    title: '¿Enviar trabajo para revisión?',
-                    html: '<p class="mb-2">Verifica que los campos obligatorios estén completos antes de enviar.</p>' +
-                        '<p class="text-muted small mb-0">Mientras esté en revisión no podrás editarlo.</p>',
-                    icon: 'question',
+                    title: title,
+                    html: html,
+                    icon: icon,
                     showCancelButton: true,
-                    confirmButtonColor: '#007bff',
+                    confirmButtonColor: confirmButtonColor,
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: '<i class="fas fa-paper-plane"></i> Sí, enviar',
+                    confirmButtonText: confirmButtonText,
                     cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
                     reverseButtons: true,
                     focusCancel: true,
                     customClass: {
-                        confirmButton: 'btn btn-primary btn-lg',
+                        confirmButton: 'btn btn-lg',
                         cancelButton: 'btn btn-secondary btn-lg'
                     },
                     buttonsStyling: false
