@@ -6,6 +6,7 @@ use App\Models\WorkOfExtension;
 use App\Models\WorkStatus;
 use App\Services\WorkOfExtension\ApproveWorkService;
 use App\Services\WorkOfExtension\RejectWorkService;
+use App\Services\Dashboard\CoordinatorDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -43,21 +44,11 @@ class CoordinatorController extends Controller {
             'organizational_unit_id' => $user->getAttribute('main_organizational_unit_id')
         ]);
 
-        // Obtener trabajos pendientes para este coordinador
-        $pendingWorks = $this->getPendingWorksForCoordinator($user);
+        // Delegar lógica al servicio
+        $service = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        $data = $service->getDashboardData($user);
 
-        // Obtener estadísticas
-        $statistics = $this->getCoordinatorStatistics($user);
-
-        // Obtener trabajos recientes (últimos 10)
-        $recentWorks = $this->getRecentWorksForCoordinator($user);
-
-        return view('coordinator.dashboard', [
-            'pendingWorks' => $pendingWorks,
-            'recentWorks' => $recentWorks,
-            'statistics' => $statistics,
-            'user' => $user
-        ]);
+        return view('coordinator.dashboard', $data);
     }
 
     /**
@@ -70,7 +61,8 @@ class CoordinatorController extends Controller {
         $user = $request->user();
 
         // Verificar que el trabajo pertenece a la unidad del coordinador
-        if (!$this->canCoordinatorReviewWork($user, $work)) {
+        $dashboardService = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        if (!$dashboardService->canCoordinatorReviewWork($user, $work)) {
             return redirect()
                 ->route('coordinator.dashboard')
                 ->with('error', __('No tiene permisos para revisar este trabajo.'));
@@ -101,8 +93,8 @@ class CoordinatorController extends Controller {
         return view('coordinator.show', [
             'work' => $work,
             'user' => $user,
-            'canApprove' => $this->canApproveWork($work),
-            'canRequestChanges' => $this->canRequestChanges($work)
+            'canApprove' => $dashboardService->canApproveWork($work),
+            'canRequestChanges' => $dashboardService->canRequestChanges($work)
         ]);
     }
 
@@ -116,7 +108,8 @@ class CoordinatorController extends Controller {
         $user = $request->user();
 
         // Validar autorización específica para este trabajo
-        if (!$this->canCoordinatorReviewWork($user, $work) || !$this->canApproveWork($work)) {
+        $dashboardService = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        if (!$dashboardService->canCoordinatorReviewWork($user, $work) || !$dashboardService->canApproveWork($work)) {
             return redirect()
                 ->route('coordinator.dashboard')
                 ->with('error', __('No puede aprobar este trabajo en su estado actual.'));
@@ -163,7 +156,8 @@ class CoordinatorController extends Controller {
         $user = $request->user();
 
         // Validar autorización específica para este trabajo
-        if (!$this->canCoordinatorReviewWork($user, $work) || !$this->canRequestChanges($work)) {
+        $dashboardService = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        if (!$dashboardService->canCoordinatorReviewWork($user, $work) || !$dashboardService->canRequestChanges($work)) {
             return redirect()
                 ->route('coordinator.dashboard')
                 ->with('error', __('No puede solicitar cambios a este trabajo en su estado actual.'));
@@ -203,158 +197,6 @@ class CoordinatorController extends Controller {
                 ->route('coordinator.show', $work)
                 ->with('error', __('Error al solicitar subsanaciones. Inténtelo de nuevo.'));
         }
-    }
-
-    // Métodos privados auxiliares
-
-    /**
-     * Obtener trabajos pendientes de revisión para el coordinador
-     */
-    private function getPendingWorksForCoordinator($user)
-    {
-        return WorkOfExtension::where('organizational_unit_id', $user->getAttribute('main_organizational_unit_id'))
-            ->whereHas('currentStatus', function ($query) {
-            $query->whereIn('name', ['En Revisión Coordinador', 'Enviado a Coordinador']);
-            })
-            ->with(['workType', 'responsibleUser', 'currentStatus'])
-            ->orderBy('submitted_at', 'asc')
-            ->get();
-    }
-
-    /**
-     * Obtener trabajos recientes procesados por el coordinador
-     */
-    private function getRecentWorksForCoordinator($user) {
-        return WorkOfExtension::where('organizational_unit_id', $user->getAttribute('main_organizational_unit_id'))
-            ->whereHas('statusHistory', function ($query) use ($user) {
-                $query->where('changed_by_user_id', $user->getKey());
-            })
-            ->with(['workType', 'responsibleUser', 'currentStatus'])
-            ->orderBy('updated_at', 'desc')
-            ->limit(10)
-            ->get();
-    }
-
-    /**
-     * Obtener estadísticas para el dashboard del coordinador
-     */
-    private function getCoordinatorStatistics($user) {
-        $unitId = $user->getAttribute('main_organizational_unit_id');
-
-        return [
-            'pending' => WorkOfExtension::where('organizational_unit_id', $unitId)
-                ->whereHas('currentStatus', function ($query) {
-                    $query->where('name', 'En Revisión Coordinador');
-                })
-                ->count(),
-
-            'approved_this_month' => WorkOfExtension::where('organizational_unit_id', $unitId)
-                ->whereHas('statusHistory', function ($query) use ($user) {
-                    $query->where('changed_by_user_id', $user->getKey())
-                        ->whereHas('toStatus', function ($q) {
-                            $q->where('name', 'En Decano/Director');
-                        })
-                        ->where('created_at', '>=', now()->startOfMonth());
-                })
-                ->count(),
-
-            'changes_requested_this_month' => WorkOfExtension::where('organizational_unit_id', $unitId)
-                ->whereHas('statusHistory', function ($query) use ($user) {
-                    $query->where('changed_by_user_id', $user->getKey())
-                        ->whereHas('toStatus', function ($q) {
-                            $q->where('name', 'Requiere Subsanaciones');
-                        })
-                        ->where('created_at', '>=', now()->startOfMonth());
-                })
-                ->count(),
-
-            'total_unit_works' => WorkOfExtension::where('organizational_unit_id', $unitId)->count()
-        ];
-    }
-
-    /**
-     * Verificar si el coordinador puede revisar el trabajo
-     */
-    private function canCoordinatorReviewWork($user, $work): bool {
-        // Super admin puede revisar cualquier trabajo
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        // El trabajo debe ser de la unidad del coordinador
-        return $work->getAttribute('organizational_unit_id') === $user->getAttribute('main_organizational_unit_id');
-    }
-
-    /**
-     * CU08: Rechazar trabajo definitivamente (Solicitar correcciones)
-     */
-    public function reject(Request $request, WorkOfExtension $work): RedirectResponse {
-        // Validar permisos de usuario
-        $this->validateCoordinatorPermissions($request);
-
-        $user = $request->user();
-        $currentStatus = $work->currentStatus->name ?? '';
-
-        // Verificar que el trabajo está en estado correcto para rechazar
-        if (!in_array($currentStatus, ['Enviado a Coordinador', 'En Revisión Coordinador'])) {
-            return redirect()
-                ->route('coordinator.show', $work)
-                ->with('error', __('Este trabajo no puede ser rechazado en su estado actual.'));
-        }
-
-        // Validar datos de entrada
-        $request->validate([
-            'comments' => 'required|string|min:10|max:2000',
-        ], [
-            'comments.required' => 'Debe proporcionar comentarios para el rechazo.',
-            'comments.min' => 'Los comentarios deben tener al menos 10 caracteres.',
-            'comments.max' => 'Los comentarios no pueden exceder 2000 caracteres.',
-        ]);
-
-        $comments = $request->input('comments');
-
-        try {
-            // Lógica de negocio delegada al servicio
-            $service = new RejectWorkService();
-            $service->rejectByCoordinator($work, $user, $comments);
-
-            Log::info('Trabajo rechazado por coordinador', [
-                'work_id' => $work->getKey(),
-                'coordinator_id' => $user->getKey(),
-                'reason' => $comments
-            ]);
-
-            return redirect()
-                ->route('coordinator.show', $work)
-                ->with('success', __('Trabajo rechazado. El profesor ha sido notificado y debe realizar las correcciones indicadas.'));
-
-        } catch (\Exception $e) {
-            Log::error('Error al rechazar trabajo', [
-                'work_id' => $work->getKey(),
-                'coordinator_id' => $user->getKey(),
-                'error' => $e->getMessage()
-            ]);
-
-            return redirect()
-                ->route('coordinator.show', $work)
-                ->with('error', __('Error al rechazar el trabajo. Inténtelo de nuevo.'));
-        }
-    }
-
-    /**
-     * Verificar si el trabajo puede ser aprobado
-     */
-    private function canApproveWork($work): bool {
-        $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
-        return in_array($work->currentStatus->name, $validStatuses);
-    }
-
-    /**
-     * Verificar si se pueden solicitar cambios al trabajo
-     */
-    private function canRequestChanges($work): bool {
-        $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
-        return in_array($work->currentStatus->name, $validStatuses);
     }
 
     /**

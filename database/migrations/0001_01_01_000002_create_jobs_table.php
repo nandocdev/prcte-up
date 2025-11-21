@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('available_at');
             $table->unsignedInteger('created_at');
 
-            $table->primary(['id'], 'jobs_pk');
+            $table->primary(['id'], 'jobs_pk'); // Ya creado por $table->id()
         });
 
         Schema::create('job_batches', function (Blueprint $table) {

@@ -236,8 +236,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:super_admin|viex_admin')->group(function () {
             Route::resource('work-types', \App\Http\Controllers\Admin\WorkTypesController::class);
             Route::resource('work-statuses', \App\Http\Controllers\Admin\WorkStatusesController::class);
-            // Commented out - using CatalogManagementController instead
-            // Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
+            Route::resource('institutional-project-types', \App\Http\Controllers\Admin\InstitutionalProjectTypesController::class);
             Route::post('evaluation-criteria/sync', [\App\Http\Controllers\Admin\EvaluationCriteriaController::class, 'sync'])
                 ->name('evaluation-criteria.sync');
             Route::resource('evaluation-criteria', \App\Http\Controllers\Admin\EvaluationCriteriaController::class)

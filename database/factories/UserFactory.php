@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\OrganizationalUnit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -28,6 +29,10 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'cedula' => fake()->unique()->numerify('8-###-####'),
+            'professor_code' => fake()->optional(0.7)->numerify('PROF###'),
+            'main_organizational_unit_id' => OrganizationalUnit::first()?->id ?? OrganizationalUnit::factory()->create()->id,
+            'is_active' => true,
             'remember_token' => Str::random(10),
         ];
     }

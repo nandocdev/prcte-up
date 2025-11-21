@@ -10,31 +10,21 @@ use App\Models\WorkEvaluation;
 use App\Models\WorkOfExtension;
 use App\Models\WorkStatus;
 use App\Models\WorkType;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
+use Tests\TestsWithSeeders;
 
 class GenerateSystemReportsTest extends TestCase
 {
-    use RefreshDatabase;
+    use TestsWithSeeders;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        Permission::create([
-            'name' => 'works.generate-report',
-            'guard_name' => 'web',
-        ]);
-
-        Role::create([
-            'name' => 'super_admin',
-            'guard_name' => 'web',
-        ]);
     }
 
     public function test_super_admin_can_access_reports_index(): void
@@ -102,36 +92,16 @@ class GenerateSystemReportsTest extends TestCase
         ]);
 
         $user->assignRole('super_admin');
-        $user->givePermissionTo('works.generate-report');
 
         return $user;
     }
 
     private function createSampleWorks(): void
     {
-        $workType = WorkType::create([
-            'name' => 'Proyecto',
-            'description' => 'Trabajo de extensión tipo proyecto',
-            'is_active' => true,
-        ]);
-
-        $draftStatus = WorkStatus::create([
-            'name' => 'Borrador',
-            'description' => 'Trabajo en edición',
-            'is_active' => true,
-        ]);
-
-        $certifiedStatus = WorkStatus::create([
-            'name' => 'Certificado',
-            'description' => 'Trabajo con certificado emitido',
-            'is_active' => true,
-        ]);
-
-        $unit = OrganizationalUnit::create([
-            'name' => 'Facultad de Ciencias',
-            'type' => 'Faculty',
-            'parent_id' => null,
-        ]);
+        $workType = WorkType::first(); // Use existing work type from seeders
+        $draftStatus = WorkStatus::where('name', 'Borrador')->first();
+        $certifiedStatus = WorkStatus::where('name', 'Certificado')->first();
+        $unit = OrganizationalUnit::find(100); // Campus Central from seeders
 
         $responsible = User::factory()->create([
             'cedula' => '8-999-3001',

@@ -111,9 +111,10 @@ class EvaluationStatisticsReport extends SystemReport
 
         $rows = $query->get()
             ->map(function ($row) {
+            $finalDecision = $row->final_decision ?? 'pending';
                 return [
-                    'decision' => $row->final_decision,
-                    'decision_label' => $this->resolveDecisionLabel((string) $row->final_decision),
+                'decision' => $finalDecision,
+                'decision_label' => $this->resolveDecisionLabel((string) $finalDecision),
                     'total' => (int) $row->total,
                     'avg_total_score' => $row->avg_total_score !== null ? round((float) $row->avg_total_score, 2) : null,
                     'avg_weighted_score' => $row->avg_weighted_score !== null ? round((float) $row->avg_weighted_score, 2) : null,

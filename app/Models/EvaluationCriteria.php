@@ -51,6 +51,7 @@ class EvaluationCriteria extends Model
         'max_score',
         'weight',
         'order_visualization',
+        'order', // Alias para order_visualization
         'is_active',
         'is_required',
     ];
@@ -64,6 +65,7 @@ class EvaluationCriteria extends Model
         'max_score' => 'integer',
         'weight' => 'integer',
         'order_visualization' => 'integer',
+        'order' => 'integer', // Alias para order_visualization
         'is_active' => 'boolean',
         'is_required' => 'boolean',
         'deleted_at' => 'datetime',
@@ -110,6 +112,27 @@ class EvaluationCriteria extends Model
     public function evaluationDetails(): HasMany
     {
         return $this->hasMany(EvaluationDetail::class);
+    }
+
+    /**
+     * Get the order attribute (alias for order_visualization)
+     *
+     * @return int
+     */
+    public function getOrderAttribute(): int
+    {
+        return $this->order_visualization;
+    }
+
+    /**
+     * Set the order attribute (alias for order_visualization)
+     *
+     * @param int $value
+     * @return void
+     */
+    public function setOrderAttribute(int $value): void
+    {
+        $this->order_visualization = $value;
     }
 
     /**

@@ -6,6 +6,8 @@ use App\Models\WorkOfExtension;
 use App\Models\User;
 use App\Services\WorkOfExtension\EvaluateWorkService;
 use App\Services\WorkOfExtension\CertifyWorkService;
+use App\Services\Dashboard\ViexDashboardService;
+use App\Services\Authorization\WorkAuthorizationService;
 use App\Events\WorkReceivedInViex;
 use App\Events\EvaluatorAssigned;
 use App\Events\WorkCertifiedByViex;
@@ -47,42 +49,11 @@ class ViexController extends Controller
     {
         $user = Auth::user();
 
-        // Trabajos recibidos en VIEX (diferentes estados)
-        $pendingEvaluation = WorkOfExtension::whereHas('currentStatus', function ($query) {
-            $query->where('name', 'En VIEX - En Evaluación');
-        })
-        ->with(['responsibleUser', 'organizationalUnit', 'workType', 'currentStatus'])
-        ->orderBy('submitted_at', 'desc')
-        ->get();
+        // Delegar lógica del dashboard al servicio
+        $dashboardService = new ViexDashboardService(app(WorkAuthorizationService::class));
+        $data = $dashboardService->getDashboardData($user);
 
-        $approved = WorkOfExtension::whereHas('currentStatus', function ($query) {
-            $query->where('name', 'En VIEX - Aprobado');
-        })
-        ->with(['responsibleUser', 'organizationalUnit', 'workType', 'currentStatus'])
-        ->orderBy('updated_at', 'desc')
-        ->limit(10)
-        ->get();
-
-        // Estadísticas
-        $stats = [
-            'pending_evaluation' => $pendingEvaluation->count(),
-            'approved_this_month' => WorkOfExtension::whereHas('currentStatus', function ($query) {
-                $query->where('name', 'En VIEX - Aprobado');
-            })
-            ->where('updated_at', '>=', now()->startOfMonth())
-            ->count(),
-            'certified_this_month' => WorkOfExtension::whereHas('currentStatus', function ($query) {
-                $query->where('name', 'Certificado');
-            })
-            ->where('updated_at', '>=', now()->startOfMonth())
-            ->count(),
-        ];
-
-        return view('viex.index', compact(
-            'pendingEvaluation',
-            'approved',
-            'stats'
-        ));
+        return view('viex.index', $data);
     }
 
     /**
@@ -93,7 +64,11 @@ class ViexController extends Controller
      */
     public function show(WorkOfExtension $work)
     {
-        $this->authorize('viewAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexReviewWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para revisar este trabajo.');
+        }
 
         $work->load([
             'responsibleUser',
@@ -132,7 +107,11 @@ class ViexController extends Controller
      */
     public function receive(Request $request, WorkOfExtension $work)
     {
-        $this->authorize('viewAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexReviewWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para recibir este trabajo.');
+        }
 
         $request->validate([
             'comments' => 'nullable|string|max:1000',
@@ -174,7 +153,11 @@ class ViexController extends Controller
      */
     public function showAssignEvaluatorsForm(WorkOfExtension $work)
     {
-        $this->authorize('assignEvaluator', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexAssignEvaluators(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para asignar evaluadores a este trabajo.');
+        }
 
         $work->load(['workEvaluators.evaluator', 'workType', 'organizationalUnit']);
 
@@ -196,7 +179,11 @@ class ViexController extends Controller
      */
     public function assignEvaluator(AssignEvaluatorRequest $request, WorkOfExtension $work)
     {
-        $this->authorize('assignEvaluator', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexAssignEvaluators(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para asignar evaluadores a este trabajo.');
+        }
 
         $validated = $request->validated();
 
@@ -246,7 +233,11 @@ class ViexController extends Controller
      */
     public function startEvaluation(Request $request, WorkOfExtension $work)
     {
-        $this->authorize('assignEvaluator', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexAssignEvaluators(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para iniciar evaluación de este trabajo.');
+        }
 
         $request->validate([
             'comments' => 'nullable|string|max:1000',
@@ -287,7 +278,11 @@ class ViexController extends Controller
      */
     public function reviewEvaluations(WorkOfExtension $work)
     {
-        $this->authorize('approveAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexApproveWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para revisar evaluaciones de este trabajo.');
+        }
 
         $work->load([
             'responsibleUser',
@@ -314,7 +309,11 @@ class ViexController extends Controller
      */
     public function approve(ApproveWorkRequest $request, WorkOfExtension $work)
     {
-        $this->authorize('approveAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexApproveWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para aprobar este trabajo.');
+        }
 
         try {
             DB::beginTransaction();
@@ -360,7 +359,11 @@ class ViexController extends Controller
      */
     public function reject(RejectWorkRequest $request, WorkOfExtension $work)
     {
-        $this->authorize('rejectAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexRejectWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para rechazar este trabajo.');
+        }
 
         try {
             DB::beginTransaction();
@@ -406,7 +409,11 @@ class ViexController extends Controller
      */
     public function approveAndCertify(Request $request, WorkOfExtension $work)
     {
-        $this->authorize('approveAndCertifyAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexApproveAndCertifyWork(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para aprobar y certificar este trabajo.');
+        }
 
         $request->validate([
             'comments' => 'nullable|string|max:1000',
@@ -464,7 +471,11 @@ class ViexController extends Controller
      */
     public function requestChanges(RequestChangesRequest $request, WorkOfExtension $work)
     {
-        $this->authorize('requestChangesAsViex', $work);
+        // Delegar verificación de autorización al servicio
+        $authService = app(WorkAuthorizationService::class);
+        if (!$authService->canViexRequestChanges(Auth::user(), $work)) {
+            abort(403, 'No tiene permisos para solicitar cambios a este trabajo.');
+        }
 
         try {
             DB::beginTransaction();
