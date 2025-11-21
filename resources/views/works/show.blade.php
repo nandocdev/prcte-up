@@ -629,6 +629,23 @@
                         <i class="fas fa-copy"></i>
                         Duplicar Trabajo
                     </a>
+
+                    {{-- Chat con Evaluadores --}}
+                    @if($work->evaluators && $work->evaluators->count() > 0)
+                    <a href="{{ route('works.messages.show', $work) }}" class="btn btn-primary mb-2">
+                        <i class="fas fa-comments"></i>
+                        Chat con Evaluadores
+                        @php
+                        $unreadCount = $work->messages()
+                        ->where('recipient_user_id', auth()->id())
+                        ->where('is_read', false)
+                        ->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                        <span class="badge badge-light ml-1">{{ $unreadCount }}</span>
+                        @endif
+                    </a>
+                    @endif
                 </div>
 
                 {{-- Volver --}}
@@ -826,7 +843,7 @@
         const submitWorkBtn = $('#submitWorkBtn');
 
         if (submitWorkForm.length && submitWorkBtn.length) {
-            const missingFields = @json($work->getMissingFieldsForSubmission());
+            const missingFields = @json($work - > getMissingFieldsForSubmission());
 
             const showSubmitConfirmation = () => {
                 let title = '¿Enviar trabajo para revisión?';

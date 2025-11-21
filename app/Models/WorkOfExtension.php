@@ -139,6 +139,14 @@ class WorkOfExtension extends Model implements HasMedia {
     }
 
     /**
+     * Mensajes del chat interno
+     */
+    public function messages()
+    {
+        return $this->hasMany(WorkMessage::class)->orderBy('created_at');
+    }
+
+    /**
      * Participantes del trabajo
      */
     public function participants() {

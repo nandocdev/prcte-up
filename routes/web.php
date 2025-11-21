@@ -7,8 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ViexAdminController;
 use App\Http\Controllers\ViexController;
 use App\Http\Controllers\EvaluatorController;
-use App\Http\Controllers\WorkOfExtensionController;
-use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\WorkMessageController;
 use App\Http\Controllers\Admin\RoleManagementController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
 use App\Http\Controllers\Admin\SystemReportsController;
@@ -41,6 +40,12 @@ Route::middleware('auth')->group(function () {
 
     // Rutas para gestión de trabajos de extensión
     Route::resource('works', WorkOfExtensionController::class);
+
+    // Rutas para mensajes del chat interno
+    Route::get('works/{work}/messages', [WorkMessageController::class, 'show'])->name('works.messages.show');
+    Route::post('works/{work}/messages', [WorkMessageController::class, 'store'])->name('works.messages.store');
+    Route::get('messages/unread', [WorkMessageController::class, 'unread'])->name('messages.unread');
+    Route::post('messages/{message}/mark-read', [WorkMessageController::class, 'markAsRead'])->name('messages.mark-read');
 
     // Ruta adicional para envío a coordinador (CU04)
     Route::post('works/{work}/submit', [WorkOfExtensionController::class, 'submit'])

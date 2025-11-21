@@ -33,6 +33,8 @@ use App\Listeners\SendWorkApprovedByDeanDirectorNotification;
 use App\Listeners\SendWorkChangesRequestedByDeanDirectorNotification;
 use App\Events\WorkCertifiedByViex;
 use App\Listeners\SendWorkCertifiedByViexNotification;
+use App\Events\WorkMessageSent;
+use App\Listeners\SendWorkMessageNotification;
 /**
  * Proveedor de servicios de eventos
  * Registra los eventos y listeners del sistema
@@ -97,6 +99,11 @@ class EventServiceProvider extends ServiceProvider {
         ],
         WorkCertifiedByViex::class => [
             SendWorkCertifiedByViexNotification::class,
+        ],
+
+        // Mensajes del chat interno
+        WorkMessageSent::class => [
+            SendWorkMessageNotification::class,
         ],
     ];
 
