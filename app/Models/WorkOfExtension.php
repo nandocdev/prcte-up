@@ -648,4 +648,44 @@ class WorkOfExtension extends Model implements HasMedia {
             }
         });
     }
+
+    /**
+     * Obtener comentarios y retroalimentación del trabajo
+     * Filtra solo entradas del historial que tienen comentarios
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getCommentsAndFeedback(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->statusHistory()
+            ->with(['status', 'changedBy'])
+            ->whereNotNull('comments')
+            ->where('comments', '!=', '')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Obtener último comentario de rechazo
+     * Útil para mostrar en alertas
+     *
+     * @return WorkStatusHistory|null
+     */
+    public function getLastRejectionComment(): ?WorkStatusHistory
+    {
+        return $this->statusHistory()
+            ->with(['status', 'changedBy'])
+            ->whereNotNull('comments')
+            ->where('comments', '!=', '')
+            ->whereHas('status', function ($query) {
+                $query->whereIn('name', [
+                    'Rechazado por Coordinador',
+                    'Rechazado por Decano/Director',
+                    'Rechazado por VIEX',
+                    'Devuelto para Corrección'
+                ]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
 }

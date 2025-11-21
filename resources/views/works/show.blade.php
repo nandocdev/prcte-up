@@ -204,48 +204,52 @@
         </div>
         @endif
 
-        {{-- Documentos Adjuntos --}}
-        @if($work->media && $work->media->count() > 0)
-        <div class="card card-warning">
+        {{-- Comentarios y Retroalimentación --}}
+        @php
+        $comments = $work->getCommentsAndFeedback();
+        @endphp
+        @if($comments && $comments->count() > 0)
+        <div class="card card-info">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-paperclip"></i>
-                    Documentos Adjuntos
-                    <span class="badge badge-light ml-2">{{ $work->media->count() }}</span>
+                    <i class="fas fa-comments"></i>
+                    Comentarios y Retroalimentación
+                    <span class="badge badge-light ml-2">{{ $comments->count() }}</span>
                 </h3>
             </div>
             <div class="card-body">
-                <div class="row">
-                    @foreach($work->media as $document)
-                    <div class="col-md-6 mb-3">
-                        <div class="card border">
-                            <div class="card-body p-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="mr-3">
-                                        @php
-                                        $extension = pathinfo($document->file_name, PATHINFO_EXTENSION);
-                                        $iconClass = match (strtolower($extension)) {
-                                        'pdf' => 'fa-file-pdf text-danger',
-                                        'doc', 'docx' => 'fa-file-word text-primary',
-                                        'xls', 'xlsx' => 'fa-file-excel text-success',
-                                        'jpg', 'jpeg', 'png', 'gif' => 'fa-file-image text-warning',
-                                        default => 'fa-file text-secondary'
-                                        };
-                                        @endphp
-                                        <i class="fas {{ $iconClass }} fa-2x"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">{{ $document->name }}</h6>
-                                        <small class="text-muted">
-                                            {{ number_format($document->size / 1024, 2) }} KB •
-                                            {{ $document->created_at->format('d/m/Y H:i') }}
-                                        </small>
-                                    </div>
-                                    <div class="ml-2">
-                                        <a href="{{ $document->getUrl() }}" class="btn btn-sm btn-outline-primary"
-                                            target="_blank" title="Descargar archivo">
-                                            <i class="fas fa-download"></i>
-                                        </a>
+                <div class="timeline timeline-inverse">
+                    @foreach($comments as $comment)
+                    <div class="time-label">
+                        <span class="bg-info">
+                            {{ $comment->created_at->format('d M Y') }}
+                        </span>
+                    </div>
+                    <div>
+                        @php
+                        $commentIcon = match ($comment->status->name ?? '') {
+                        'Rechazado por Coordinador', 'Rechazado por Decano/Director', 'Rechazado por VIEX' => 'fa-times-circle bg-danger',
+                        'Devuelto para Corrección' => 'fa-exclamation-triangle bg-warning',
+                        'Aprobado por Coordinador', 'Aprobado por Decano/Director' => 'fa-check-circle bg-success',
+                        default => 'fa-comment bg-info'
+                        };
+                        @endphp
+                        <i class="fas {{ $commentIcon }}"></i>
+                        <div class="timeline-item">
+                            <span class="time">
+                                <i class="far fa-clock"></i>
+                                {{ $comment->created_at->format('H:i') }}
+                            </span>
+                            <h3 class="timeline-header">
+                                {{ $comment->status->name ?? 'Comentario' }}
+                                @if($comment->changedBy)
+                                <small class="text-muted">por {{ $comment->changedBy->name }}</small>
+                                @endif
+                            </h3>
+                            <div class="timeline-body">
+                                <div class="card border-left-primary">
+                                    <div class="card-body py-2">
+                                        <p class="mb-0">{{ $comment->comments }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -253,14 +257,6 @@
                     </div>
                     @endforeach
                 </div>
-            </div>
-        </div>
-        @else
-        <div class="card card-secondary">
-            <div class="card-body text-center text-muted">
-                <i class="fas fa-inbox fa-3x mb-3"></i>
-                <h5>No hay documentos adjuntos</h5>
-                <p>Este trabajo aún no tiene documentos de soporte adjuntos.</p>
             </div>
         </div>
         @endif
