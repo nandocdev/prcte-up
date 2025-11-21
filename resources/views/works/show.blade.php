@@ -295,8 +295,8 @@
                     @if($work->title && $work->work_type_id)
                     <form action="{{ route('works.submit', $work) }}" method="POST" id="submitWorkForm" class="d-inline">
                         @csrf
-                        @method('PATCH')
-                        <button type="button" class="btn btn-primary btn-block mb-2" id="submitWorkBtn">
+                        <button type="submit" class="btn btn-primary btn-block mb-2" id="submitWorkBtn"
+                            onclick="return confirmSubmitWork()">
                             <i class="fas fa-paper-plane"></i>
                             Enviar para Revisión
                         </button>
@@ -752,47 +752,10 @@
         // Mostrar detalles completos de archivos al hacer hover
         $('[data-toggle="popover"]').popover();
 
-        // SweetAlert para envío de trabajo a revisión
-        $('#submitWorkBtn').on('click', function(e) {
-            e.preventDefault();
-
-            Swal.fire({
-                title: '¿Enviar trabajo a revisión?',
-                html: '<p class="mb-2">Una vez enviado, <strong>no podrá editarlo</strong> hasta que sea revisado.</p>' +
-                    '<p class="text-muted small">El trabajo será enviado al Coordinador de Extensión para su evaluación.</p>',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#007bff',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: '<i class="fas fa-paper-plane"></i> Sí, enviar',
-                cancelButtonText: '<i class="fas fa-times"></i> Cancelar',
-                reverseButtons: true,
-                focusCancel: true,
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-lg',
-                    cancelButton: 'btn btn-secondary btn-lg'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Mostrar loading
-                    Swal.fire({
-                        title: 'Enviando trabajo...',
-                        html: 'Por favor espere mientras se procesa su solicitud.',
-                        icon: 'info',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // Enviar el formulario
-                    $('#submitWorkForm').submit();
-                }
-            });
-        });
+        // Función de confirmación simple para envío de trabajo
+        function confirmSubmitWork() {
+            return confirm('¿Está seguro de enviar este trabajo para revisión?\n\nUna vez enviado, no podrá editarlo hasta que sea revisado.');
+        }
 
         $('.js-resubmit-btn').on('click', function(e) {
             e.preventDefault();

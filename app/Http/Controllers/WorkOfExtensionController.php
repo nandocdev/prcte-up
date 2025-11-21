@@ -356,6 +356,17 @@ class WorkOfExtensionController extends Controller {
      * CU04: Enviar trabajo a coordinador para revisión
      */
     public function submit(Request $request, WorkOfExtension $work): RedirectResponse {
+        // Log para debug del token CSRF
+        Log::info('Submit request received', [
+            'work_id' => $work->getKey(),
+            'user_id' => $request->user()->getKey(),
+            'has_csrf_token' => $request->has('_token'),
+            'csrf_token_length' => strlen($request->input('_token', '')),
+            'session_id' => session()->getId(),
+            'method' => $request->method(),
+            'all_input' => $request->all()
+        ]);
+
         // Verificar autorización
         $this->authorize('update', $work);
 

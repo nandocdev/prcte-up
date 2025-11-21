@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('works', WorkOfExtensionController::class);
 
     // Ruta adicional para envío a coordinador (CU04)
-    Route::patch('works/{work}/submit', [WorkOfExtensionController::class, 'submit'])
+    Route::post('works/{work}/submit', [WorkOfExtensionController::class, 'submit'])
         ->name('works.submit');
 
     // Ruta adicional para reenvío después de corrección (CU05)
