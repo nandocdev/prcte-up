@@ -70,14 +70,14 @@
 
 {{-- Botón de Acción Principal --}}
 @can('create', App\Models\WorkOfExtension::class)
-    <div class="row mb-3">
-        <div class="col-12">
-            <a href="{{ route('works.create') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-plus"></i>
-                Registrar Nuevo Trabajo de Extensión
-            </a>
-        </div>
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{{ route('works.create') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus"></i>
+            Registrar Nuevo Trabajo de Extensión
+        </a>
     </div>
+</div>
 @endcan
 
 {{-- Filtros --}}
@@ -104,6 +104,12 @@
                                 <select name="status" class="form-control"
                                     onchange="document.getElementById('filterForm').submit();">
                                     <option value="">Todos los estados</option>
+                                    @forelse(($statusFilters ?? []) as $filterKey => $filter)
+                                    <option value="{{ $filterKey }}"
+                                        {{ request('status') === $filterKey ? 'selected' : '' }}>
+                                        {{ $filter['label'] }}
+                                    </option>
+                                    @empty
                                     <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Borrador
                                     </option>
                                     <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>
@@ -112,6 +118,7 @@
                                         Revisión</option>
                                     <option value="certified" {{ request('status') == 'certified' ? 'selected' : '' }}>
                                         Certificados</option>
+                                    @endforelse
                                 </select>
                             </div>
                         </div>
@@ -192,146 +199,146 @@
             </div>
             <div class="card-body p-0">
                 @if($works->isEmpty())
-                    <div class="text-center p-4">
-                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                        <h4 class="text-muted">No hay trabajos registrados</h4>
-                        <p class="text-muted">
-                            @can('create', App\Models\WorkOfExtension::class)
-                                ¡Comienza registrando tu primer trabajo de extensión!
-                            @else
-                                No se encontraron trabajos con los filtros aplicados.
-                            @endcan
-                        </p>
+                <div class="text-center p-4">
+                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No hay trabajos registrados</h4>
+                    <p class="text-muted">
                         @can('create', App\Models\WorkOfExtension::class)
-                            <a href="{{ route('works.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Registrar Primer Trabajo
-                            </a>
+                        ¡Comienza registrando tu primer trabajo de extensión!
+                        @else
+                        No se encontraron trabajos con los filtros aplicados.
                         @endcan
-                    </div>
+                    </p>
+                    @can('create', App\Models\WorkOfExtension::class)
+                    <a href="{{ route('works.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Registrar Primer Trabajo
+                    </a>
+                    @endcan
+                </div>
                 @else
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Título</th>
-                                    <th>Tipo</th>
-                                    <th>Estado</th>
-                                    <th>Período</th>
-                                    <th>Fecha Creación</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($works as $work)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div>
-                                                    <strong>{{ Str::limit($work->title, 50) }}</strong>
-                                                    @if($work->description)
-                                                        <br>
-                                                        <small class="text-muted">
-                                                            {{ Str::limit($work->description, 80) }}
-                                                        </small>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-secondary">
-                                                {{ $work->workType->name ?? 'No definido' }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $statusColors = [
-                                                    'Borrador' => 'warning',
-                                                    'Enviado a Coordinador' => 'info',
-                                                    'En Revisión Coordinador' => 'primary',
-                                                    'En Revisión Decano/Director' => 'primary',
-                                                    'En Evaluación VIEX' => 'primary',
-                                                    'Certificado' => 'success',
-                                                    'Rechazado por Coordinador' => 'danger',
-                                                    'Rechazado por Decano/Director' => 'danger',
-                                                    'Rechazado por VIEX' => 'danger',
-                                                    'Devuelto para Corrección' => 'warning'
-                                                ];
-                                                $statusName = $work->currentStatus->name ?? 'Sin estado';
-                                                $statusColor = $statusColors[$statusName] ?? 'secondary';
-                                            @endphp
-                                            <span class="badge badge-{{ $statusColor }}">
-                                                {{ $statusName }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small>{{ $work->academic_period ?? '-' }}</small>
-                                        </td>
-                                        <td>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Período</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($works as $work)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <strong>{{ Str::limit($work->title, 50) }}</strong>
+                                            @if($work->description)
+                                            <br>
                                             <small class="text-muted">
-                                                {{ $work->created_at->format('d/m/Y H:i') }}
+                                                {{ Str::limit($work->description, 80) }}
                                             </small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                @can('view', $work)
-                                                    <a href="{{ route('works.show', $work) }}" class="btn btn-sm btn-info"
-                                                        title="Ver detalles">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @endcan
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-secondary">
+                                        {{ $work->workType->name ?? 'No definido' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @php
+                                    $statusColors = [
+                                    'Borrador' => 'warning',
+                                    'Enviado a Coordinador' => 'info',
+                                    'En Revisión Coordinador' => 'primary',
+                                    'En Revisión Decano/Director' => 'primary',
+                                    'En Evaluación VIEX' => 'primary',
+                                    'Certificado' => 'success',
+                                    'Rechazado por Coordinador' => 'danger',
+                                    'Rechazado por Decano/Director' => 'danger',
+                                    'Rechazado por VIEX' => 'danger',
+                                    'Devuelto para Corrección' => 'warning'
+                                    ];
+                                    $statusName = $work->currentStatus->name ?? 'Sin estado';
+                                    $statusColor = $statusColors[$statusName] ?? 'secondary';
+                                    @endphp
+                                    <span class="badge badge-{{ $statusColor }}">
+                                        {{ $statusName }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>{{ $work->academic_period ?? '-' }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ $work->created_at->format('d/m/Y H:i') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @can('view', $work)
+                                        <a href="{{ route('works.show', $work) }}" class="btn btn-sm btn-info"
+                                            title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @endcan
 
-                                                @can('update', $work)
-                                                    @if($work->is_draft === '1')
-                                                        <a href="{{ route('works.edit', $work) }}" class="btn btn-sm btn-warning"
-                                                            title="Editar">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                    @endif
-                                                @endcan
+                                        @can('update', $work)
+                                        @if($work->is_draft === '1')
+                                        <a href="{{ route('works.edit', $work) }}" class="btn btn-sm btn-warning"
+                                            title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @endif
+                                        @endcan
 
-                                                @can('delete', $work)
-                                                    @if($work->is_draft === '1')
-                                                        <form action="{{ route('works.destroy', $work) }}" method="POST"                                            class="d-inline"
-                                                            onsubmit="return confirm('¿Estás seguro de eliminar este trabajo?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                @endcan
+                                        @can('delete', $work)
+                                        @if($work->is_draft === '1')
+                                        <form action="{{ route('works.destroy', $work) }}" method="POST" class="d-inline"
+                                            onsubmit="return confirm('¿Estás seguro de eliminar este trabajo?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        @endcan
 
-                                                {{-- Botón de envío para trabajos en borrador --}}
-                                                @can('update', $work)
-                                                    @if($work->is_draft === '1')
-                                                        <form action="{{ route('works.submit', $work) }}" method="POST" class="d-inline"
-                                                            onsubmit="return confirm('¿Enviar este trabajo a revisión?')">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <button type="submit" class="btn btn-sm btn-success"
-                                                                title="Enviar a revisión">
-                                                                <i class="fas fa-paper-plane"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                @endcan
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                        {{-- Botón de envío para trabajos en borrador --}}
+                                        @can('update', $work)
+                                        @if($work->is_draft === '1')
+                                        <form action="{{ route('works.submit', $work) }}" method="POST" class="d-inline"
+                                            onsubmit="return confirm('¿Enviar este trabajo a revisión?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                title="Enviar a revisión">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
                 @endif
             </div>
 
             {{-- Paginación --}}
             @if(method_exists($works, 'links') && $works->hasPages())
-                <div class="card-footer">
-                    {{ $works->appends(request()->query())->links() }}
-                </div>
+            <div class="card-footer">
+                {{ $works->appends(request()->query())->links() }}
+            </div>
             @endif
         </div>
     </div>
@@ -343,15 +350,19 @@
     .small-box .icon {
         transition: transform 0.3s ease-in-out;
     }
+
     .small-box:hover .icon {
         transform: scale(1.1);
     }
+
     .table td {
         vertical-align: middle;
     }
+
     .btn-group .btn {
         margin-right: 2px;
     }
+
     .btn-group .btn:last-child {
         margin-right: 0;
     }
@@ -369,6 +380,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .btn-group .btn {
             margin-bottom: 2px;
             margin-right: 0;
@@ -379,17 +391,17 @@
 
 @section('js')
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         // Inicializar tooltips
         $('[title]').tooltip();
 
         // Confirmación para eliminación
-        $('form[onsubmit*="eliminar"]').off('submit').on('submit', function (e) {
+        $('form[onsubmit*="eliminar"]').off('submit').on('submit', function(e) {
             return confirm('¿Estás seguro de eliminar este trabajo?');
         });
 
         // Confirmación para envío
-        $('form[onsubmit*="revisión"]').off('submit').on('submit', function (e) {
+        $('form[onsubmit*="revisión"]').off('submit').on('submit', function(e) {
             return confirm('¿Enviar este trabajo a revisión?');
         });
     });

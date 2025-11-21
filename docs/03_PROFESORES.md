@@ -41,7 +41,15 @@ public function index(Request $request): View {
 Los filtros se aplican automáticamente al cambiar las opciones en el formulario:
 
 **Filtros disponibles:**
-- **Estado**: draft, submitted, in_review, certified, rejected
+- **Estado** (alineado al flujo oficial):
+    - `Borrador`
+    - `Enviado al Coordinador`
+    - `En Revisión del Coordinador`
+    - `Devuelto para Corrección`
+    - `En VIEX`
+    - `Aprobado por VIEX`
+    - `Certificado`
+    - `Rechazado`
 - **Tipo de Trabajo**: IDs de tipos de trabajo activos
 - **Período Académico**: Valores como "2024-I", "2024-II"
 - **Búsqueda**: Texto libre en título y descripción
