@@ -177,6 +177,60 @@
                             </div>
                         </div>
 
+                        <!-- Datos de ubicación académica -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="campus_name">
+                                        <strong>{{ __('Sede / Campus') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('campus_name') is-invalid @enderror"
+                                        id="campus_name" name="campus_name" value="{{ old('campus_name') }}" required>
+                                    @error('campus_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="faculty_name">
+                                        <strong>{{ __('Facultad') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('faculty_name') is-invalid @enderror"
+                                        id="faculty_name" name="faculty_name" value="{{ old('faculty_name') }}" required>
+                                    @error('faculty_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="department_name">
+                                        <strong>{{ __('Departamento') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('department_name') is-invalid @enderror"
+                                        id="department_name" name="department_name" value="{{ old('department_name') }}" required>
+                                    @error('department_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="school_name">
+                                        <strong>{{ __('Escuela / Programa') }}</strong>
+                                    </label>
+                                    <input type="text" class="form-control @error('school_name') is-invalid @enderror"
+                                        id="school_name" name="school_name" value="{{ old('school_name') }}">
+                                    @error('school_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Título del Trabajo -->
                         <div class="form-group">
                             <label for="title">
@@ -267,7 +321,35 @@
 
                         <!-- Responsable Principal -->
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="responsible_office_phone">
+                                        <strong>{{ __('Teléfono de Oficina') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('responsible_office_phone') is-invalid @enderror"
+                                        id="responsible_office_phone" name="responsible_office_phone"
+                                        value="{{ old('responsible_office_phone') }}" required>
+                                    @error('responsible_office_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="responsible_personal_phone">
+                                        <strong>{{ __('Teléfono Particular') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('responsible_personal_phone') is-invalid @enderror"
+                                        id="responsible_personal_phone" name="responsible_personal_phone"
+                                        value="{{ old('responsible_personal_phone') }}" required>
+                                    @error('responsible_personal_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="responsible_name">
                                         <strong>{{ __('Responsable Principal') }}</strong> <span class="text-danger">*</span>
@@ -279,7 +361,22 @@
                                     </small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="responsible_email">
+                                        <strong>{{ __('Correo de Contacto') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="email" class="form-control @error('responsible_email') is-invalid @enderror"
+                                        id="responsible_email" name="responsible_email"
+                                        value="{{ old('responsible_email', $user->email ?? '') }}" required>
+                                    @error('responsible_email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="responsible_phone">
                                         <strong>{{ __('Teléfono de Contacto') }}</strong>
@@ -289,6 +386,25 @@
                                         value="{{ old('responsible_phone') }}"
                                         placeholder="{{ __('Ej: +507 6888-8888') }}">
                                     @error('responsible_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sdg_goal_id">
+                                        <strong>{{ __('Objetivo de Desarrollo Sostenible (ODS)') }}</strong> <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-control select2 @error('sdg_goal_id') is-invalid @enderror" id="sdg_goal_id"
+                                        name="sdg_goal_id" required>
+                                        <option value="">{{ __('Seleccione el ODS que atiende el trabajo...') }}</option>
+                                        @foreach($sdgGoals as $goal)
+                                        <option value="{{ $goal->id }}" {{ old('sdg_goal_id') == $goal->id ? 'selected' : '' }}>
+                                            {{ $goal->code }} - {{ $goal->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @error('sdg_goal_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -311,10 +427,27 @@
                     </div>
                 </div>
 
-                @include('works.partials.project-section')
-                @include('works.partials.activity-section')
-                @include('works.partials.publication-section')
-                @include('works.partials.assistance-section')
+                @include('works.partials.project-section', [
+                'projectDetail' => null,
+                'workTypesConfig' => $workTypesConfig,
+                'institutionalProjectTypes' => $institutionalProjectTypes,
+                ])
+                @include('works.partials.activity-section', [
+                'activityDetail' => null,
+                'workTypesConfig' => $workTypesConfig,
+                ])
+                @include('works.partials.publication-section', [
+                'publicationDetail' => null,
+                'workTypesConfig' => $workTypesConfig,
+                ])
+                @include('works.partials.assistance-section', [
+                'technicalDetail' => null,
+                'workTypesConfig' => $workTypesConfig,
+                ])
+
+                @include('works.partials.participants-section', [
+                'participants' => collect(),
+                ])
 
                 <!-- Sección 3: Carga de Archivos -->
                 @include('works.partials.file-upload-section')

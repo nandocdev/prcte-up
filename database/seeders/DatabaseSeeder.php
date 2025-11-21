@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder {
             WorkTypesSeeder::class,             // work_type (sin FK) - Usa Eloquent, más moderno
             WorkStatusSeeder::class,            // work_statuses (sin FK)
             InstitutionalProjectTypeSeeder::class, // institutional_project_types (sin FK)
+            SdgGoalSeeder::class,
         ]);
 
         // 2. Seeders de estructura organizacional (auto-referencia)

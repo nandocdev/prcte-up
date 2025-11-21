@@ -13,6 +13,7 @@ use App\Models\WorkStatus;
 use App\Models\WorkStatusHistory;
 use App\Models\User;
 use App\Models\OrganizationalUnit;
+use App\Models\SdgGoal;
 
 /**
  * Modelo principal para los trabajos de extensión
@@ -61,6 +62,10 @@ class WorkOfExtension extends Model implements HasMedia {
         'work_type_id',
         'primary_responsible_user_id',
         'organizational_unit_id',
+        'campus_name',
+        'faculty_name',
+        'department_name',
+        'school_name',
         'current_status_id',
         'start_date',
         'end_date',
@@ -70,6 +75,10 @@ class WorkOfExtension extends Model implements HasMedia {
         'description',
         'academic_period',
         'responsible_phone',
+        'responsible_office_phone',
+        'responsible_personal_phone',
+        'responsible_email',
+        'sdg_goal_id',
     ];
 
     protected $casts = [
@@ -108,6 +117,11 @@ class WorkOfExtension extends Model implements HasMedia {
      */
     public function organizationalUnit() {
         return $this->belongsTo(OrganizationalUnit::class);
+    }
+
+    public function sdgGoal()
+    {
+        return $this->belongsTo(SdgGoal::class, 'sdg_goal_id');
     }
 
     /**

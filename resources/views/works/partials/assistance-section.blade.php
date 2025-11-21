@@ -3,6 +3,9 @@
 $technicalDetail = $technicalDetail ?? null;
 $workTypesConfig = $workTypesConfig ?? [];
 $workModalities = $workTypesConfig['work_modalities'] ?? ($workTypesConfig['modalities'] ?? []);
+$assistanceDetails = is_array(optional($technicalDetail)->details_json)
+? $technicalDetail->details_json
+: [];
 @endphp
 
 <div class="card card-secondary work-section" id="section-asistencia" style="display: none;">
@@ -65,6 +68,42 @@ $workModalities = $workTypesConfig['work_modalities'] ?? ($workTypesConfig['moda
             @enderror
         </div>
 
+        <div class="form-group">
+            <label for="assistance_description">
+                <strong>{{ __('Descripción de la Asistencia Técnica') }}</strong> <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control @error('assistance_description') is-invalid @enderror"
+                id="assistance_description" name="assistance_description" rows="3" data-required="true"
+                placeholder="{{ __('Explique el alcance y actividades principales de la asistencia...') }}">{{ old('assistance_description', data_get($assistanceDetails, 'description')) }}</textarea>
+            @error('assistance_description')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="form-group">
+            <label for="assistance_objectives">
+                <strong>{{ __('Objetivos de la Asistencia') }}</strong> <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control @error('assistance_objectives') is-invalid @enderror"
+                id="assistance_objectives" name="assistance_objectives" rows="3" data-required="true"
+                placeholder="{{ __('Detalle objetivos generales y específicos...') }}">{{ old('assistance_objectives', data_get($assistanceDetails, 'objectives')) }}</textarea>
+            @error('assistance_objectives')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="form-group">
+            <label for="assistance_methodology">
+                <strong>{{ __('Metodología de Trabajo') }}</strong> <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control @error('assistance_methodology') is-invalid @enderror"
+                id="assistance_methodology" name="assistance_methodology" rows="3" data-required="true"
+                placeholder="{{ __('Explique las técnicas, herramientas o enfoques utilizados...') }}">{{ old('assistance_methodology', data_get($assistanceDetails, 'methodology')) }}</textarea>
+            @error('assistance_methodology')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
         <!-- Productos Esperados -->
         <div class="form-group">
             <label for="asistencia_productos_esperados">
@@ -72,8 +111,20 @@ $workModalities = $workTypesConfig['work_modalities'] ?? ($workTypesConfig['moda
             </label>
             <textarea class="form-control @error('expected_products') is-invalid @enderror"
                 id="expected_products" name="expected_products" rows="3"
-                placeholder="{{ __('Describa los productos o resultados esperados de la asistencia técnica...') }}">{{ old('expected_products', optional($technicalDetail)->expected_products) }}</textarea>
+                placeholder="{{ __('Describa los productos o resultados esperados de la asistencia técnica...') }}">{{ old('expected_products', optional($technicalDetail)->expected_products ?? data_get($assistanceDetails, 'expected_products')) }}</textarea>
             @error('expected_products')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="form-group">
+            <label for="assistance_evidence">
+                <strong>{{ __('Evidencias / Documentos de Respaldo') }}</strong> <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control @error('assistance_evidence') is-invalid @enderror"
+                id="assistance_evidence" name="assistance_evidence" rows="3" data-required="true"
+                placeholder="{{ __('Indique actas, informes, certificaciones u otras evidencias...') }}">{{ old('assistance_evidence', data_get($assistanceDetails, 'evidence')) }}</textarea>
+            @error('assistance_evidence')
             <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>

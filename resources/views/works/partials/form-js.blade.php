@@ -134,6 +134,60 @@
         const progressBar = $('#form-progress');
         const requiredFieldsList = $('#required-fields');
         const contextualHelp = $('#contextual-help');
+        const participantsContainer = $('#participants-container');
+        const addParticipantBtn = $('#add-participant-btn');
+        const participantTemplate = $('#participant-row-template');
+        const participantsEmptyState = $('#participants-empty-state');
+
+        function refreshParticipantsState() {
+            if (!participantsContainer.length) {
+                return;
+            }
+
+            const totalParticipants = participantsContainer.find('.participant-row').length;
+
+            if (participantsEmptyState.length) {
+                participantsEmptyState.toggleClass('d-none', totalParticipants > 0);
+            }
+
+            if (totalParticipants === 0) {
+                participantsContainer.data('next-index', 0);
+            }
+        }
+
+        function appendParticipantRow() {
+            if (!participantTemplate.length || !participantsContainer.length) {
+                return;
+            }
+
+            const currentIndex = Number(participantsContainer.data('next-index')) || 0;
+            const template = participantTemplate.html().replace(/__INDEX__/g, currentIndex);
+            participantsContainer.append(template);
+            participantsContainer.data('next-index', currentIndex + 1);
+            refreshParticipantsState();
+        }
+
+        if (addParticipantBtn.length) {
+            addParticipantBtn.on('click', function(e) {
+                e.preventDefault();
+                appendParticipantRow();
+            });
+        }
+
+        $(document).on('click', '.remove-participant', function() {
+            $(this).closest('.participant-row').remove();
+            refreshParticipantsState();
+        });
+
+        $(document).on('change', '.participant-primary-toggle', function() {
+            if (!this.checked) {
+                return;
+            }
+
+            $('.participant-primary-toggle').not(this).prop('checked', false);
+        });
+
+        refreshParticipantsState();
 
         // Configuración de secciones específicas
         const sectionConfig = {

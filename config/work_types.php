@@ -69,6 +69,13 @@ return [
         4 => 'asistencia',  // Asistencia Técnica
     ],
 
+    'project_categories' => [
+        'general' => 'Proyecto de Extensión',
+        'institucional' => 'Proyecto Institucional',
+        'unidad_academica' => 'Proyecto de Unidad Académica',
+        'servicio_social' => 'Proyecto de Servicio Social',
+    ],
+
     // Configuración de Correos Institucionales
     'viex_projects_email' => env('VIEX_PROJECTS_EMAIL', 'viexproyectos@up.ac.pa'),
 ];

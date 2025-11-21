@@ -14,6 +14,17 @@ class WorkParticipant extends Model {
         'user_id',
         'external_participant_name',
         'role',
+        'name',
+        'email',
+        'phone',
+        'institution',
+        'is_internal',
+        'is_primary',
+    ];
+
+    protected $casts = [
+        'is_internal' => 'boolean',
+        'is_primary' => 'boolean',
     ];
 
     // Relaciones
@@ -38,7 +49,15 @@ class WorkParticipant extends Model {
      * Obtener el nombre del participante (interno o externo)
      */
     public function getParticipantNameAttribute() {
-        return $this->user ? $this->user->name : $this->getAttribute('external_participant_name');
+        if ($this->user) {
+            return $this->user->name;
+        }
+
+        if (!empty($this->getAttribute('name'))) {
+            return $this->getAttribute('name');
+        }
+
+        return $this->getAttribute('external_participant_name');
     }
 
     // Scopes

@@ -6,6 +6,8 @@ use App\Models\WorkOfExtension;
 use App\Models\WorkType;
 use App\Models\OrganizationalUnit;
 use App\Models\Certification;
+use App\Models\SdgGoal;
+use App\Models\InstitutionalProjectType;
 use App\Http\Requests\RegisterWorkRequest;
 use App\Http\Requests\StoreCompleteWorkRequest;
 use App\Services\WorkOfExtension\CreateWorkService;
@@ -74,6 +76,8 @@ class WorkOfExtensionController extends Controller {
         $workTypes = WorkType::getActiveTypes();
         // Log::info('Tipos de trabajo obtenidos', ['works_types' => $workTypes->pluck('id', 'name')]);
         $organizationalUnits = OrganizationalUnit::getUnitsForSelection();
+        $sdgGoals = SdgGoal::orderBy('code')->get();
+        $institutionalProjectTypes = InstitutionalProjectType::orderBy('name')->get();
 
         // Obtener configuración para dropdowns
         $workTypesConfig = config('work_types');
@@ -82,7 +86,9 @@ class WorkOfExtensionController extends Controller {
             'workTypes' => $workTypes,
             'organizationalUnits' => $organizationalUnits,
             'workTypesConfig' => $workTypesConfig,
-            'user' => Auth::user()
+            'user' => Auth::user(),
+            'sdgGoals' => $sdgGoals,
+            'institutionalProjectTypes' => $institutionalProjectTypes,
         ]);
     }
 
@@ -194,6 +200,8 @@ class WorkOfExtensionController extends Controller {
         // Delegar obtención de datos maestros al modelo (igual que create)
         $workTypes = WorkType::getActiveTypes();
         $organizationalUnits = OrganizationalUnit::getUnitsForSelection();
+        $sdgGoals = SdgGoal::orderBy('code')->get();
+        $institutionalProjectTypes = InstitutionalProjectType::orderBy('name')->get();
 
         // Cargar datos específicos del tipo de trabajo
         $work->load(['projectDetail', 'activityDetail', 'publicationDetail', 'technicalAssistanceDetail']);
@@ -203,7 +211,9 @@ class WorkOfExtensionController extends Controller {
             'workTypes' => $workTypes,
             'organizationalUnits' => $organizationalUnits,
             'periods' => config('work_types.academic_periods'),
-            'config' => config('work_types')
+            'config' => config('work_types'),
+            'sdgGoals' => $sdgGoals,
+            'institutionalProjectTypes' => $institutionalProjectTypes,
         ]);
     }
 

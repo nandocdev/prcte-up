@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\WorkType;
 use App\Models\OrganizationalUnit;
 use App\Models\WorkStatus;
+use App\Models\SdgGoal;
 
 class WorkOfExtensionSeeder extends Seeder {
     /**
@@ -97,6 +98,8 @@ class WorkOfExtensionSeeder extends Seeder {
             ],
         ];
 
+        $sdgGoals = SdgGoal::all();
+
         foreach ($sampleWorks as $index => $workData) {
             // Seleccionar profesor responsable
             $professor = $professors->random();
@@ -123,6 +126,10 @@ class WorkOfExtensionSeeder extends Seeder {
                 'work_type_id' => $workType->getKey(),
                 'primary_responsible_user_id' => $professor->getKey(),
                 'organizational_unit_id' => $orgUnit->getKey(),
+                'campus_name' => $workData['campus'] ?? 'Campus Central',
+                'faculty_name' => $orgUnit->getAttribute('name'),
+                'department_name' => $workData['department'] ?? 'Departamento Académico',
+                'school_name' => $workData['school'] ?? 'Escuela de Extensión',
                 'current_status_id' => $status->getKey(),
                 'description' => $workData['description'],
                 'start_date' => $workData['start_date'],
@@ -131,6 +138,11 @@ class WorkOfExtensionSeeder extends Seeder {
                 'publication_consent' => $workData['publication_consent'],
                 'is_draft' => $isDraft,
                 'submitted_at' => $submittedAt,
+                'responsible_phone' => $workData['office_phone'] ?? '+507 200-0000',
+                'responsible_office_phone' => $workData['office_phone'] ?? '+507 200-0000',
+                'responsible_personal_phone' => $workData['personal_phone'] ?? '+507 6000-0000',
+                'responsible_email' => $professor->email,
+                'sdg_goal_id' => $sdgGoals->random()->getKey(),
             ]);
 
             $this->command->info("✅ Trabajo creado: {$workData['title']}");
