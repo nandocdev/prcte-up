@@ -11,8 +11,8 @@ use App\Http\Requests\StoreCompleteWorkRequest;
 use App\Services\WorkOfExtension\CreateWorkService;
 use App\Services\WorkOfExtension\UpdateWorkService;
 use App\Services\WorkOfExtension\SubmitWorkService;
-use App\Services\Listing\WorkListingService;
-use App\Services\Publication\PublicationService;
+use App\Services\Dashboard\WorkListingService;
+use App\Services\WorkOfExtension\PublicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -32,6 +32,17 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
  */
 class WorkOfExtensionController extends Controller {
     use AuthorizesRequests;
+
+    protected WorkListingService $workListingService;
+    protected PublicationService $publicationService;
+
+    public function __construct(
+        WorkListingService $workListingService,
+        PublicationService $publicationService
+    ) {
+        $this->workListingService = $workListingService;
+        $this->publicationService = $publicationService;
+    }
     /**
      * Display a listing of the resource.
      * Muestra dashboard con trabajos del usuario según su rol
@@ -44,8 +55,7 @@ class WorkOfExtensionController extends Controller {
         ]);
 
         // Delegar lógica de listado al servicio
-        $listingService = new WorkListingService();
-        $data = $listingService->getWorksListing($request->user(), $request->all());
+        $data = $this->workListingService->getWorksListing($request, $request->user());
 
         return view('works.index', $data);
     }
@@ -417,8 +427,7 @@ class WorkOfExtensionController extends Controller {
             $isAuthorized = $request->boolean('authorized', true);
 
             // Delegar lógica de negocio al servicio
-            $publicationService = new PublicationService();
-            $publicationService->authorizePublication($work, $request->user(), $isAuthorized);
+            $this->publicationService->authorizePublication($work, $request->user(), $isAuthorized);
 
             $message = $isAuthorized
                 ? __('¡Autorización registrada exitosamente! VIEX ha sido notificado de su consentimiento para publicar este trabajo.')
