@@ -193,7 +193,7 @@
 </div>
 
 {{-- Lista de Trabajos --}}
-<div class="row">
+<!-- <div class="row"> -->
     <div class="col-12">
         <div class="card">
             <div class="card-header">
@@ -357,7 +357,7 @@
             @endif
         </div>
     </div>
-</div>
+<!-- </div> -->
 @stop
 
 @section('css')
