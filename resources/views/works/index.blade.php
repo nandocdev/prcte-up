@@ -68,6 +68,43 @@
     </div>
 </div>
 
+{{-- Reportes Personales --}}
+@if($statistics['certified'] ?? 0 > 0)
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card card-outline card-success">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    Reportes de Trabajos Certificados
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">
+                    <i class="fas fa-info-circle text-info"></i>
+                    Descarga un reporte consolidado de todos tus trabajos certificados en formato PDF o Excel.
+                </p>
+                <div class="btn-group">
+                    <a href="{{ route('works.reports.personal.pdf') }}" class="btn btn-danger" target="_blank">
+                        <i class="fas fa-file-pdf"></i>
+                        Descargar PDF
+                    </a>
+                    <a href="{{ route('works.reports.personal.excel') }}" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i>
+                        Descargar Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Botón de Acción Principal --}}
 @can('create', App\Models\WorkOfExtension::class)
 <div class="row mb-3">

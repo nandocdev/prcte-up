@@ -14,13 +14,8 @@ use App\Services\WorkOfExtension\CreateWorkService;
 use App\Services\WorkOfExtension\UpdateWorkService;
 use App\Services\WorkOfExtension\SubmitWorkService;
 use App\Services\Dashboard\WorkListingService;
-use App\Services\WorkOfExtension\PublicationService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\PersonalReports\PersonalWorksReportService;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Controlador principal para gestión de trabajos de extensión
@@ -37,13 +32,16 @@ class WorkOfExtensionController extends Controller {
 
     protected WorkListingService $workListingService;
     protected PublicationService $publicationService;
+    protected PersonalWorksReportService $personalReportService;
 
     public function __construct(
         WorkListingService $workListingService,
-        PublicationService $publicationService
+        PublicationService $publicationService,
+        PersonalWorksReportService $personalReportService
     ) {
         $this->workListingService = $workListingService;
         $this->publicationService = $publicationService;
+        $this->personalReportService = $personalReportService;
     }
     /**
      * Display a listing of the resource.
@@ -470,36 +468,42 @@ class WorkOfExtensionController extends Controller {
     }
 
     /**
-     * Descargar certificado del trabajo
+     * Generar reporte PDF de trabajos certificados del profesor
+     * UC-DOC-015: Generar reporte personal de trabajos aprobados
      */
-    public function downloadCertificate(Certification $certification) {
-        $work = $certification->work;
-
-        if (!$work) {
-            abort(404, 'Trabajo no encontrado');
-        }
-
-        // Verificar autorización usando las policies
-        $this->authorize('view', $work);
+    public function generatePersonalReportPdf(Request $request): \Barryvdh\DomPDF\PDF
+    {
+        $user = $request->user();
 
         try {
-            return $certification->buildDownloadResponse();
-        } catch (\RuntimeException $exception) {
-            Log::warning('Archivo de certificación no disponible para descarga pública.', [
-                'certification_id' => $certification->getKey(),
-                'work_id' => $work->getKey(),
-                'error' => $exception->getMessage(),
+            return $this->personalReportService->generatePdfReport($user);
+        } catch (\Exception $e) {
+            Log::error('Error generando reporte PDF personal', [
+                'user_id' => $user->getKey(),
+                'error' => $e->getMessage()
             ]);
 
-            return redirect()->back()->with('error', __('certifications.download_missing_file'));
-        } catch (\Throwable $exception) {
-            Log::error('Error inesperado al descargar certificado.', [
-                'certification_id' => $certification->getKey(),
-                'work_id' => $work->getKey(),
-                'error' => $exception->getMessage(),
+            abort(500, 'Error al generar el reporte PDF');
+        }
+    }
+
+    /**
+     * Generar reporte Excel de trabajos certificados del profesor
+     * UC-DOC-015: Generar reporte personal de trabajos aprobados
+     */
+    public function generatePersonalReportExcel(Request $request): StreamedResponse
+    {
+        $user = $request->user();
+
+        try {
+            return $this->personalReportService->generateExcelReport($user);
+        } catch (\Exception $e) {
+            Log::error('Error generando reporte Excel personal', [
+                'user_id' => $user->getKey(),
+                'error' => $e->getMessage()
             ]);
 
-            return redirect()->back()->with('error', __('certifications.download_error'));
+            abort(500, 'Error al generar el reporte Excel');
         }
     }
 }
