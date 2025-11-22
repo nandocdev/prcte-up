@@ -843,7 +843,10 @@
         const submitWorkBtn = $('#submitWorkBtn');
 
         if (submitWorkForm.length && submitWorkBtn.length) {
-            const missingFields = @json($work - > getMissingFieldsForSubmission());
+            /**
+             * @format-ignore
+             */
+            const missingFields = @json($work->getMissingFieldsForSubmission());
 
             const showSubmitConfirmation = () => {
                 let title = '¿Enviar trabajo para revisión?';
