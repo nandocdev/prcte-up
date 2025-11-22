@@ -343,10 +343,32 @@ class WorkOfExtension extends Model implements HasMedia {
     // Métodos de estado y validación
 
     /**
-     * Verificar si el trabajo está en borrador
+     * Verificar si el trabajo está en estado borrador
      */
-    public function isInDraft(): bool {
-        return $this->is_draft === '1' || $this->is_draft === 1 || $this->is_draft === true;
+    public function isInDraft(): bool
+    {
+        return $this->getAttribute('is_draft') === true;
+    }
+
+    /**
+     * Verificar si el trabajo puede ser editado para subsanar observaciones
+     * Permite edición en borrador o en estados de devolución
+     */
+    public function canBeEditedForCorrection(): bool
+    {
+        if ($this->isInDraft()) {
+            return true;
+        }
+
+        $currentStatus = $this->currentStatus?->name ?? '';
+        $editableStates = [
+            'Rechazado por Coordinador',
+            'Rechazado por Decano/Director',
+            'Rechazado por VIEX',
+            'Devuelto para Corrección'
+        ];
+
+        return in_array($currentStatus, $editableStates);
     }
 
     /**

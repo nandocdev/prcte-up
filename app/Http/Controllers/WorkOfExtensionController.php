@@ -188,11 +188,11 @@ class WorkOfExtensionController extends Controller {
         // Verificar autorización
         $this->authorize('update', $work);
 
-        // Solo permitir edición si está en borrador
-        if (!$work->isInDraft()) {
+        // Solo permitir edición si está en borrador o en estados de corrección
+        if (!$work->canBeEditedForCorrection()) {
             return redirect()
                 ->route('works.show', $work)
-                ->with('warning', __('Solo se pueden editar trabajos en estado borrador.'));
+                ->with('warning', __('Solo se pueden editar trabajos en estado borrador o devueltos para corrección.'));
         }
 
         // Log para debug
@@ -229,11 +229,11 @@ class WorkOfExtensionController extends Controller {
         // Verificar autorización
         $this->authorize('update', $work);
 
-        // Validar que esté en borrador
-        if (!$work->isInDraft()) {
+        // Validar que esté en estado editable
+        if (!$work->canBeEditedForCorrection()) {
             return redirect()
                 ->route('works.show', $work)
-                ->with('error', __('Solo se pueden actualizar trabajos en estado borrador.'));
+                ->with('error', __('Solo se pueden actualizar trabajos en estado borrador o devueltos para corrección.'));
         }
 
         // Log para debug detallado
