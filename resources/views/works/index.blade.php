@@ -162,15 +162,30 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> Buscar
-                            </button>
-                            <a href="{{ route('works.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Limpiar
-                            </a>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha Desde</label>
+                                <input type="date" name="date_from" class="form-control"
+                                    value="{{ request('date_from') }}">
+                            </div>
                         </div>
-                    </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha Hasta</label>
+                                <input type="date" name="date_to" class="form-control"
+                                    value="{{ request('date_to') }}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                                <a href="{{ route('works.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Limpiar
+                                </a>
+                            </div>
+                        </div>
                 </form>
             </div>
         </div>

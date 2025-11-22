@@ -167,9 +167,9 @@ class WorkListingService
             $query->where('academic_period', $request->input('academic_period'));
         }
 
-        // Búsqueda por texto
-        if ($request->filled('search')) {
-            $query = $this->applySearchFilter($query, $request->input('search'));
+        // Filtro por fecha de creación
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $query = $this->applyDateFilter($query, $request->input('date_from'), $request->input('date_to'));
         }
 
         return $query;
@@ -208,10 +208,23 @@ class WorkListingService
      */
     private function applySearchFilter(\Illuminate\Database\Eloquent\Builder $query, string $search): \Illuminate\Database\Eloquent\Builder
     {
-        return $query->where(function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
-        });
+        return $query->where('title', 'like', "%{$search}%");
+    }
+
+    /**
+     * Aplicar filtro de fecha
+     */
+    private function applyDateFilter(\Illuminate\Database\Eloquent\Builder $query, ?string $dateFrom, ?string $dateTo): \Illuminate\Database\Eloquent\Builder
+    {
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+        return $query;
     }
 
     /**

@@ -141,21 +141,57 @@ class WorkListingServiceTest extends TestCase
         $match = $this->createWorkFor($user, 'Enviado a Coordinador', [
             'is_draft' => false,
             'title' => 'Programa de alfabetización comunitaria',
+            'description' => 'Este programa se enfoca en la educación básica',
         ]);
 
         $this->createWorkFor($user, 'Enviado a Coordinador', [
             'is_draft' => false,
-            'title' => 'Proyecto distinto',
+            'title' => 'Proyecto de matemáticas avanzadas',
+            'description' => 'Curso avanzado de cálculo diferencial',
         ]);
 
         $request = Request::create('/works', 'GET', [
-            'search' => 'alfabetización',
+            'search' => 'comunitaria',
         ]);
 
         $result = $service->getWorksListing($request, $user);
 
         $this->assertCount(1, $result['works']);
         $this->assertTrue($result['works']->first()->is($match));
+    }
+
+    public function test_date_filter_returns_works_within_date_range(): void
+    {
+        $service = app(WorkListingService::class);
+
+        $user = User::factory()->create();
+        $user->assignRole('profesor');
+
+        // Crear trabajos con fechas específicas
+        $oldWork = $this->createWorkFor($user, 'Enviado a Coordinador', [
+            'is_draft' => false,
+            'created_at' => now()->subDays(10),
+        ]);
+
+        $targetWork = $this->createWorkFor($user, 'Enviado a Coordinador', [
+            'is_draft' => false,
+            'created_at' => now()->subDays(5),
+        ]);
+
+        $newWork = $this->createWorkFor($user, 'Enviado a Coordinador', [
+            'is_draft' => false,
+            'created_at' => now()->subDays(1),
+        ]);
+
+        $request = Request::create('/works', 'GET', [
+            'date_from' => now()->subDays(7)->format('Y-m-d'),
+            'date_to' => now()->subDays(3)->format('Y-m-d'),
+        ]);
+
+        $result = $service->getWorksListing($request, $user);
+
+        $this->assertCount(1, $result['works']);
+        $this->assertTrue($result['works']->first()->is($targetWork));
     }
 
     private function createWorkFor(User $user, string $statusName, array $attributes = []): WorkOfExtension
