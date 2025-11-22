@@ -630,11 +630,17 @@
                         Duplicar Trabajo
                     </a>
 
-                    {{-- Chat con Evaluadores --}}
-                    @if($work->evaluators && $work->evaluators->count() > 0)
+                    {{-- Chat con Coordinadores y Evaluadores --}}
+                    @php
+                    $coordinators = \App\Models\User::role('coordinador_extension')
+                        ->where('main_organizational_unit_id', $work->organizational_unit_id)
+                        ->get();
+                    $possibleRecipients = $coordinators->merge($work->evaluators ?? collect())->unique('id');
+                    @endphp
+                    @if($possibleRecipients->count() > 0)
                     <a href="{{ route('works.messages.show', $work) }}" class="btn btn-primary mb-2">
                         <i class="fas fa-comments"></i>
-                        Chat con Evaluadores
+                        Chat con Revisores
                         @php
                         $unreadCount = $work->messages()
                         ->where('recipient_user_id', auth()->id())

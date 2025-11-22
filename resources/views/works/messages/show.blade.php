@@ -39,20 +39,20 @@
             <div class="card-body">
                 {{-- Lista de evaluadores --}}
                 <div class="mb-3">
-                    <h5>Evaluadores Asignados:</h5>
+                    <h5>Destinatarios disponibles:</h5>
                     <div class="row">
-                        @forelse($work->evaluators as $evaluator)
+                        @forelse($possibleRecipients as $recipient)
                         <div class="col-md-4 mb-2">
                             <div class="card border-info">
                                 <div class="card-body p-2">
                                     <div class="d-flex align-items-center">
                                         <div class="flex-grow-1">
-                                            <strong>{{ $evaluator->name }}</strong><br>
-                                            <small class="text-muted">{{ $evaluator->email }}</small>
+                                            <strong>{{ $recipient->name }}</strong><br>
+                                            <small class="text-muted">{{ $recipient->email }}</small>
                                         </div>
                                         <button class="btn btn-sm btn-outline-primary start-chat-btn"
-                                                data-recipient-id="{{ $evaluator->id }}"
-                                                data-recipient-name="{{ $evaluator->name }}">
+                                                data-recipient-id="{{ $recipient->id }}"
+                                                data-recipient-name="{{ $recipient->name }}">
                                             <i class="fas fa-comment"></i> Chatear
                                         </button>
                                     </div>
@@ -63,7 +63,7 @@
                         <div class="col-12">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
-                                No hay evaluadores asignados aún.
+                                No hay destinatarios disponibles para este trabajo.
                             </div>
                         </div>
                         @endforelse
