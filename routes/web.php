@@ -58,6 +58,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('works/{work}/resubmit', [WorkOfExtensionController::class, 'resubmit'])
         ->name('works.resubmit');
 
+    // Ruta para autorización de publicación (CU06)
+    Route::patch('works/{work}/authorize-publication', [WorkOfExtensionController::class, 'authorizePublication'])
+        ->name('works.authorize-publication');
+
     // Rutas para reportes personales (UC-DOC-015)
     Route::get('works/reports/personal/pdf', [WorkOfExtensionController::class, 'generatePersonalReportPdf'])
         ->name('works.reports.personal.pdf');
@@ -113,7 +117,7 @@ Route::middleware('auth')->group(function () {
 
         // Asignación de evaluadores
         Route::get('/works/{work}/assign-evaluators', [ViexController::class, 'showAssignEvaluatorsForm'])->name('assign-evaluators');
-        Route::post('/works/{work}/assign-evaluator', [ViexController::class, 'assignEvaluator'])->name('assign-evaluator');
+        Route::post('/works/{work}/assign-evaluator', [ViexController::class, 'assignEvaluator'])->name('evaluation.assign-evaluator');
 
         // Inicio de evaluación
         Route::post('/works/{work}/start-evaluation', [ViexController::class, 'startEvaluation'])->name('start-evaluation');

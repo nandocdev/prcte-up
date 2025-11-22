@@ -50,6 +50,22 @@ El sistema maneja **4 tipos de trabajos de extensión**:
    cd vi-ex
    ```
 
+   1.1. **Instalar dependencias del servidor**
+   ```bash
+   sudo apt update
+   sudo apt install php8.2 php8.2-cli php8.2-common php8.2-mysql php8.2-zip php8.2-gd php8.2-mbstring php8.2-curl php8.2-xml php8.2-bcmath php8.2-oci8 -y
+   ```
+   1.2. **Instalar Composer**
+   ```bash
+   curl -sS https://getcomposer.org/installer | php
+   sudo mv composer.phar /usr/local/bin/composer
+   ```  
+   1.3. **Instalar Node.js**
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```
+
 2. **Instalar dependencias PHP**
    ```bash
    composer install --no-interaction --prefer-dist

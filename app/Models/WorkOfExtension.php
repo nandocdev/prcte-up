@@ -71,6 +71,8 @@ class WorkOfExtension extends Model implements HasMedia {
         'start_date',
         'end_date',
         'publication_consent',
+        'publication_authorized',
+        'publication_authorized_at',
         'is_draft',
         'submitted_at',
         'description',
@@ -86,7 +88,9 @@ class WorkOfExtension extends Model implements HasMedia {
         'start_date' => 'date',
         'end_date' => 'date',
         'submitted_at' => 'date',
+        'publication_authorized_at' => 'datetime',
         'publication_consent' => 'boolean',
+        'publication_authorized' => 'boolean',
         'is_draft' => 'boolean',
     ];
 
@@ -405,6 +409,18 @@ class WorkOfExtension extends Model implements HasMedia {
 
         // Validar detalles específicos según tipo de trabajo
         return $this->validateSpecificDetails();
+    }
+
+    /**
+     * Verificar si el trabajo está certificado
+     * Un trabajo está certificado si tiene una certificación y está en estado "Certificado"
+     *
+     * @return bool
+     */
+    public function isCertified(): bool
+    {
+        return $this->certification()->exists() &&
+               ($this->currentStatus?->name === 'Certificado');
     }
 
     /**

@@ -15,6 +15,13 @@ use App\Services\WorkOfExtension\UpdateWorkService;
 use App\Services\WorkOfExtension\SubmitWorkService;
 use App\Services\Dashboard\WorkListingService;
 use App\Services\PersonalReports\PersonalWorksReportService;
+use App\Services\PublicationService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
