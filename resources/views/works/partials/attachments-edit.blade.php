@@ -80,7 +80,7 @@
                 <label for="attachments">
                     {{ __('Seleccionar archivos') }}
                     <small class="text-muted">
-                        ({{ __('Formatos soportados: PDF, DOC, XLS, PPT, imágenes. Tamaño máximo: 10MB por archivo') }})
+                        ({{ __('Formatos soportados: PDF, DOC, XLS, PPT, imágenes. Tamaño máximo: 5MB por archivo') }})
                     </small>
                 </label>
 
@@ -206,7 +206,7 @@
         // Validación de archivos
         attachmentsInput.addEventListener('change', function() {
             const files = Array.from(this.files);
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 5 * 1024 * 1024; // 5MB
             const allowedTypes = [
                 'application/pdf',
                 'application/msword',
@@ -227,7 +227,7 @@
 
             files.forEach(file => {
                 if (file.size > maxSize) {
-                    invalidFiles.push(`${file.name}: {{ __('Archivo demasiado grande (máximo 10MB)') }}`);
+                    invalidFiles.push(`${file.name}: {{ __('Archivo demasiado grande (máximo 5MB)') }}`);
                 }
                 if (!allowedTypes.includes(file.type)) {
                     invalidFiles.push(`${file.name}: {{ __('Formato no soportado') }}`);

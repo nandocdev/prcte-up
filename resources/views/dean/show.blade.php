@@ -141,33 +141,33 @@
                     </thead>
                     <tbody>
                         @foreach($work->participants as $index => $participant)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
-                                    <strong>{{ $participant->getAttribute('name') }}</strong>
-                                    @if($participant->getAttribute('is_primary'))
-                                        <span class="badge badge-primary ml-1">{{ __('Coordinador') }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge badge-secondary">
-                                        {{ $participant->getAttribute('role') ?? __('Participante') }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($participant->getAttribute('email'))
-                                        <a href="mailto:{{ $participant->getAttribute('email') }}">
-                                            <i class="fas fa-envelope"></i>
-                                            {{ $participant->getAttribute('email') }}
-                                        </a>
-                                    @else
-                                        <span class="text-muted">{{ __('N/A') }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    {{ $participant->getAttribute('institution') ?? __('N/A') }}
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>
+                                <strong>{{ $participant->getAttribute('name') }}</strong>
+                                @if($participant->getAttribute('is_primary'))
+                                <span class="badge badge-primary ml-1">{{ __('Coordinador') }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge badge-secondary">
+                                    {{ $participant->getAttribute('role') ?? __('Participante') }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($participant->getAttribute('email'))
+                                <a href="mailto:{{ $participant->getAttribute('email') }}">
+                                    <i class="fas fa-envelope"></i>
+                                    {{ $participant->getAttribute('email') }}
+                                </a>
+                                @else
+                                <span class="text-muted">{{ __('N/A') }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                {{ $participant->getAttribute('institution') ?? __('N/A') }}
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -176,13 +176,13 @@
         @endif
 
         {{-- Archivos y Evidencias --}}
-        @if($work->getMedia('attachments')->count() > 0)
+        @if($work->getMedia('evidencias')->count() > 0)
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-paperclip mr-2"></i>
                     {{ __('Evidencias y Documentos') }}
-                    <span class="badge badge-success ml-2">{{ $work->getMedia('attachments')->count() }}</span>
+                    <span class="badge badge-success ml-2">{{ $work->getMedia('evidencias')->count() }}</span>
                 </h3>
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -192,7 +192,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    @foreach($work->getMedia('attachments') as $media)
+                    @foreach($work->getMedia('evidencias') as $media)
                     <div class="col-md-6 mb-3">
                         <div class="card card-outline card-info">
                             <div class="card-body p-3">
@@ -242,10 +242,10 @@
                 {{-- Resumen de Archivos --}}
                 <div class="alert alert-info mt-3">
                     <i class="fas fa-info-circle"></i>
-                    <strong>{{ __('Total de archivos:') }}</strong> {{ $work->getMedia('attachments')->count() }}
+                    <strong>{{ __('Total de archivos:') }}</strong> {{ $work->getMedia('evidencias')->count() }}
                     <br>
                     <strong>{{ __('Tamaño total:') }}</strong>
-                    {{ number_format($work->getMedia('attachments')->sum('size') / 1024 / 1024, 2) }} MB
+                    {{ number_format($work->getMedia('evidencias')->sum('size') / 1024 / 1024, 2) }} MB
                 </div>
             </div>
         </div>
@@ -278,62 +278,62 @@
             <div class="card-body">
                 <div class="timeline">
                     @foreach($work->statusHistory->sortByDesc('created_at') as $history)
-                        {{-- Time Label --}}
-                        <div class="time-label">
-                            <span class="bg-{{ $loop->first ? 'primary' : 'gray' }}">
-                                <i class="fas fa-calendar-day"></i>
-                                {{ $history->created_at->format('d/m/Y') }}
+                    {{-- Time Label --}}
+                    <div class="time-label">
+                        <span class="bg-{{ $loop->first ? 'primary' : 'gray' }}">
+                            <i class="fas fa-calendar-day"></i>
+                            {{ $history->created_at->format('d/m/Y') }}
+                        </span>
+                    </div>
+
+                    {{-- Timeline Item --}}
+                    <div>
+                        @php
+                        $iconClass = match ($history->status->name ?? '') {
+                        'Borrador' => 'fas fa-edit bg-secondary',
+                        'Enviado a Coordinador', 'En Revisión Coordinador' => 'fas fa-clock bg-warning',
+                        'Enviado a Decano/Director' => 'fas fa-arrow-up bg-success',
+                        'Enviado a VIEX' => 'fas fa-check-circle bg-primary',
+                        'Aprobado', 'Certificado' => 'fas fa-check-double bg-success',
+                        'Devuelto para Corrección' => 'fas fa-redo bg-info',
+                        'Rechazado por Coordinador', 'Rechazado por Decano', 'Rechazado por VIEX' => 'fas fa-times-circle bg-danger',
+                        default => 'fas fa-circle bg-gray'
+                        };
+                        @endphp
+                        <i class="{{ $iconClass }}"></i>
+
+                        <div class="timeline-item">
+                            <span class="time">
+                                <i class="fas fa-clock"></i>
+                                {{ $history->created_at->format('H:i') }}
                             </span>
-                        </div>
 
-                        {{-- Timeline Item --}}
-                        <div>
-                            @php
-                                $iconClass = match ($history->status->name ?? '') {
-                                    'Borrador' => 'fas fa-edit bg-secondary',
-                                    'Enviado a Coordinador', 'En Revisión Coordinador' => 'fas fa-clock bg-warning',
-                                    'Enviado a Decano/Director' => 'fas fa-arrow-up bg-success',
-                                    'Enviado a VIEX' => 'fas fa-check-circle bg-primary',
-                                    'Aprobado', 'Certificado' => 'fas fa-check-double bg-success',
-                                    'Devuelto para Corrección' => 'fas fa-redo bg-info',
-                                    'Rechazado por Coordinador', 'Rechazado por Decano', 'Rechazado por VIEX' => 'fas fa-times-circle bg-danger',
-                                    default => 'fas fa-circle bg-gray'
-                                };
-                            @endphp
-                            <i class="{{ $iconClass }}"></i>
+                            <h3 class="timeline-header">
+                                <strong>{{ $history->status->name ?? __('Estado desconocido') }}</strong>
+                            </h3>
 
-                            <div class="timeline-item">
-                                <span class="time">
-                                    <i class="fas fa-clock"></i>
-                                    {{ $history->created_at->format('H:i') }}
-                                </span>
-
-                                <h3 class="timeline-header">
-                                    <strong>{{ $history->status->name ?? __('Estado desconocido') }}</strong>
-                                </h3>
-
-                                @if($history->comments)
-                                    <div class="timeline-body">
-                                        <div class="callout callout-info">
-                                            <p class="mb-0" style="white-space: pre-wrap;">{{ $history->comments }}</p>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                <div class="timeline-footer">
-                                    @if($history->changedBy)
-                                        <small class="text-muted">
-                                            <i class="fas fa-user"></i>
-                                            <strong>{{ __('Por:') }}</strong> {{ $history->changedBy->name }}
-                                        </small>
-                                    @endif
-                                    <small class="text-muted ml-3">
-                                        <i class="fas fa-calendar"></i>
-                                        {{ $history->created_at->diffForHumans() }}
-                                    </small>
+                            @if($history->comments)
+                            <div class="timeline-body">
+                                <div class="callout callout-info">
+                                    <p class="mb-0" style="white-space: pre-wrap;">{{ $history->comments }}</p>
                                 </div>
                             </div>
+                            @endif
+
+                            <div class="timeline-footer">
+                                @if($history->changedBy)
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i>
+                                    <strong>{{ __('Por:') }}</strong> {{ $history->changedBy->name }}
+                                </small>
+                                @endif
+                                <small class="text-muted ml-3">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ $history->created_at->diffForHumans() }}
+                                </small>
+                            </div>
                         </div>
+                    </div>
                     @endforeach
 
                     {{-- End of Timeline --}}

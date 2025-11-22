@@ -180,13 +180,13 @@
                 @endif
 
                 {{-- Archivos y Evidencias --}}
-                @if($work->getMedia('attachments')->count() > 0)
+                @if($work->getMedia('evidencias')->count() > 0)
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-paperclip mr-2"></i>
                             {{ __('Evidencias y Documentos') }}
-                            <span class="badge badge-success ml-2">{{ $work->getMedia('attachments')->count() }}</span>
+                            <span class="badge badge-success ml-2">{{ $work->getMedia('evidencias')->count() }}</span>
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -196,7 +196,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @foreach($work->getMedia('attachments') as $media)
+                            @foreach($work->getMedia('evidencias') as $media)
                             <div class="col-md-6 mb-3">
                                 <div class="card card-outline card-info">
                                     <div class="card-body p-3">
@@ -246,10 +246,10 @@
                         {{-- Resumen de Archivos --}}
                         <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle"></i>
-                            <strong>{{ __('Total de archivos:') }}</strong> {{ $work->getMedia('attachments')->count() }}
+                            <strong>{{ __('Total de archivos:') }}</strong> {{ $work->getMedia('evidencias')->count() }}
                             <br>
                             <strong>{{ __('Tamaño total:') }}</strong>
-                            {{ number_format($work->getMedia('attachments')->sum('size') / 1024 / 1024, 2) }} MB
+                            {{ number_format($work->getMedia('evidencias')->sum('size') / 1024 / 1024, 2) }} MB
                         </div>
                     </div>
                 </div>

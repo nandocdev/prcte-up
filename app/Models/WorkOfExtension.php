@@ -352,6 +352,7 @@ class WorkOfExtension extends Model implements HasMedia {
     /**
      * Verificar si el trabajo puede ser enviado
      * Valida todos los campos obligatorios según el tipo de trabajo
+     * Incluye validación de evidencias documentales requeridas
      * 
      * @return bool
      */
@@ -371,6 +372,11 @@ class WorkOfExtension extends Model implements HasMedia {
             empty($this->end_date) ||
             empty($this->academic_period)
         ) {
+            return false;
+        }
+
+        // Validar que tenga al menos una evidencia documental
+        if ($this->getMedia('evidencias')->isEmpty()) {
             return false;
         }
 
@@ -417,6 +423,7 @@ class WorkOfExtension extends Model implements HasMedia {
     /**
      * Obtener lista de campos faltantes para poder enviar el trabajo
      * Útil para mostrar mensajes de error específicos al usuario
+     * Incluye validación de evidencias documentales
      * 
      * @return array
      */
@@ -445,6 +452,11 @@ class WorkOfExtension extends Model implements HasMedia {
         }
         if (empty($this->academic_period)) {
             $missing[] = __('Período académico');
+        }
+
+        // Verificar evidencias documentales
+        if ($this->getMedia('evidencias')->isEmpty()) {
+            $missing[] = __('Al menos una evidencia documental');
         }
 
         // Verificar campos específicos según tipo
