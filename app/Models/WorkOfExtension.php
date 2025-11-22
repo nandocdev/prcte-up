@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Models\WorkStatus;
 use App\Models\WorkStatusHistory;
 use App\Models\User;
@@ -532,6 +533,117 @@ class WorkOfExtension extends Model implements HasMedia {
             ->with(['status', 'changedBy'])
             ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+    /**
+     * Obtener historial completo de trámites del trabajo
+     * Incluye cambios de estado, mensajes, archivos, y otros eventos
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getCompleteHistory(): \Illuminate\Support\Collection
+    {
+        $events = collect();
+
+        // 1. Evento de creación del trabajo
+        $events->push([
+            'type' => 'creation',
+            'title' => 'Trabajo creado',
+            'description' => 'El trabajo de extensión fue registrado en el sistema',
+            'icon' => 'fa-plus-circle',
+            'icon_class' => 'bg-success',
+            'created_at' => $this->created_at,
+            'user' => $this->responsibleUser,
+            'data' => null
+        ]);
+
+        // 2. Cambios de estado
+        foreach ($this->statusHistory()->with(['status', 'changedBy'])->orderBy('created_at')->get() as $history) {
+            $events->push([
+                'type' => 'status_change',
+                'title' => 'Cambio de estado',
+                'description' => "Estado cambiado a: {$history->status->name}",
+                'icon' => 'fa-exchange-alt',
+                'icon_class' => 'bg-primary',
+                'created_at' => $history->created_at,
+                'user' => $history->changedBy,
+                'data' => [
+                    'from_status' => $history->fromStatus?->name,
+                    'to_status' => $history->status->name,
+                    'comments' => $history->comments
+                ]
+            ]);
+        }
+
+        // 3. Mensajes del chat
+        foreach ($this->messages()->with(['sender', 'recipient'])->orderBy('created_at')->get() as $message) {
+            $isFromCurrentUser = $message->sender_user_id === auth()->id();
+            $events->push([
+                'type' => 'message',
+                'title' => $isFromCurrentUser ? 'Mensaje enviado' : 'Mensaje recibido',
+                'description' => "Mensaje con " . ($isFromCurrentUser ? $message->recipient->name : $message->sender->name),
+                'icon' => 'fa-comment',
+                'icon_class' => $isFromCurrentUser ? 'bg-info' : 'bg-warning',
+                'created_at' => $message->created_at,
+                'user' => $message->sender,
+                'data' => [
+                    'message' => Str::limit($message->message, 100),
+                    'recipient' => $message->recipient->name,
+                    'is_read' => $message->is_read
+                ]
+            ]);
+        }
+
+        // 4. Archivos subidos
+        foreach ($this->getMedia('evidencias') as $media) {
+            $events->push([
+                'type' => 'file_upload',
+                'title' => 'Archivo subido',
+                'description' => "Se agregó el archivo: {$media->name}",
+                'icon' => 'fa-file-upload',
+                'icon_class' => 'bg-secondary',
+                'created_at' => $media->created_at,
+                'user' => null, // Los archivos no tienen usuario asociado directamente
+                'data' => [
+                    'file_name' => $media->name,
+                    'file_size' => $media->size,
+                    'mime_type' => $media->mime_type
+                ]
+            ]);
+        }
+
+        // 5. Cambios en autorización de publicación
+        if ($this->publication_consent) {
+            $events->push([
+                'type' => 'publication_authorized',
+                'title' => 'Publicación autorizada',
+                'description' => 'Se autorizó la publicación de resultados del trabajo',
+                'icon' => 'fa-book-open',
+                'icon_class' => 'bg-success',
+                'created_at' => $this->updated_at, // Aproximado
+                'user' => $this->responsibleUser,
+                'data' => null
+            ]);
+        }
+
+        // 6. Certificación (si existe)
+        if ($this->certification) {
+            $events->push([
+                'type' => 'certified',
+                'title' => 'Trabajo certificado',
+                'description' => 'El trabajo fue certificado oficialmente por VIEX',
+                'icon' => 'fa-certificate',
+                'icon_class' => 'bg-success',
+                'created_at' => $this->certification->created_at,
+                'user' => null, // Certificado por el sistema
+                'data' => [
+                    'certification_number' => $this->certification->certification_number
+                ]
+            ]);
+        }
+
+        // Ordenar todos los eventos por fecha
+        return $events->sortBy('created_at')->values();
     }
 
     /**

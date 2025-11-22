@@ -668,48 +668,71 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-history"></i>
-                    Historial de Estados
+                    Historial Completo de Trámites
                 </h3>
             </div>
             <div class="card-body">
-                @if($timeline && $timeline->count() > 0)
+                @php
+                $completeHistory = $work->getCompleteHistory();
+                @endphp
+                @if($completeHistory && $completeHistory->count() > 0)
                 <div class="timeline timeline-inverse">
-                    @foreach($timeline as $history)
+                    @foreach($completeHistory as $event)
                     <div class="time-label">
                         <span class="bg-primary">
-                            {{ $history->created_at->format('d M Y') }}
+                            {{ $event['created_at']->format('d M Y') }}
                         </span>
                     </div>
                     <div>
-                        @php
-                        $iconClass = match ($history->status->name ?? '') {
-                        'Borrador' => 'fa-pencil-alt bg-secondary',
-                        'Enviado a Coordinador' => 'fa-paper-plane bg-warning',
-                        'En Revisión Coordinador' => 'fa-search bg-info',
-                        'Enviado a Decano' => 'fa-level-up-alt bg-primary',
-                        'En Revisión Decano' => 'fa-user-tie bg-primary',
-                        'Enviado a VIEX' => 'fa-university bg-dark',
-                        'En Evaluación VIEX' => 'fa-clipboard-check bg-dark',
-                        'Certificado' => 'fa-certificate bg-success',
-                        'Rechazado' => 'fa-times-circle bg-danger',
-                        'Subsanar' => 'fa-exclamation-triangle bg-orange',
-                        default => 'fa-circle bg-secondary'
-                        };
-                        @endphp
-                        <i class="fas {{ $iconClass }}"></i>
+                        <i class="fas {{ $event['icon'] }} {{ $event['icon_class'] }}"></i>
                         <div class="timeline-item">
                             <span class="time">
                                 <i class="far fa-clock"></i>
-                                {{ $history->created_at->format('H:i') }}
+                                {{ $event['created_at']->format('H:i') }}
                             </span>
-                            <h3 class="timeline-header">{{ $history->status->name ?? 'Estado Desconocido' }}</h3>
-                            <div class="timeline-body">
-                                @if($history->comments)
-                                <p>{{ $history->comments }}</p>
+                            <h3 class="timeline-header">
+                                {{ $event['title'] }}
+                                @if($event['user'])
+                                <small class="text-muted">por {{ $event['user']->name }}</small>
                                 @endif
-                                <small class="text-muted">
-                                    Por: {{ $history->changedBy->name ?? 'Sistema' }}
-                                </small>
+                            </h3>
+                            <div class="timeline-body">
+                                <p class="mb-2">{{ $event['description'] }}</p>
+
+                                {{-- Información adicional según el tipo de evento --}}
+                                @if($event['type'] === 'status_change' && $event['data']['comments'])
+                                <div class="alert alert-light border-left-primary py-2 px-3 mb-2">
+                                    <strong><i class="fas fa-comment-dots"></i> Comentarios:</strong>
+                                    <p class="mb-0 mt-1">{{ $event['data']['comments'] }}</p>
+                                </div>
+                                @elseif($event['type'] === 'message')
+                                <div class="alert alert-light border-left-info py-2 px-3 mb-2">
+                                    <strong><i class="fas fa-envelope"></i> Mensaje:</strong>
+                                    <p class="mb-0 mt-1">{{ $event['data']['message'] }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> Para: {{ $event['data']['recipient'] }}
+                                        @if($event['data']['is_read'])
+                                        <span class="badge badge-success ml-2"><i class="fas fa-check"></i> Leído</span>
+                                        @else
+                                        <span class="badge badge-warning ml-2"><i class="fas fa-envelope"></i> No leído</span>
+                                        @endif
+                                    </small>
+                                </div>
+                                @elseif($event['type'] === 'file_upload')
+                                <div class="alert alert-light border-left-secondary py-2 px-3 mb-2">
+                                    <strong><i class="fas fa-file"></i> Archivo:</strong>
+                                    <p class="mb-1 mt-1">{{ $event['data']['file_name'] }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-weight-hanging"></i> {{ number_format($event['data']['file_size'] / 1024, 1) }} KB
+                                        <i class="fas fa-file-code ml-2"></i> {{ $event['data']['mime_type'] }}
+                                    </small>
+                                </div>
+                                @elseif($event['type'] === 'certified')
+                                <div class="alert alert-success border-left-success py-2 px-3 mb-2">
+                                    <strong><i class="fas fa-certificate"></i> Certificación:</strong>
+                                    <p class="mb-0 mt-1">Número de certificación: {{ $event['data']['certification_number'] }}</p>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -721,7 +744,7 @@
                 @else
                 <div class="text-center text-muted">
                     <i class="fas fa-clock fa-2x mb-2"></i>
-                    <p>Sin historial de cambios disponible</p>
+                    <p>Sin historial de trámites disponible</p>
                 </div>
                 @endif
             </div>

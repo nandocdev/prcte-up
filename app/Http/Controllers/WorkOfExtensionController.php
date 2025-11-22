@@ -176,7 +176,7 @@ class WorkOfExtensionController extends Controller {
             'work' => $work,
             'canEdit' => $request->user()->can('update', $work),
             'canSubmit' => $work->canBeSubmitted(),
-            'timeline' => $work->getStatusTimeline()
+            'timeline' => $work->getCompleteHistory()
         ]);
     }
 
