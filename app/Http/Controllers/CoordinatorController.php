@@ -60,9 +60,19 @@ class CoordinatorController extends Controller {
             'organizational_unit_id' => $user->getAttribute('main_organizational_unit_id')
         ]);
 
+        // Obtener filtros del request
+        $filters = $request->only([
+            'work_type_id',
+            'professor_id',
+            'date_from',
+            'date_to',
+            'status',
+            'search'
+        ]);
+
         // Delegar lógica al servicio
         $service = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
-        $data = $service->getDashboardData($user);
+        $data = $service->getDashboardData($user, $filters);
 
         return view('coordinator.dashboard', $data);
     }

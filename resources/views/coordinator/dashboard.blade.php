@@ -71,6 +71,122 @@
     </div>
 </div>
 
+<!-- Filtros de Búsqueda -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-filter mr-1"></i>
+                    Filtros de Búsqueda
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ route('coordinator.dashboard') }}" class="form-inline">
+                    <div class="row">
+                        <!-- Búsqueda por título -->
+                        <div class="col-md-3 col-sm-6">
+                            <div class="form-group">
+                                <label for="search" class="sr-only">Buscar por título</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" id="search" name="search"
+                                           placeholder="Buscar por título..."
+                                           value="{{ $filters['search'] ?? '' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por tipo de trabajo -->
+                        <div class="col-md-2 col-sm-6">
+                            <div class="form-group">
+                                <label for="work_type_id" class="sr-only">Tipo de trabajo</label>
+                                <select class="form-control" id="work_type_id" name="work_type_id">
+                                    <option value="">Todos los tipos</option>
+                                    @foreach($availableFilters['work_types'] as $type)
+                                        <option value="{{ $type->id }}"
+                                                {{ ($filters['work_type_id'] ?? '') == $type->id ? 'selected' : '' }}>
+                                            {{ $type->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por profesor -->
+                        <div class="col-md-2 col-sm-6">
+                            <div class="form-group">
+                                <label for="professor_id" class="sr-only">Profesor</label>
+                                <select class="form-control" id="professor_id" name="professor_id">
+                                    <option value="">Todos los profesores</option>
+                                    @foreach($availableFilters['professors'] as $professor)
+                                        <option value="{{ $professor->id }}"
+                                                {{ ($filters['professor_id'] ?? '') == $professor->id ? 'selected' : '' }}>
+                                            {{ $professor->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por estado (solo para trabajos recientes) -->
+                        <div class="col-md-2 col-sm-6">
+                            <div class="form-group">
+                                <label for="status" class="sr-only">Estado</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">Todos los estados</option>
+                                    @foreach($availableFilters['statuses'] as $status)
+                                        <option value="{{ $status->name }}"
+                                                {{ ($filters['status'] ?? '') == $status->name ? 'selected' : '' }}>
+                                            {{ $status->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por fecha -->
+                        <div class="col-md-3 col-sm-12">
+                            <div class="form-group">
+                                <label class="sr-only">Rango de fechas</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" name="date_from"
+                                           value="{{ $filters['date_from'] ?? '' }}"
+                                           placeholder="Desde">
+                                    <div class="input-group-prepend input-group-append">
+                                        <span class="input-group-text">a</span>
+                                    </div>
+                                    <input type="date" class="form-control" name="date_to"
+                                           value="{{ $filters['date_to'] ?? '' }}"
+                                           placeholder="Hasta">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary mr-2">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                            <a href="{{ route('coordinator.dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Limpiar Filtros
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Trabajos Pendientes de Revisión -->
 <div class="row" id="pending-works">
     <div class="col-12">
@@ -78,7 +194,11 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-clock mr-1"></i>
-                    Trabajos Pendientes de Revisión ({{ $pendingWorks->count() }})
+                    Trabajos Pendientes de Revisión
+                    @if(!empty(array_filter($filters)))
+                        <small class="text-muted">(filtrados)</small>
+                    @endif
+                    <span class="badge badge-warning">{{ $pendingWorks->count() }}</span>
                 </h3>
             </div>
             <div class="card-body">
@@ -156,6 +276,10 @@
                     <h3 class="card-title">
                         <i class="fas fa-history mr-1"></i>
                         Trabajos Procesados Recientemente
+                        @if(!empty(array_filter($filters)))
+                            <small class="text-muted">(filtrados)</small>
+                        @endif
+                        <span class="badge badge-info">{{ $recentWorks->count() }}</span>
                     </h3>
                 </div>
                 <div class="card-body">
