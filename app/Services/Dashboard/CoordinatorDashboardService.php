@@ -129,6 +129,14 @@ class CoordinatorDashboardService
     }
 
     /**
+     * Verificar si el trabajo puede ser rechazado
+     */
+    public function canRejectWork(WorkOfExtension $work): bool
+    {
+        return $this->authorizationService->canCoordinatorRejectWork($work);
+    }
+
+    /**
      * Aplicar filtros a la consulta de trabajos
      */
     private function applyFilters(\Illuminate\Database\Eloquent\Builder $query, array $filters): void

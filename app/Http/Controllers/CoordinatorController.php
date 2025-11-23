@@ -230,6 +230,59 @@ class CoordinatorController extends Controller {
     }
 
     /**
+     * CU07: Rechazar trabajo definitivamente
+     */
+    public function reject(Request $request, WorkOfExtension $work): RedirectResponse {
+        // Validar permisos de coordinador
+        $this->validateCoordinatorPermissions($request);
+
+        $user = $request->user();
+
+        // Validar autorización específica para este trabajo
+        $dashboardService = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        if (!$dashboardService->canCoordinatorReviewWork($user, $work) || !$dashboardService->canRejectWork($work)) {
+            return redirect()
+                ->route('coordinator.dashboard')
+                ->with('error', __('No puede rechazar este trabajo en su estado actual.'));
+        }
+
+        // Validar que se proporcionaron comentarios
+        $request->validate([
+            'comments' => 'required|string|min:10|max:2000'
+        ], [
+            'comments.required' => 'Debe proporcionar comentarios explicando el motivo del rechazo.',
+            'comments.min' => 'Los comentarios deben tener al menos 10 caracteres.',
+            'comments.max' => 'Los comentarios no pueden exceder 2000 caracteres.'
+        ]);
+
+        try {
+            // Lógica de negocio delegada al servicio
+            $service = new RejectWorkService();
+            $service->rejectByCoordinator($work, $user, $request->input('comments'));
+
+            Log::info('Trabajo rechazado por coordinador', [
+                'work_id' => $work->getKey(),
+                'coordinator_id' => $user->getKey()
+            ]);
+
+            return redirect()
+                ->route('coordinator.show', $work)
+                ->with('success', __('Trabajo rechazado. El profesor ha sido notificado.'));
+
+        } catch (\Exception $e) {
+            Log::error('Error al rechazar trabajo', [
+                'work_id' => $work->getKey(),
+                'coordinator_id' => $user->getKey(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('coordinator.show', $work)
+                ->with('error', __('Error al rechazar el trabajo. Inténtelo de nuevo.'));
+        }
+    }
+
+    /**
      * Actualizar checklist de revisión del coordinador
      */
     public function updateChecklist(Request $request, WorkOfExtension $work): \Illuminate\Http\JsonResponse

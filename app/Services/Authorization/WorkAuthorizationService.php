@@ -58,6 +58,15 @@ class WorkAuthorizationService
     }
 
     /**
+     * Verificar si un trabajo puede ser rechazado por coordinador
+     */
+    public function canCoordinatorRejectWork(WorkOfExtension $work): bool
+    {
+        $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
+        return in_array($work->currentStatus->name, $validStatuses);
+    }
+
+    /**
      * Verificar si un trabajo puede ser aprobado por decano/director
      */
     public function canDeanDirectorApproveWork(WorkOfExtension $work): bool
