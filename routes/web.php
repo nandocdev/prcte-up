@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/coordinator/works/{work}/approve', [CoordinatorController::class, 'approve'])->name('coordinator.approve');
         Route::post('/coordinator/works/{work}/request-changes', [CoordinatorController::class, 'requestChanges'])->name('coordinator.request-changes');
         Route::post('/coordinator/works/{work}/reject', [CoordinatorController::class, 'reject'])->name('coordinator.reject');
+        Route::post('/coordinator/works/{work}/checklist', [CoordinatorController::class, 'updateChecklist'])->name('coordinator.checklist.update');
     });
 
     // Rutas para Decano/Director (CU10, CU11)

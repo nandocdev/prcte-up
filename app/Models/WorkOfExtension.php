@@ -233,6 +233,14 @@ class WorkOfExtension extends Model implements HasMedia {
         return $this->hasMany(WorkEvaluation::class);
     }
 
+    /**
+     * Checklists de coordinadores para este trabajo
+     */
+    public function coordinatorChecklists()
+    {
+        return $this->hasMany(CoordinatorChecklist::class);
+    }
+
     // Scopes
 
     /**

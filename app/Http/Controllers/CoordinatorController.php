@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WorkOfExtension;
-use App\Models\WorkStatus;
+use App\Models\CoordinatorChecklist;
 use App\Services\WorkOfExtension\ApproveWorkService;
 use App\Services\WorkOfExtension\RejectWorkService;
 use App\Services\Dashboard\CoordinatorDashboardService;
@@ -28,6 +27,23 @@ class CoordinatorController extends Controller {
      */
     public function __construct() {
         // En Laravel 11, la validación se hace dentro de cada método
+    }
+
+    /**
+     * Validar permisos de coordinador de extensión
+     */
+    protected function validateCoordinatorPermissions(Request $request): void {
+        $user = $request->user();
+
+        // Verificar que el usuario tenga el rol de coordinador
+        if (!$user->hasRole('coordinador_extension') && !$user->hasRole('super_admin')) {
+            abort(403, __('No tiene permisos para acceder a esta funcionalidad.'));
+        }
+
+        // Verificar que tenga unidad organizacional asignada
+        if (!$user->getAttribute('main_organizational_unit_id')) {
+            abort(403, __('No tiene una unidad organizacional asignada. Contacte al administrador.'));
+        }
     }
 
     /**
@@ -85,6 +101,9 @@ class CoordinatorController extends Controller {
             'media'
         ]);
 
+        // Obtener o crear checklist para este coordinador
+        $checklist = CoordinatorChecklist::getOrCreateForWork($work, $user);
+
         Log::info('Coordinador revisando trabajo', [
             'work_id' => $work->getKey(),
             'coordinator_id' => $user->getKey()
@@ -94,7 +113,8 @@ class CoordinatorController extends Controller {
             'work' => $work,
             'user' => $user,
             'canApprove' => $dashboardService->canApproveWork($work),
-            'canRequestChanges' => $dashboardService->canRequestChanges($work)
+            'canRequestChanges' => $dashboardService->canRequestChanges($work),
+            'checklist' => $checklist
         ]);
     }
 
@@ -200,28 +220,63 @@ class CoordinatorController extends Controller {
     }
 
     /**
-     * Validar que el usuario tenga permisos de coordinador
+     * Actualizar checklist de revisión del coordinador
      */
-    private function validateCoordinatorPermissions(Request $request): void {
+    public function updateChecklist(Request $request, WorkOfExtension $work): \Illuminate\Http\JsonResponse
+    {
+        // Validar permisos de coordinador
+        $this->validateCoordinatorPermissions($request);
+
         $user = $request->user();
 
-        if (!$user) {
-            abort(401, 'Usuario no autenticado.');
+        // Validar autorización específica para este trabajo
+        $dashboardService = new CoordinatorDashboardService(app(\App\Services\Authorization\WorkAuthorizationService::class));
+        if (!$dashboardService->canCoordinatorReviewWork($user, $work)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('No tiene permisos para revisar este trabajo.')
+            ], 403);
         }
 
-        if (!$user->hasAnyRole(['coordinador_extension', 'super_admin'])) {
-            Log::error('Acceso de coordinador validado', [
-                'user_id' => $user->getKey(),
-                'user_email' => $user->email,
-                'roles' => $user->getRoleNames()->toArray()
-            ]);
-            abort(403, 'Acceso denegado. Se requiere rol de Coordinador de Extensión.');
-        }
-
-        Log::info('Acceso de coordinador validado', [
-            'user_id' => $user->getKey(),
-            'user_email' => $user->email,
-            'roles' => $user->getRoleNames()->toArray()
+        // Validar datos del request
+        $request->validate([
+            'checklist_data' => 'required|array',
+            'reviewer_notes' => 'nullable|string|max:5000'
         ]);
+
+        try {
+            // Obtener o crear checklist
+            $checklist = CoordinatorChecklist::getOrCreateForWork($work, $user);
+
+            // Actualizar checklist
+            $checklist->updateChecklist(
+                $request->input('checklist_data'),
+                $request->input('reviewer_notes')
+            );
+
+            Log::info('Checklist actualizado por coordinador', [
+                'work_id' => $work->getKey(),
+                'coordinator_id' => $user->getKey(),
+                'progress' => $checklist->getProgressPercentage() . '%'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Checklist actualizado correctamente.'),
+                'progress' => $checklist->getProgressPercentage()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar checklist', [
+                'work_id' => $work->getKey(),
+                'coordinator_id' => $user->getKey(),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => __('Error al actualizar el checklist. Inténtelo de nuevo.')
+            ], 500);
+        }
     }
 }

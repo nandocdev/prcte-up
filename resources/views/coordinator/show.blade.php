@@ -164,16 +164,9 @@
 
 @section('js')
 <script>
-    // Sistema de almacenamiento local para notas de revisión
-    const WORK_ID = {
-
-        <?=
-        $work->getKey()
-        ?>
-
-    };
-    const STORAGE_KEY = `coordinator_review_notes_${WORK_ID}`;
-    const CHECKLIST_KEY = `coordinator_review_checklist_${WORK_ID}`;
+    // Sistema de almacenamiento AJAX para notas de revisión
+    const WORK_ID = {{ $work->getKey() }};
+    const CSRF_TOKEN = '{{ csrf_token() }}';
 
     $(document).ready(function() {
         // Debug: Verificar que los modales existen en el DOM
@@ -189,10 +182,6 @@
             console.log('✓ Bootstrap modal disponible');
         }
 
-        // Cargar notas guardadas
-        loadReviewNotes();
-        loadChecklist();
-
         // Auto-guardar notas cada 5 segundos
         let notesTimeout;
         $('#reviewerNotes').on('input', function() {
@@ -204,7 +193,7 @@
         });
 
         // Guardar checklist al hacer clic
-        $('.review-checklist input[type="checkbox"]').on('change', function() {
+        $('.checklist-item').on('change', function() {
             saveChecklist();
         });
 
@@ -212,14 +201,6 @@
         $('textarea').on('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        // Limpiar notas al enviar cualquier formulario de acción
-        $('#approveModal form, #requestChangesModal form, #rejectModal form').on('submit', function() {
-            // Limpiar notas y checklist del localStorage
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(CHECKLIST_KEY);
-            console.log('Notas y checklist limpiados después de enviar acción');
         });
 
         // Fallback manual para abrir modales si data-toggle no funciona
@@ -245,62 +226,185 @@
         });
     });
 
-    // Guardar notas en localStorage
+    // Guardar notas vía AJAX
     function saveReviewNotes() {
         const notes = $('#reviewerNotes').val();
-        localStorage.setItem(STORAGE_KEY, notes);
-        console.log('Notas guardadas automáticamente');
 
-        // Mostrar indicador de guardado
-        $('.autosave-indicator').html('<span class="badge badge-success"><i class="fas fa-check"></i> Guardado</span>');
+        $.ajax({
+            url: `/coordinator/works/${WORK_ID}/checklist`,
+            method: 'POST',
+            data: {
+                _token: CSRF_TOKEN,
+                reviewer_notes: notes
+            },
+            success: function(response) {
+                console.log('Notas guardadas automáticamente');
 
-        // Ocultar indicador después de 2 segundos
-        setTimeout(function() {
-            $('.autosave-indicator').fadeOut(function() {
-                $(this).html('').show();
-            });
-        }, 2000);
-    }
+                // Mostrar indicador de guardado
+                $('.autosave-indicator').html('<span class="badge badge-success"><i class="fas fa-check"></i> Guardado</span>');
 
-    // Cargar notas desde localStorage
-    function loadReviewNotes() {
-        const notes = localStorage.getItem(STORAGE_KEY);
-        if (notes) {
-            $('#reviewerNotes').val(notes);
-        }
-    }
+                // Ocultar indicador después de 2 segundos
+                setTimeout(function() {
+                    $('.autosave-indicator').fadeOut(function() {
+                        $(this).html('').show();
+                    });
+                }, 2000);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar notas:', error);
+                $('.autosave-indicator').html('<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Error</span>');
 
-    // Guardar checklist
-    function saveChecklist() {
-        const checklist = {};
-        $('.review-checklist input[type="checkbox"]').each(function() {
-            checklist[$(this).attr('id')] = $(this).is(':checked');
+                setTimeout(function() {
+                    $('.autosave-indicator').fadeOut(function() {
+                        $(this).html('').show();
+                    });
+                }, 3000);
+            }
         });
-        localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
     }
 
-    // Cargar checklist
-    function loadChecklist() {
-        const checklistJson = localStorage.getItem(CHECKLIST_KEY);
-        if (checklistJson) {
-            const checklist = JSON.parse(checklistJson);
-            $('.review-checklist input[type="checkbox"]').each(function() {
-                const checkId = $(this).attr('id');
-                if (checklist[checkId]) {
-                    $(this).prop('checked', true);
+    // Guardar checklist vía AJAX
+    function saveChecklist() {
+        const checklistData = {};
+
+        // Campos globales
+        checklistData.format_correct = $('#check_format').is(':checked');
+        checklistData.objectives_clear = $('#check_objectives').is(':checked');
+        checklistData.description_complete = $('#check_description').is(':checked');
+        checklistData.evidence_attached = $('#check_evidence').is(':checked');
+        checklistData.participants_complete = $('#check_participants').is(':checked');
+        checklistData.dates_coherent = $('#check_dates').is(':checked');
+        checklistData.regulations_compliant = $('#check_regulations').is(':checked');
+
+        // Campos específicos por tipo de trabajo
+        @if($work->work_type_id == 1) {{-- Proyecto --}}
+            checklistData.project_category_valid = $('#check_project_category').is(':checked');
+            checklistData.general_description_complete = $('#check_general_description').is(':checked');
+            checklistData.justification_adequate = $('#check_justification').is(':checked');
+            checklistData.methodology_clear = $('#check_methodology').is(':checked');
+            checklistData.scope_defined = $('#check_scope').is(':checked');
+            checklistData.resource_plan_complete = $('#check_resource_plan').is(':checked');
+            checklistData.schedule_realistic = $('#check_schedule').is(':checked');
+            checklistData.cost_plan_detailed = $('#check_cost_plan').is(':checked');
+            checklistData.beneficiaries_described = $('#check_beneficiaries').is(':checked');
+            checklistData.communication_plan_present = $('#check_communication_plan').is(':checked');
+            checklistData.institution_relationships_clear = $('#check_institution_relationships').is(':checked');
+            checklistData.final_comments_relevant = $('#check_final_comments').is(':checked');
+            checklistData.ss_intervention_appropriate = $('#check_ss_intervention').is(':checked');
+        @elseif($work->work_type_id == 2) {{-- Actividad --}}
+            checklistData.activity_type_appropriate = $('#check_activity_type').is(':checked');
+            checklistData.modality_suitable = $('#check_modality').is(':checked');
+            checklistData.duration_reasonable = $('#check_duration').is(':checked');
+            checklistData.introduction_contextualized = $('#check_introduction').is(':checked');
+            checklistData.justification_adequate = $('#check_activity_justification').is(':checked');
+            checklistData.objectives_specific = $('#check_activity_objectives').is(':checked');
+            checklistData.methodology_detailed = $('#check_activity_methodology').is(':checked');
+            checklistData.resources_available = $('#check_resources').is(':checked');
+            checklistData.beneficiaries_profile_clear = $('#check_beneficiaries_profile').is(':checked');
+            checklistData.expected_participants_realistic = $('#check_expected_participants').is(':checked');
+            checklistData.institution_relationships_present = $('#check_activity_relationships').is(':checked');
+            checklistData.comments_relevant = $('#check_activity_comments').is(':checked');
+            checklistData.certification_appropriate = $('#check_certification').is(':checked');
+        @elseif($work->work_type_id == 3) {{-- Publicación --}}
+            checklistData.publication_type_valid = $('#check_publication_type').is(':checked');
+            checklistData.summary_comprehensive = $('#check_summary').is(':checked');
+            checklistData.editorial_reputable = $('#check_editorial').is(':checked');
+            checklistData.isbn_issn_present = $('#check_isbn_issn').is(':checked');
+            checklistData.target_audience_defined = $('#check_target_audience').is(':checked');
+            checklistData.relevance_justified = $('#check_relevance').is(':checked');
+            checklistData.publication_date_valid = $('#check_publication_date').is(':checked');
+            checklistData.media_type_appropriate = $('#check_media_type').is(':checked');
+            checklistData.media_nature_clear = $('#check_media_nature').is(':checked');
+            checklistData.language_appropriate = $('#check_language').is(':checked');
+            checklistData.print_run_realistic = $('#check_print_run').is(':checked');
+        @elseif($work->work_type_id == 4) {{-- Asistencia Técnica --}}
+            checklistData.assistance_type_valid = $('#check_assistance_type').is(':checked');
+            checklistData.collaborating_institution_clear = $('#check_institution').is(':checked');
+            checklistData.specialization_area_relevant = $('#check_specialization').is(':checked');
+            checklistData.description_comprehensive = $('#check_assistance_description').is(':checked');
+            checklistData.objectives_clear = $('#check_assistance_objectives').is(':checked');
+            checklistData.methodology_detailed = $('#check_assistance_methodology').is(':checked');
+            checklistData.expected_products_defined = $('#check_expected_products').is(':checked');
+            checklistData.evidence_sufficient = $('#check_assistance_evidence').is(':checked');
+            checklistData.work_modality_appropriate = $('#check_work_modality').is(':checked');
+            checklistData.estimated_hours_realistic = $('#check_estimated_hours').is(':checked');
+        @endif
+
+        $.ajax({
+            url: `/coordinator/works/${WORK_ID}/checklist`,
+            method: 'POST',
+            data: {
+                _token: CSRF_TOKEN,
+                checklist_data: checklistData
+            },
+            success: function(response) {
+                console.log('Checklist guardado:', response);
+
+                // Actualizar porcentaje de progreso si está disponible
+                if (response.progress_percentage !== undefined) {
+                    const progressBadge = $('.badge-info');
+                    if (progressBadge.length > 0) {
+                        progressBadge.text(response.progress_percentage + '% completado');
+                    }
+                }
+
+                // Mostrar indicador de guardado
+                $('.autosave-indicator').html('<span class="badge badge-success"><i class="fas fa-check"></i> Checklist guardado</span>');
+
+                setTimeout(function() {
+                    $('.autosave-indicator').fadeOut(function() {
+                        $(this).html('').show();
+                    });
+                }, 2000);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar checklist:', error);
+                $('.autosave-indicator').html('<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Error al guardar</span>');
+
+                setTimeout(function() {
+                    $('.autosave-indicator').fadeOut(function() {
+                        $(this).html('').show();
+                    });
+                }, 3000);
+            }
+        });
+    }
+
+    // Limpiar checklist
+    function clearChecklist() {
+        if (confirm('¿Está seguro de que desea limpiar el checklist? Esta acción no se puede deshacer.')) {
+            // Desmarcar todos los checkboxes
+            $('.checklist-item').prop('checked', false);
+
+            // Enviar checklist vacío
+            const emptyChecklist = {};
+            $('.checklist-item').each(function() {
+                const fieldName = $(this).attr('id').replace('check_', '');
+                emptyChecklist[fieldName] = false;
+            });
+
+            $.ajax({
+                url: `/coordinator/works/${WORK_ID}/checklist`,
+                method: 'POST',
+                data: {
+                    _token: CSRF_TOKEN,
+                    checklist_data: emptyChecklist
+                },
+                success: function(response) {
+                    console.log('Checklist limpiado');
+                    alert('Checklist limpiado correctamente');
+
+                    // Actualizar porcentaje de progreso
+                    const progressBadge = $('.badge-info');
+                    if (progressBadge.length > 0) {
+                        progressBadge.text('0% completado');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al limpiar checklist:', error);
+                    alert('Error al limpiar el checklist');
                 }
             });
-        }
-    }
-
-    // Limpiar notas y checklist
-    function clearReviewNotes() {
-        if (confirm('¿Está seguro de que desea limpiar todas sus notas y el checklist? Esta acción no se puede deshacer.')) {
-            $('#reviewerNotes').val('');
-            $('.review-checklist input[type="checkbox"]').prop('checked', false);
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(CHECKLIST_KEY);
-            alert('Notas y checklist limpiados correctamente');
         }
     }
 
@@ -349,10 +453,6 @@
         // Mostrar spinner
         const originalText = $submitBtn.html();
         $submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Procesando...');
-
-        // Limpiar notas del localStorage
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(CHECKLIST_KEY);
 
         // Si falla, restaurar botón después de 3 segundos
         setTimeout(function() {
