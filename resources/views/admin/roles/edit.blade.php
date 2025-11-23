@@ -39,13 +39,13 @@
                         <label for="name">{{ __('Nombre del Rol') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror"
                             id="name" name="name" value="{{ old('name', $role->name) }}" required
-                            @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+                            @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
                         readonly
                         @endif>
                         @error('name')
                         <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
-                        @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+                        @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
                         <small class="form-text text-warning">
                             <i class="fas fa-lock"></i> {{ __('Este es un rol del sistema y no se puede renombrar.') }}
                         </small>
@@ -118,7 +118,7 @@
                 <div class="text-center mb-3">
                     <i class="fas fa-user-shield fa-3x text-primary"></i>
                     <h5 class="mt-2">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</h5>
-                    @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+                    @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
                     <span class="badge badge-warning">{{ __('Rol del Sistema') }}</span>
                     @endif
                 </div>
@@ -150,7 +150,7 @@
             </div>
         </div>
 
-        @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+        @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
         <div class="card card-warning">
             <div class="card-header">
                 <h3 class="card-title">{{ __('Rol del Sistema') }}</h3>

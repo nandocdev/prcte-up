@@ -8,29 +8,23 @@ use App\Events\WorkPublicationAuthorized;
 use App\Events\WorkApprovedByCoordinator;
 use App\Events\WorkChangesRequestedByCoordinator;
 use App\Events\WorkRejectedByCoordinator;
-use App\Events\WorkRejectedByDeanDirector;
 use App\Events\WorkReceivedInViex;
 use App\Events\EvaluatorAssigned;
 use App\Events\EvaluationSubmitted;
 use App\Events\WorkApprovedByViex;
 use App\Events\WorkRejectedByViex;
 use App\Events\WorkChangesRequestedByViex;
-use App\Events\WorkApprovedByDeanDirector;
-use App\Events\WorkChangesRequestedByDeanDirector;
 use App\Listeners\SendWorkSubmittedNotification;
 use App\Listeners\SendPublicationAuthorizedNotification;
 use App\Listeners\SendWorkApprovedByCoordinatorNotification;
 use App\Listeners\SendWorkChangesRequestedByCoordinatorNotification;
 use App\Listeners\SendWorkRejectedByCoordinatorNotification;
-use App\Listeners\SendWorkRejectedByDeanDirectorNotification;
 use App\Listeners\SendWorkReceivedInViexNotification;
 use App\Listeners\SendEvaluatorAssignedNotification;
 use App\Listeners\SendEvaluationSubmittedNotification;
 use App\Listeners\SendWorkApprovedByViexNotification;
 use App\Listeners\SendWorkRejectedByViexNotification;
 use App\Listeners\SendWorkChangesRequestedByViexNotification;
-use App\Listeners\SendWorkApprovedByDeanDirectorNotification;
-use App\Listeners\SendWorkChangesRequestedByDeanDirectorNotification;
 use App\Events\WorkCertifiedByViex;
 use App\Listeners\SendWorkCertifiedByViexNotification;
 use App\Events\WorkMessageSent;
@@ -65,17 +59,6 @@ class EventServiceProvider extends ServiceProvider {
         ],
         WorkRejectedByCoordinator::class => [
             SendWorkRejectedByCoordinatorNotification::class,
-        ],
-
-        // CU11: Rechazar Trabajo para Subsanación (Decano/Director)
-        WorkRejectedByDeanDirector::class => [
-            SendWorkRejectedByDeanDirectorNotification::class,
-        ],
-        WorkApprovedByDeanDirector::class => [
-            SendWorkApprovedByDeanDirectorNotification::class,
-        ],
-        WorkChangesRequestedByDeanDirector::class => [
-            SendWorkChangesRequestedByDeanDirectorNotification::class,
         ],
 
         // CU9: Evaluación VIEX

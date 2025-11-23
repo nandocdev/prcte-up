@@ -28,11 +28,6 @@ class RolesAndPermissionsSeeder extends Seeder {
             'works.approve.unit',
             'works.request-changes.unit',
 
-            // Permisos de decano/director
-            'works.manage.dean',
-            'works.approve.dean',
-            'works.request-changes.dean',
-
             // Permisos VIEX
             'works.manage.viex',
             'works.assign-evaluator',
@@ -85,20 +80,7 @@ class RolesAndPermissionsSeeder extends Seeder {
             'works.request-changes.unit',
         ]);
 
-        // 4. Decano/Director - Puede aprobar trabajos para enviar a VIEX
-        $decano = Role::firstOrCreate(['name' => 'decano_director']);
-        $decano->givePermissionTo([
-            'works.create',
-            'works.view.own',
-            'works.edit.own',
-            'works.delete.own',
-            'works.submit',
-            'works.manage.dean',
-            'works.approve.dean',
-            'works.request-changes.dean',
-        ]);
-
-        // 5. VIEX Admin - Puede certificar y gestionar trabajos finales
+        // 4. VIEX Admin - Puede certificar y gestionar trabajos finales
         $viexAdmin = Role::firstOrCreate(['name' => 'viex_admin']);
         $viexAdmin->givePermissionTo([
             'works.create',
@@ -113,7 +95,7 @@ class RolesAndPermissionsSeeder extends Seeder {
             'works.generate-report',
         ]);
 
-        // 6. Evaluador - Puede evaluar trabajos asignados por VIEX
+        // 5. Evaluador - Puede evaluar trabajos asignados por VIEX
         $evaluador = Role::firstOrCreate(['name' => 'evaluador']);
         $evaluador->givePermissionTo([
             'works.evaluate',

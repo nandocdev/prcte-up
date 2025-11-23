@@ -56,22 +56,22 @@ class WorkStatusSeeder extends Seeder
             [
                 'name' => 'Pendiente Decano',
                 'description' => 'Trabajo a la espera de decisión del Decano/Director.',
-                'is_active' => true,
+                'is_active' => false, // Desactivado según diagrama de flujo correcto
             ],
             [
                 'name' => 'Enviado a Decano/Director',
                 'description' => 'Trabajo remitido al Decano/Director para revisión.',
-                'is_active' => true,
+                'is_active' => false, // Desactivado según diagrama de flujo correcto
             ],
             [
                 'name' => 'En Revisión Decano/Director',
                 'description' => 'Decano/Director revisando el trabajo.',
-                'is_active' => true,
+                'is_active' => false, // Desactivado según diagrama de flujo correcto
             ],
             [
                 'name' => 'Rechazado por Decano/Director',
                 'description' => 'Trabajo rechazado por el Decano/Director.',
-                'is_active' => true,
+                'is_active' => false, // Desactivado según diagrama de flujo correcto
             ],
             [
                 'name' => 'Aprobado por Coordinador',
@@ -150,6 +150,6 @@ class WorkStatusSeeder extends Seeder
 
         echo "✓ Estados de trabajo cargados via WorkStatusSeeder\n";
         echo "📊 Total: " . count($statuses) . " estados disponibles\n";
-        echo "🔄 Flujo: Borrador → Coordinador → Decano → VIEX → Certificado\n\n";
+        echo "🔄 Flujo: Borrador → Coordinador → VIEX → Certificado\n\n";
     }
 }

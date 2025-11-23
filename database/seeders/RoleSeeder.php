@@ -16,7 +16,6 @@ class RoleSeeder extends Seeder {
         $roles = [
             'super_admin' => 'Super Administrador del Sistema',
             'viex_admin' => 'Administrador VIEX',
-            'decano_director' => 'Decano o Director de Unidad Académica',
             'coordinador_extension' => 'Coordinador de Extensión',
             'profesor' => 'Profesor'
         ];

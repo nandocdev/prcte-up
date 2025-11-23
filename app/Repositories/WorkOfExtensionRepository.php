@@ -54,8 +54,6 @@ class WorkOfExtensionRepository
             $query->visibleToProfessor($user);
         } elseif ($user->hasRole('coordinador_extension')) {
             $query->visibleToCoordinator($user);
-        } elseif ($user->hasRole('decano_director')) {
-            $query->visibleToDean($user);
         } elseif ($user->hasRole('viex_admin')) {
             $query->visibleToViex();
         } else {
@@ -141,21 +139,6 @@ class WorkOfExtensionRepository
     }
 
     /**
-     * Obtener trabajos pendientes de revisión para un decano/director
-     */
-    public function getPendingForDean(User $dean): Collection
-    {
-        return WorkOfExtension::query()
-            ->visibleToDean($dean)
-            ->whereHas('currentStatus', function ($query) {
-                $query->whereIn('name', ['Enviado a Decano/Director', 'En Revisión Decano/Director']);
-            })
-            ->with(['workType', 'organizationalUnit', 'responsibleUser'])
-            ->orderBy('created_at', 'asc')
-            ->get();
-    }
-
-    /**
      * Obtener trabajos pendientes de evaluación en VIEX
      */
     public function getPendingForViex(): Collection
@@ -231,8 +214,6 @@ class WorkOfExtensionRepository
             $query->visibleToProfessor($user);
         } elseif ($user->hasRole('coordinador_extension')) {
             $query->visibleToCoordinator($user);
-        } elseif ($user->hasRole('decano_director')) {
-            $query->visibleToDean($user);
         } elseif ($user->hasRole('viex_admin')) {
             $query->visibleToViex();
         }

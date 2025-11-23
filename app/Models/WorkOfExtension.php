@@ -35,16 +35,6 @@ class WorkOfExtension extends Model implements HasMedia {
         'Rechazado por VIEX',
     ];
 
-    public const DEAN_STATUS_NAMES = [
-        'Enviado a Decano/Director',
-        'En Revisión Decano/Director',
-        'Pendiente Decano',
-        'Aprobado por Coordinador',
-        'Pendiente VIEX',
-        'Certificado',
-        'Rechazado por VIEX',
-    ];
-
     public const VIEX_STATUS_NAMES = [
         'Enviado a VIEX',
         'Pendiente VIEX',
@@ -313,23 +303,7 @@ class WorkOfExtension extends Model implements HasMedia {
     }
 
     /**
-     * Scope: trabajos visibles para un decano/director (su unidad y subunidades, y que hayan sido aprobados por el coordinador y remitidos al decano)
-     */
-    public function scopeVisibleToDean($query, $user)
-    {
-        $unitId = (int) $user->getAttribute('main_organizational_unit_id');
-        $unitIds = OrganizationalUnit::descendantIds($unitId);
-
-        $statuses = self::DEAN_STATUS_NAMES;
-
-        return $query->whereIn('organizational_unit_id', $unitIds)
-            ->whereHas('currentStatus', function ($q) use ($statuses) {
-                $q->whereIn('name', $statuses);
-            });
-    }
-
-    /**
-     * Scope: trabajos visibles para VIEX (los que pasaron por profesor->coordinador->decano, procesados o pendientes en VIEX)
+     * Scope: trabajos visibles para VIEX (trabajos enviados directamente desde coordinador)
      */
     public function scopeVisibleToViex($query)
     {
@@ -874,7 +848,6 @@ class WorkOfExtension extends Model implements HasMedia {
             ->whereHas('status', function ($query) {
                 $query->whereIn('name', [
                     'Rechazado por Coordinador',
-                    'Rechazado por Decano/Director',
                     'Rechazado por VIEX',
                     'Devuelto para Corrección'
                 ]);

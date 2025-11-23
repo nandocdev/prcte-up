@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\CoordinatorController;
-use App\Http\Controllers\DeanDirectorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ViexAdminController;
@@ -77,16 +76,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/coordinator/works/{work}/request-changes', [CoordinatorController::class, 'requestChanges'])->name('coordinator.request-changes');
         Route::post('/coordinator/works/{work}/reject', [CoordinatorController::class, 'reject'])->name('coordinator.reject');
         Route::post('/coordinator/works/{work}/checklist', [CoordinatorController::class, 'updateChecklist'])->name('coordinator.checklist.update');
-    });
-
-    // Rutas para Decano/Director (CU10, CU11)
-    // Usamos auth middleware y validación en el controlador para mejor control
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/dean', [DeanDirectorController::class, 'dashboard'])->name('dean.dashboard');
-        Route::get('/dean/works/{work}', [DeanDirectorController::class, 'show'])->name('dean.show');
-        Route::post('/dean/works/{work}/approve', [DeanDirectorController::class, 'approve'])->name('dean.approve');
-        Route::post('/dean/works/{work}/request-changes', [DeanDirectorController::class, 'requestChanges'])->name('dean.request-changes');
-        Route::post('/dean/works/{work}/reject', [DeanDirectorController::class, 'reject'])->name('dean.reject');
     });
 
     // Rutas para VIEX Admin (CU12, CU13, CU14, CU15)

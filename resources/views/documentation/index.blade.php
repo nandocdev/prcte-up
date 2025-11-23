@@ -126,20 +126,6 @@
                     </div>
                     @endif
 
-                    @if(auth()->user()->hasRole('decano_director'))
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <a href="{{ route('documentation.show', 'deans') }}" class="text-decoration-none">
-                            <div class="card bg-gradient-warning h-100">
-                                <div class="card-body text-center text-white">
-                                    <i class="fas fa-university fa-3x mb-3"></i>
-                                    <h5>Guía para Decanos</h5>
-                                    <p class="mb-0">Aprobación institucional</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    @endif
-
                     @if(auth()->user()->hasRole('viex_admin'))
                     <div class="col-md-6 col-lg-4 mb-3">
                         <a href="{{ route('documentation.show', 'viex-admin') }}" class="text-decoration-none">

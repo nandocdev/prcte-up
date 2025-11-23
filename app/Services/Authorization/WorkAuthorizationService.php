@@ -26,20 +26,6 @@ class WorkAuthorizationService
     }
 
     /**
-     * Verificar si un decano/director puede revisar un trabajo específico
-     */
-    public function canDeanDirectorReviewWork(User $deanDirector, WorkOfExtension $work): bool
-    {
-        // Super admin puede revisar cualquier trabajo
-        if ($deanDirector->hasRole('super_admin')) {
-            return true;
-        }
-
-        // El decano/director debe ser de la misma unidad organizacional
-        return $work->getAttribute('organizational_unit_id') === $deanDirector->getAttribute('main_organizational_unit_id');
-    }
-
-    /**
      * Verificar si un trabajo puede ser aprobado por coordinador
      */
     public function canCoordinatorApproveWork(WorkOfExtension $work): bool
@@ -64,22 +50,6 @@ class WorkAuthorizationService
     {
         $validStatuses = ['En Revisión Coordinador', 'Enviado a Coordinador'];
         return in_array($work->currentStatus->name, $validStatuses);
-    }
-
-    /**
-     * Verificar si un trabajo puede ser aprobado por decano/director
-     */
-    public function canDeanDirectorApproveWork(WorkOfExtension $work): bool
-    {
-        return $work->currentStatus->name === 'Enviado a Decano/Director';
-    }
-
-    /**
-     * Verificar si se pueden solicitar cambios a un trabajo (decano/director)
-     */
-    public function canDeanDirectorRequestChanges(WorkOfExtension $work): bool
-    {
-        return $work->currentStatus->name === 'Enviado a Decano/Director';
     }
 
     /**

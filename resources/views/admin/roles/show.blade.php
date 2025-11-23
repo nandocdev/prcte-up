@@ -32,7 +32,7 @@
                 </div>
                 <h3 class="profile-username text-center">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</h3>
 
-                @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+                @if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
                 <p class="text-muted text-center">
                     <span class="badge badge-warning">
                         <i class="fas fa-shield-alt"></i> {{ __('Rol del Sistema') }}
@@ -145,7 +145,7 @@
 </div>
 
 <!-- Descripción del rol si es del sistema -->
-@if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'decano_director', 'viex_admin']))
+@if(in_array($role->name, ['super_admin', 'profesor', 'coordinador_extension', 'viex_admin']))
 <div class="row">
     <div class="col-12">
         <div class="card card-info">
@@ -162,9 +162,6 @@
                 @break
                 @case('coordinador_extension')
                 <p><strong>{{ __('Coordinador de Extensión') }}:</strong> {{ __('Puede revisar y aprobar trabajos de extensión de su unidad organizacional antes de ser enviados al Decanato/Dirección.') }}</p>
-                @break
-                @case('decano_director')
-                <p><strong>{{ __('Decano/Director') }}:</strong> {{ __('Aprueba los trabajos de extensión para ser enviados a VIEX. Tiene autoridad sobre los trabajos de su facultad/dependencia.') }}</p>
                 @break
                 @case('viex_admin')
                 <p><strong>{{ __('Administrador VIEX') }}:</strong> {{ __('Asigna evaluadores, certifica trabajos finales y genera reportes. Es el rol de mayor autoridad en el proceso de extensión.') }}</p>

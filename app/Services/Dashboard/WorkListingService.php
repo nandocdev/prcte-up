@@ -137,8 +137,6 @@ class WorkListingService
             $query->visibleToProfessor($user);
         } elseif ($user->hasRole('coordinador_extension')) {
             $query->visibleToCoordinator($user);
-        } elseif ($user->hasRole('decano_director')) {
-            $query->visibleToDean($user);
         } elseif ($user->hasRole('viex_admin')) {
             $query->visibleToViex();
         }

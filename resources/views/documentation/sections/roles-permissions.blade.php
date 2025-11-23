@@ -72,34 +72,6 @@
             </div>
             
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 {{ auth()->user()->hasRole('decano_director') ? 'border-warning' : 'border-secondary' }}">
-                    <div class="card-header {{ auth()->user()->hasRole('decano_director') ? 'bg-warning text-white' : 'bg-light' }}">
-                        <h5 class="mb-0">
-                            <i class="fas fa-university"></i> Decano/Director
-                            @if(auth()->user()->hasRole('decano_director'))
-                                <span class="badge badge-light text-warning ml-2">Tu Rol</span>
-                            @endif
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            <strong>Función Principal:</strong> Aprobar trabajos a nivel de facultad/centro.
-                        </p>
-                        <h6>Responsabilidades:</h6>
-                        <ul class="small">
-                            <li>Revisar trabajos aprobados por coordinadores</li>
-                            <li>Aprobar y tramitar trabajos hacia VIEX</li>
-                            <li>Devolver trabajos con observaciones</li>
-                            <li>Generar reportes institucionales</li>
-                            <li>Supervisar coordinadores de extensión</li>
-                        </ul>
-                        <h6>Alcance:</h6>
-                        <p class="small text-muted">Ve trabajos de toda su facultad o centro.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6 mb-4">
                 <div class="card h-100 {{ auth()->user()->hasRole('viex_admin') ? 'border-danger' : 'border-secondary' }}">
                     <div class="card-header {{ auth()->user()->hasRole('viex_admin') ? 'bg-danger text-white' : 'bg-light' }}">
                         <h5 class="mb-0">
@@ -197,8 +169,7 @@
                         <th>Funcionalidad</th>
                         <th class="text-center">Profesor</th>
                         <th class="text-center">Coordinador</th>
-                        <th class="text-center">Decano</th>
-                        <th class="text-center">VIEX</th>
+
                         <th class="text-center">Evaluador</th>
                         <th class="text-center">Super Admin</th>
                     </tr>

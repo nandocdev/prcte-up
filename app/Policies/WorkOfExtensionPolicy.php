@@ -50,20 +50,6 @@ class WorkOfExtensionPolicy {
                 in_array($workStatusName, $coordinatorStatuses);
         }
 
-        // Decano puede ver trabajos de su facultad en estados relevantes
-        if ($user->hasRole('decano_director')) {
-            $unitId = (int) $user->getAttribute('main_organizational_unit_id');
-            $unitIds = \App\Models\OrganizationalUnit::descendantIds($unitId);
-
-            $deanStatuses = \App\Models\WorkOfExtension::DEAN_STATUS_NAMES;
-
-            $workUnitId = (int) $workOfExtension->getAttribute('organizational_unit_id');
-            $workStatusName = $workOfExtension->currentStatus?->getAttribute('name');
-
-            return in_array($workUnitId, $unitIds) &&
-                in_array($workStatusName, $deanStatuses);
-        }
-
         // VIEX puede ver trabajos en estados VIEX
         if ($user->hasRole('viex_admin')) {
             $viexStatuses = \App\Models\WorkOfExtension::VIEX_STATUS_NAMES;
@@ -168,13 +154,6 @@ class WorkOfExtensionPolicy {
     }
 
     /**
-     * Determine whether the user can review as dean/director.
-     */
-    public function reviewAsDean(User $user, WorkOfExtension $workOfExtension): bool {
-        return $user->hasRole('decano_director') || $user->hasRole('super_admin');
-    }
-
-    /**
      * Determine whether the user can review as VIEX.
      */
     public function reviewAsViex(User $user, WorkOfExtension $workOfExtension): bool {
@@ -214,41 +193,6 @@ class WorkOfExtensionPolicy {
         // TODO: Validar que el coordinador sea de la misma unidad organizacional
         // Por ahora permitimos a cualquier coordinador
         return true;
-    }
-
-    /**
-     * Determine whether the user can approve as dean/director.
-     */
-    public function approveAsDean(User $user, WorkOfExtension $workOfExtension): bool {
-        // Solo decanos/directores o super admin
-        if (!$user->hasAnyRole(['decano_director', 'super_admin'])) {
-            return false;
-        }
-
-        // TODO: Validar que el decano/director sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier decano/director
-        return true;
-    }
-
-    /**
-     * Determine whether the user can request changes as dean/director.
-     */
-    public function requestChangesAsDean(User $user, WorkOfExtension $workOfExtension): bool {
-        // Solo decanos/directores o super admin
-        if (!$user->hasAnyRole(['decano_director', 'super_admin'])) {
-            return false;
-        }
-
-        // TODO: Validar que el decano/director sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier decano/director
-        return true;
-    }
-
-    /**
-     * Determine whether the user can manage dean/director workflow.
-     */
-    public function manageDeanDirectorWorkflow(User $user): bool {
-        return $user->hasRole('decano_director') || $user->hasRole('super_admin');
     }
 
     /**

@@ -40,18 +40,6 @@ class UserSeeder extends Seeder {
                 'role' => 'viex_admin'
             ],
 
-            // === DECANO/DIRECTOR ===
-            [
-                'name' => 'Dr. Ana Patricia Herrera',
-                'email' => 'ana.herrera@up.ac.pa',
-                'password' => Hash::make('dean2025'),
-                'cedula' => '8-333-3333',
-                'professor_code' => 'FI001',
-                'main_organizational_unit_id' => 201, // Facultad de Ingeniería
-                'is_active' => true,
-                'role' => 'decano_director'
-            ],
-
             // === COORDINADOR DE EXTENSIÓN ===
             [
                 'name' => 'Prof. Luis Fernando García',
@@ -101,7 +89,6 @@ class UserSeeder extends Seeder {
         echo "🔐 Credenciales de acceso:\n";
         echo "Super Admin: admin@up.ac.pa / admin123\n";
         echo "VIEX Admin: maria.vasquez@up.ac.pa / viex2025\n";
-        echo "Decano Ingeniería: ana.herrera@up.ac.pa / dean2025\n";
         echo "Coord. Ext. Ingeniería: luis.garcia@up.ac.pa / coord2025\n";
         echo "Profesor: alejandra.morales@up.ac.pa / prof2025\n";
     }

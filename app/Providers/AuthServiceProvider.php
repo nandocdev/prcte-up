@@ -33,10 +33,6 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasRole('viex_admin') || $user->hasRole('super_admin');
         });
 
-        Gate::define('manage-dean', function ($user) {
-            return $user->hasRole('decano_director') || $user->hasRole('super_admin');
-        });
-
         Gate::define('coordinate-works', function ($user) {
             return $user->hasRole('coordinador_extension') || $user->hasRole('super_admin');
         });
