@@ -6,6 +6,7 @@ use App\Models\CoordinatorChecklist;
 use App\Services\WorkOfExtension\ApproveWorkService;
 use App\Services\WorkOfExtension\RejectWorkService;
 use App\Services\Dashboard\CoordinatorDashboardService;
+use App\Http\Requests\RequestChangesByCoordinatorRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -179,7 +180,7 @@ class CoordinatorController extends Controller {
     /**
      * CU07: Solicitar subsanaciones al profesor
      */
-    public function requestChanges(Request $request, WorkOfExtension $work): RedirectResponse {
+    public function requestChanges(RequestChangesByCoordinatorRequest $request, WorkOfExtension $work): RedirectResponse {
         // Validar permisos de coordinador
         $this->validateCoordinatorPermissions($request);
 
@@ -192,15 +193,6 @@ class CoordinatorController extends Controller {
                 ->route('coordinator.dashboard')
                 ->with('error', __('No puede solicitar cambios a este trabajo en su estado actual.'));
         }
-
-        // Validar que se proporcionaron comentarios
-        $request->validate([
-            'comments' => 'required|string|min:10|max:1000'
-        ], [
-            'comments.required' => 'Debe proporcionar comentarios explicando las subsanaciones requeridas.',
-            'comments.min' => 'Los comentarios deben tener al menos 10 caracteres.',
-            'comments.max' => 'Los comentarios no pueden exceder 1000 caracteres.'
-        ]);
 
         try {
             // Lógica de negocio delegada al servicio
