@@ -161,7 +161,7 @@ class CoordinatorController extends Controller {
 
             return redirect()
                 ->route('coordinator.show', $work)
-                ->with('success', __('Trabajo aprobado y enviado al Decano/Director para revisión.'));
+                ->with('success', __('Trabajo aprobado y enviado directamente a VIEX para evaluación.'));
 
         } catch (\Exception $e) {
             Log::error('Error al aprobar trabajo', [

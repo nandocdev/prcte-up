@@ -14,10 +14,10 @@ use Illuminate\Notifications\Notification;
  * Notification: Trabajo de Extensión Aprobado por Coordinador
  *
  * Notifica a los destinatarios que un trabajo ha sido aprobado por el
- * coordinador de extensión y enviado al siguiente nivel (Decano/Director).
+ * coordinador de extensión y enviado directamente a VIEX para evaluación.
  *
  * Destinatarios:
- * - Decano/Director (debe revisar y aprobar)
+ * - Usuarios VIEX (deben revisar y aprobar/certificar)
  * - Profesor (informado del progreso)
  *
  * @package App\Notifications
@@ -37,7 +37,7 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
     protected ?string $comments;
 
     /**
-     * Tipo de destinatario: 'dean' o 'professor'.
+     * Tipo de destinatario: 'viex' o 'professor'.
      */
     protected string $recipientType;
 
@@ -46,7 +46,7 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
      *
      * @param WorkOfExtension $work El trabajo aprobado
      * @param string|null $comments Comentarios del coordinador
-     * @param string $recipientType Tipo de destinatario ('dean' o 'professor')
+     * @param string $recipientType Tipo de destinatario ('viex' o 'professor')
      */
     public function __construct(WorkOfExtension $work, ?string $comments, string $recipientType)
     {
@@ -77,25 +77,25 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
         // Cargar relaciones necesarias
         $this->work->load(['workType', 'responsibleUser', 'organizationalUnit']);
 
-        if ($this->recipientType === 'dean') {
-            return $this->buildDeanEmail($notifiable);
+        if ($this->recipientType === 'viex') {
+            return $this->buildViexEmail($notifiable);
         }
 
         return $this->buildProfessorEmail($notifiable);
     }
 
     /**
-     * Construir el email para el Decano/Director.
+     * Construir el email para usuarios VIEX.
      *
      * @param object $notifiable El objeto notificable
      * @return MailMessage
      */
-    private function buildDeanEmail(object $notifiable): MailMessage
+    private function buildViexEmail(object $notifiable): MailMessage
     {
         $mail = (new MailMessage())
-            ->subject(__('Trabajo de Extensión Aprobado por Coordinador - Requiere su Revisión'))
-            ->greeting(__('Estimado/a Decano/Director'))
-            ->line(__('Un trabajo de extensión ha sido aprobado por el coordinador y requiere su revisión y aprobación.'))
+            ->subject(__('Trabajo de Extensión Aprobado por Coordinador - Listo para Evaluación VIEX'))
+            ->greeting(__('Estimado/a Evaluador VIEX'))
+            ->line(__('Un trabajo de extensión ha sido aprobado por el coordinador y está listo para evaluación final por VIEX.'))
             ->line(__('**Título:** :title', ['title' => $this->work->getAttribute('title')]))
             ->line(__('**Tipo de Trabajo:** :type', [
                 'type' => $this->work->workType?->getAttribute('name') ?? 'N/A',
@@ -112,8 +112,8 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
                 ->line($this->comments);
         }
 
-        $mail->line(__('El trabajo está ahora pendiente de su revisión y aprobación para ser enviado a VIEX.'))
-            ->action(__('Revisar Trabajo en Sistema'), route('dean.show', $this->work))
+        $mail->line(__('El trabajo está ahora listo para su evaluación y certificación final.'))
+            ->action(__('Revisar Trabajo en Sistema'), route('viex.show', $this->work))
             ->line(__('Por favor, revise el trabajo a la brevedad posible.'))
             ->salutation(__('Cordialmente,') . "\n" . __('Sistema VIEX - Universidad de Panamá'));
 
@@ -131,19 +131,19 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
         $mail = (new MailMessage())
             ->subject(__('Su Trabajo de Extensión ha sido Aprobado por el Coordinador'))
             ->greeting(__('Estimado/a Profesor/a'))
-            ->line(__('Le informamos que su trabajo de extensión ha sido aprobado por el coordinador y enviado al Decano/Director para revisión.'))
+            ->line(__('Le informamos que su trabajo de extensión ha sido aprobado por el coordinador y enviado directamente a VIEX para evaluación final.'))
             ->line(__('**Título:** :title', ['title' => $this->work->getAttribute('title')]))
             ->line(__('**Tipo de Trabajo:** :type', [
                 'type' => $this->work->workType?->getAttribute('name') ?? 'N/A',
             ]))
-            ->line(__('**Estado Actual:** Enviado a Decano/Director'));
+            ->line(__('**Estado Actual:** Enviado a VIEX para evaluación'));
 
         if ($this->comments) {
             $mail->line(__('**Comentarios del Coordinador:**'))
                 ->line($this->comments);
         }
 
-        $mail->line(__('Su trabajo avanza en el proceso de revisión. Será notificado cuando el Decano/Director realice su evaluación.'))
+        $mail->line(__('Su trabajo ha sido enviado directamente a VIEX para evaluación final. Será notificado cuando VIEX complete su evaluación.'))
             ->action(__('Ver Detalles del Trabajo'), route('works.show', $this->work))
             ->salutation(__('Cordialmente,') . "\n" . __('Sistema VIEX - Universidad de Panamá'));
 
@@ -158,11 +158,11 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
      */
     public function toArray(object $notifiable): array
     {
-        $message = $this->recipientType === 'dean'
-            ? __('Trabajo aprobado por coordinador, requiere su revisión: :title', [
+        $message = $this->recipientType === 'viex'
+            ? __('Trabajo aprobado por coordinador, listo para evaluación VIEX: :title', [
                 'title' => $this->work->getAttribute('title'),
             ])
-            : __('Su trabajo ha sido aprobado por el coordinador: :title', [
+            : __('Su trabajo ha sido aprobado por el coordinador y enviado a VIEX: :title', [
                 'title' => $this->work->getAttribute('title'),
             ]);
 
@@ -172,8 +172,8 @@ class WorkApprovedByCoordinatorNotification extends Notification implements Shou
             'work_title' => $this->work->getAttribute('title'),
             'coordinator_comments' => $this->comments,
             'recipient_type' => $this->recipientType,
-            'action_url' => $this->recipientType === 'dean'
-                ? url()->route('dean.show', $this->work)
+            'action_url' => $this->recipientType === 'viex'
+                ? url()->route('viex.show', $this->work)
                 : url()->route('works.show', $this->work),
             'message' => $message,
         ];

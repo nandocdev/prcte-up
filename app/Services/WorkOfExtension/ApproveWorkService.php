@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Log;
 class ApproveWorkService
 {
     /**
-     * Aprobar trabajo por coordinador y enviarlo a Decano/Director
-     * CU08: Avalar y remitir a Decano/Director
+     * Aprobar trabajo por coordinador y enviarlo directamente a VIEX
+     * CU08: Avalar y remitir directamente a VIEX
      */
     public function approveByCoordinator(WorkOfExtension $work, User $coordinator, ?string $comments = null): WorkOfExtension
     {
@@ -35,18 +35,18 @@ class ApproveWorkService
                 );
             }
 
-            // Cambiar a estado "Enviado a Decano/Director"
-            $approvedStatus = WorkStatus::where('name', 'Enviado a Decano/Director')->firstOrFail();
+            // Cambiar directamente a estado "Enviado a VIEX"
+            $approvedStatus = WorkStatus::where('name', 'Enviado a VIEX')->firstOrFail();
 
-            $work->changeStatus($approvedStatus, $coordinator, $comments ?? 'Trabajo aprobado por el coordinador de extensión.');
+            $work->changeStatus($approvedStatus, $coordinator, $comments ?? 'Trabajo aprobado por el coordinador de extensión y enviado directamente a VIEX.');
 
-            Log::info('Trabajo aprobado por coordinador', [
+            Log::info('Trabajo aprobado por coordinador y enviado a VIEX', [
                 'work_id' => $work->getKey(),
                 'coordinator_id' => $coordinator->getKey(),
-                'new_status' => 'Enviado a Decano/Director'
+                'new_status' => 'Enviado a VIEX'
             ]);
 
-            // Disparar evento para notificar al Decano/Director y Profesor
+            // Disparar evento para notificar a VIEX y Profesor
             WorkApprovedByCoordinator::dispatch($work, $coordinator, $comments);
 
             DB::commit();

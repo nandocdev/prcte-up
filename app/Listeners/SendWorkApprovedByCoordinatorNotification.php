@@ -44,19 +44,20 @@ class SendWorkApprovedByCoordinatorNotification implements ShouldQueue
             'coordinator_name' => $coordinator->getAttribute('name'),
         ]);
 
-        // 1. Notificar al Decano/Director
-        $dean = $this->findDean($work);
-        if ($dean) {
-            $dean->notify(new WorkApprovedByCoordinatorNotification($work, $comments, 'dean'));
-            Log::info('Notificación enviada a Decano/Director', [
+        // 1. Notificar a usuarios VIEX
+        $viexUsers = $this->findViexUsers();
+        foreach ($viexUsers as $viexUser) {
+            $viexUser->notify(new WorkApprovedByCoordinatorNotification($work, $comments, 'viex'));
+            Log::info('Notificación enviada a usuario VIEX', [
                 'work_id' => $work->getKey(),
-                'dean_id' => $dean->getKey(),
-                'dean_name' => $dean->getAttribute('name'),
+                'viex_id' => $viexUser->getKey(),
+                'viex_name' => $viexUser->getAttribute('name'),
             ]);
-        } else {
-            Log::warning('No se encontró Decano/Director para notificar', [
+        }
+
+        if ($viexUsers->isEmpty()) {
+            Log::warning('No se encontraron usuarios VIEX para notificar', [
                 'work_id' => $work->getKey(),
-                'organizational_unit_id' => $work->getAttribute('organizational_unit_id'),
             ]);
         }
 
@@ -77,33 +78,15 @@ class SendWorkApprovedByCoordinatorNotification implements ShouldQueue
     }
 
     /**
-     * Buscar al Decano/Director de la unidad organizacional del trabajo.
+     * Buscar usuarios VIEX para notificar.
      *
-     * Busca primero en la unidad organizacional padre. Si no hay usuario
-     * con rol 'decano_director', busca en la propia unidad.
+     * Busca todos los usuarios con rol 'viex' que estén activos.
      *
-     * @param \App\Models\WorkOfExtension $work El trabajo aprobado
-     * @return \App\Models\User|null El Decano/Director o null si no se encuentra
+     * @return \Illuminate\Database\Eloquent\Collection Usuarios VIEX
      */
-    private function findDean($work): ?\App\Models\User
+    private function findViexUsers()
     {
-        $organizationalUnit = $work->organizationalUnit;
-
-        if (!$organizationalUnit) {
-            return null;
-        }
-
-        // Intentar buscar en la unidad padre (Facultad)
-        $parentUnit = $organizationalUnit->parent;
-        if ($parentUnit) {
-            $dean = $parentUnit->users()->role('decano_director')->first();
-            if ($dean) {
-                return $dean;
-            }
-        }
-
-        // Si no hay usuario en la unidad padre, buscar en la unidad actual
-        return $organizationalUnit->users()->role('decano_director')->first();
+        return \App\Models\User::role('viex')->active()->get();
     }
 
     /**

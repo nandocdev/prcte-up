@@ -14,10 +14,10 @@ use Illuminate\Queue\SerializesModels;
  * Event: Trabajo de Extensión Aprobado por Coordinador
  *
  * Se dispara cuando un Coordinador de Extensión aprueba un trabajo y lo envía
- * al Decano/Director para revisión (CU7 - Flujo Principal).
+ * directamente a VIEX para evaluación final (CU-COORD-004 - Flujo Principal).
  *
  * Destinatarios de notificaciones:
- * - Decano/Director de la unidad organizacional (debe revisar y aprobar)
+ * - Usuarios VIEX (deben revisar y aprobar/certificar)
  * - Profesor responsable (informado del progreso)
  *
  * @package App\Events

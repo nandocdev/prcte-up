@@ -18,8 +18,8 @@
                         <i class="fas fa-info-circle"></i>
                         <strong>Confirmación de Aprobación</strong>
                         <p class="mb-0 mt-2">
-                            Al aprobar este trabajo, será enviado automáticamente al Decano/Director de la unidad organizacional para su revisión. 
-                            Se notificará por email al Decano/Director y al profesor responsable.
+                            Al aprobar este trabajo, será enviado automáticamente a VIEX para evaluación final. 
+                            Se notificará por email a VIEX y al profesor responsable.
                         </p>
                     </div>
 
@@ -59,9 +59,9 @@
                             id="approval_comments" 
                             class="form-control" 
                             rows="4"
-                            placeholder="Puede agregar comentarios sobre la aprobación, observaciones positivas, o recomendaciones para el Decano/Director..."></textarea>
+                            placeholder="Puede agregar comentarios sobre la aprobación, observaciones positivas, o recomendaciones para VIEX..."></textarea>
                         <small class="form-text text-muted">
-                            Estos comentarios serán visibles para el Decano/Director y el profesor.
+                            Estos comentarios serán visibles para VIEX y el profesor.
                         </small>
                     </div>
 
@@ -69,7 +69,7 @@
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="confirm_approve" required>
                         <label class="custom-control-label" for="confirm_approve">
-                            <strong>Confirmo que he revisado completamente este trabajo y considero que cumple con los requisitos para ser enviado al Decano/Director.</strong>
+                            <strong>Confirmo que he revisado completamente este trabajo y considero que cumple con los requisitos para ser enviado a VIEX.</strong>
                         </label>
                     </div>
                 </div>
