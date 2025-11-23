@@ -183,7 +183,7 @@ class CoordinatorDashboardService
 
         return [
             'work_types' => \App\Models\WorkType::where('is_active', true)->get(),
-            'professors' => \App\Models\User::whereHas('worksOfExtension', function ($query) use ($unitId) {
+            'professors' => User::whereHas('workOfExtensions', function ($query) use ($unitId) {
                 $query->where('organizational_unit_id', $unitId);
             })->distinct()->get(['id', 'name']),
             'statuses' => \App\Models\WorkStatus::whereIn('name', [
