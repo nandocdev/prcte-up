@@ -125,7 +125,9 @@ class CoordinatorController extends Controller {
             'user' => $user,
             'canApprove' => $dashboardService->canApproveWork($work),
             'canRequestChanges' => $dashboardService->canRequestChanges($work),
-            'checklist' => $checklist
+            'checklist' => $checklist,
+            'checklistCriteria' => $checklist->getCriteriaWithNames(),
+            'checklistComplete' => $checklist->isComplete(),
         ]);
     }
 
@@ -144,6 +146,14 @@ class CoordinatorController extends Controller {
             return redirect()
                 ->route('coordinator.dashboard')
                 ->with('error', __('No puede aprobar este trabajo en su estado actual.'));
+        }
+
+        // Validar que el checklist esté completo
+        $checklist = CoordinatorChecklist::getOrCreateForWork($work, $user);
+        if (!$checklist->isComplete()) {
+            return redirect()
+                ->route('coordinator.show', $work)
+                ->with('error', __('Debe completar todos los criterios de evaluación antes de aprobar el trabajo.'));
         }
 
         // Validar comentarios opcionales

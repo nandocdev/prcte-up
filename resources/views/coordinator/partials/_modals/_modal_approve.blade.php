@@ -14,6 +14,26 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    {{-- Estado del Checklist --}}
+                    @if(!$checklistComplete)
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Checklist incompleto</strong>
+                            <p class="mb-0 mt-2">
+                                El checklist de evaluación no está completo. Debe completar todos los criterios antes de aprobar el trabajo.
+                                <br><small>Complete el checklist en el panel lateral derecho antes de proceder.</small>
+                            </p>
+                        </div>
+                    @else
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Checklist completo</strong>
+                            <p class="mb-0 mt-2">
+                                Ha completado todos los criterios de evaluación requeridos para este tipo de trabajo.
+                            </p>
+                        </div>
+                    @endif
+
                     <div class="alert alert-success">
                         <i class="fas fa-info-circle"></i>
                         <strong>Confirmación de Aprobación</strong>

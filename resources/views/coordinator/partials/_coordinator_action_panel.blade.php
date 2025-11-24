@@ -73,11 +73,15 @@
                 <div class="btn-group-vertical w-100" role="group">
                     {{-- Aprobar Trabajo --}}
                     <button type="button" 
-                            class="btn btn-success btn-lg mb-2" 
+                            class="btn btn-success btn-lg mb-2 {{ !$checklistComplete ? 'disabled' : '' }}" 
                             data-toggle="modal" 
-                            data-target="#approveModal">
+                            data-target="#approveModal"
+                            {{ !$checklistComplete ? 'title="Complete el checklist antes de aprobar"' : '' }}>
                         <i class="fas fa-check-circle mr-2"></i>
                         Aprobar y Enviar al Decano/Director
+                        @if(!$checklistComplete)
+                            <i class="fas fa-exclamation-triangle ml-2" title="Checklist incompleto"></i>
+                        @endif
                     </button>
 
                     {{-- Solicitar Subsanaciones --}}
