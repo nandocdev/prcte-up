@@ -197,9 +197,11 @@ class WorkOfExtensionPolicy {
             return false;
         }
 
-        // TODO: Validar que el coordinador sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier coordinador
-        return true;
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        return $this->userBelongsToWorkUnit($user, $workOfExtension);
     }
 
     /**
@@ -211,9 +213,11 @@ class WorkOfExtensionPolicy {
             return false;
         }
 
-        // TODO: Validar que el coordinador sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier coordinador
-        return true;
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        return $this->userBelongsToWorkUnit($user, $workOfExtension);
     }
 
     /**
@@ -225,9 +229,11 @@ class WorkOfExtensionPolicy {
             return false;
         }
 
-        // TODO: Validar que el decano/director sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier decano/director
-        return true;
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        return $this->userBelongsToWorkUnit($user, $workOfExtension);
     }
 
     /**
@@ -239,9 +245,22 @@ class WorkOfExtensionPolicy {
             return false;
         }
 
-        // TODO: Validar que el decano/director sea de la misma unidad organizacional
-        // Por ahora permitimos a cualquier decano/director
-        return true;
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        return $this->userBelongsToWorkUnit($user, $workOfExtension);
+    }
+
+    /**
+     * Check whether the user's organizational unit covers the work's unit.
+     */
+    private function userBelongsToWorkUnit(User $user, WorkOfExtension $workOfExtension): bool {
+        $unitId = (int) $user->getAttribute('main_organizational_unit_id');
+        $unitIds = \App\Models\OrganizationalUnit::descendantIds($unitId);
+        $workUnitId = (int) $workOfExtension->getAttribute('organizational_unit_id');
+
+        return in_array($workUnitId, $unitIds, true);
     }
 
     /**

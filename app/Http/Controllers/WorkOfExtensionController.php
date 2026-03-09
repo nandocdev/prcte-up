@@ -161,27 +161,13 @@ class WorkOfExtensionController extends Controller {
      */
     public function store(StoreCompleteWorkRequest $request): RedirectResponse {
         try {
-            // Log para debug
-            Log::info('Iniciando creación de trabajo', [
-                'user_id' => $request->user()->getKey(),
-                'has_files' => $request->hasFile('attachments')
-            ]);
-
             // Obtener datos validados del Form Request
             $validated = $request->getValidatedData();
-
-            // Log datos validados
-            Log::info('Datos validados', $validated);
 
             // Lógica de negocio delegada al modelo
             $work = WorkOfExtension::createFromCompleteRequest($validated, $request->user());
 
-            // Log trabajo creado
-            Log::info('Trabajo creado', ['work_id' => $work->getKey()]);
-
-            // evalúa si la respuesta de la logica de negocios es satisfactoria
             if (!$work) {
-                Log::error('Error: trabajo no se creó correctamente');
                 return redirect()
                     ->route('works.create')
                     ->with('error', __('Error al registrar el trabajo de extensión.'));
@@ -189,25 +175,22 @@ class WorkOfExtensionController extends Controller {
 
             // Manejar archivos adjuntos si existen
             if ($request->hasFile('attachments')) {
-                Log::info('Procesando archivos adjuntos');
                 $work->handleAttachments($request->file('attachments'));
             }
-
-            Log::info('Trabajo guardado exitosamente', ['work_id' => $work->getKey()]);
 
             return redirect()
                 ->route('works.show', $work)
                 ->with('success', __('Trabajo de extensión registrado exitosamente.'));
 
         } catch (\Exception $e) {
-            Log::error('Error en store method', [
+            Log::error('Error al registrar trabajo de extensión', [
+                'user_id' => $request->user()->getKey(),
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()
                 ->route('works.create')
-                ->with('error', __('Error al procesar el formulario: ') . $e->getMessage());
+                ->with('error', __('Error al procesar el formulario. Por favor, inténtalo de nuevo.'));
         }
     }
 
@@ -290,36 +273,8 @@ class WorkOfExtensionController extends Controller {
                 ->with('error', __('Solo se pueden actualizar trabajos en estado borrador.'));
         }
 
-        // Log para debug detallado
-        Log::info('Actualizando trabajo de extensión', [
-            'work_id' => $work->getKey(),
-            'user_id' => $request->user()->getKey(),
-            'work_type_id' => $request->input('work_type_id'),
-            'activity_type' => $request->input('activity_type'),
-            'modality' => $request->input('modality'),
-            'all_input' => $request->except(['attachments', '_token']),
-            'validation_data' => $request->getValidatedData()
-        ]);
-
         try {
-            // Debug: Capturar todos los datos de entrada ANTES de validación
-            Log::info('DEBUG: Datos RAW recibidos', [
-                'all_data' => $request->all(),
-                'activity_type_raw' => $request->input('activity_type'),
-                'modality_raw' => $request->input('modality')
-            ]);
-
-            // Intentar obtener datos validados y capturar cualquier error
-            try {
-                $validatedData = $request->getValidatedData();
-                Log::info('DEBUG: Datos validados exitosamente', $validatedData);
-            } catch (\Exception $validationError) {
-                Log::error('DEBUG: Error en validación', [
-                    'message' => $validationError->getMessage(),
-                    'errors' => $request->errors ?? 'N/A'
-                ]);
-                throw $validationError;
-            }
+            $validatedData = $request->getValidatedData();
 
             // Manejar eliminación de archivos antes de la actualización
             if ($request->filled('remove_media')) {
@@ -328,7 +283,6 @@ class WorkOfExtensionController extends Controller {
                     $media = $work->getMedia('attachments')->where('id', $mediaId)->first();
                     if ($media) {
                         $media->delete();
-                        Log::info('Archivo eliminado', ['media_id' => $mediaId, 'work_id' => $work->getKey()]);
                     }
                 }
             }
