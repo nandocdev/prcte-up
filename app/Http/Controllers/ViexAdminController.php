@@ -22,16 +22,14 @@ use Illuminate\Support\Str;
  */
 class ViexAdminController extends Controller {
 
+    public function __construct() {
+        $this->middleware(['auth', 'role:viex_admin|super_admin']);
+    }
+
     /**
      * CU12: Listado de trabajos en VIEX - Recibir trabajos de Unidades Académicas
      */
     public function index(Request $request) {
-        // Verificar autorización básica
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
-
         try {
             $query = WorkOfExtension::with(['workType', 'primaryResponsible', 'organizationalUnit', 'currentStatus'])
                 ->whereHas('currentStatus', function ($q) {
@@ -84,7 +82,7 @@ class ViexAdminController extends Controller {
                 });
             }
 
-            $works = $query->orderBy('updated_at', 'desc')->paginate(20);
+            $works = $query->orderBy('updated_at', 'desc')->orderBy('id', 'desc')->paginate(20);
 
             // Datos para filtros
             $workTypes = \App\Models\WorkType::all();
@@ -112,12 +110,6 @@ class ViexAdminController extends Controller {
      * para su evaluación final y certificación.
      */
     public function dashboard() {
-        // Verificar autorización
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
-
         try {
             // Obtener trabajos en estado "Enviado a VIEX"
             $pendingWorks = WorkOfExtension::with(['workType', 'primaryResponsible', 'organizationalUnit', 'currentStatus'])
@@ -213,10 +205,7 @@ class ViexAdminController extends Controller {
      * evaluar y emitir dictamen.
      */
     public function show(WorkOfExtension $work) {
-        // Verificación básica de autorización - se asume que middleware ya verificó permisos VIEX
-        if (!Auth::user()) {
-            abort(403, 'No tiene permisos para acceder a este trabajo.');
-        }
+        $this->authorize('viewAsViex', $work);
 
         try {
             // Cargar relaciones necesarias
@@ -278,10 +267,7 @@ class ViexAdminController extends Controller {
      * a "En Evaluación VIEX".
      */
     public function assignEvaluator(Request $request, WorkOfExtension $work) {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
+        $this->authorize('assignEvaluator', $work);
 
         $request->validate([
             'evaluator_id' => 'required|exists:users,id',
@@ -311,7 +297,7 @@ class ViexAdminController extends Controller {
 
             // Usar método del modelo para asignar evaluador
             $instructions = $request->input('evaluation_instructions');
-            $work->assignToEvaluator($evaluator, $user, $instructions);
+            $work->assignToEvaluator($evaluator, Auth::user(), $instructions);
 
             DB::commit();
 
@@ -344,10 +330,7 @@ class ViexAdminController extends Controller {
      * Evalúa positivamente el trabajo y lo marca para certificación.
      */
     public function approve(Request $request, WorkOfExtension $work) {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
+        $this->authorize('approveAsViex', $work);
 
         $request->validate([
             'evaluation_comments' => 'nullable|string|max:2000',
@@ -360,7 +343,7 @@ class ViexAdminController extends Controller {
             // Usar método del modelo para aprobar
             $evaluationComments = $request->input('evaluation_comments');
             $recommendations = $request->input('recommendations');
-            $work->approveByViex($user, $evaluationComments, $recommendations);
+            $work->approveByViex(Auth::user(), $evaluationComments, $recommendations);
 
             DB::commit();
 
@@ -392,10 +375,7 @@ class ViexAdminController extends Controller {
      * Evalúa negativamente el trabajo y lo rechaza con observaciones.
      */
     public function reject(Request $request, WorkOfExtension $work) {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
+        $this->authorize('rejectAsViex', $work);
 
         $request->validate([
             'rejection_reason' => 'required|string|min:10|max:2000',
@@ -412,7 +392,7 @@ class ViexAdminController extends Controller {
             // Usar método del modelo para rechazar
             $rejectionReason = $request->input('rejection_reason');
             $recommendations = $request->input('recommendations');
-            $work->rejectByViex($user, $rejectionReason, $recommendations);
+            $work->rejectByViex(Auth::user(), $rejectionReason, $recommendations);
 
             DB::commit();
 
@@ -444,10 +424,7 @@ class ViexAdminController extends Controller {
      * Genera la certificación oficial del trabajo de extensión.
      */
     public function certify(Request $request, WorkOfExtension $work) {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
+        $this->authorize('approveAndCertifyAsViex', $work);
 
         $request->validate([
             'certification_number' => 'nullable|string|max:50',
@@ -474,7 +451,7 @@ class ViexAdminController extends Controller {
             $validityYears = $request->input('certificate_validity_years') ?? 5;
 
             $certification = $work->generateCertification(
-                $user,
+                Auth::user(),
                 $certificationNumber,
                 $certificationComments,
                 $validityYears
@@ -510,11 +487,6 @@ class ViexAdminController extends Controller {
      */
     public function downloadCertificate(Certification $certification)
     {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, __('certifications.unauthenticated'));
-        }
-
         $work = $certification->work;
 
         if (!$work) {
@@ -548,11 +520,6 @@ class ViexAdminController extends Controller {
      * Vista para gestión de evaluadores y estadísticas avanzadas
      */
     public function evaluators() {
-        // Verificación básica de autorización - se asume que middleware ya verificó permisos VIEX
-        if (!Auth::user()) {
-            abort(403, 'No tiene permisos para gestionar evaluadores.');
-        }
-
         try {
             // Obtener evaluadores activos
             $evaluators = User::role('viex_admin')
@@ -601,11 +568,6 @@ class ViexAdminController extends Controller {
      */
     public function generateReport(WorkOfExtension $work)
     {
-        $user = Auth::user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado.');
-        }
-
         // Verificar autorización
         $this->authorize('view', $work);
 

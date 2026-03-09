@@ -55,8 +55,7 @@ Route::middleware('auth')->group(function () {
         ->name('works.authorize-publication');
 
     // Rutas para Coordinador de Extensión (CU06, CU07, CU08)
-    // Usamos auth middleware y validación en el controlador para mejor control
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['role:coordinador_extension|super_admin'])->group(function () {
         Route::get('/coordinator', [CoordinatorController::class, 'dashboard'])->name('coordinator.dashboard');
         Route::get('/coordinator/works/{work}', [CoordinatorController::class, 'show'])->name('coordinator.show');
         Route::post('/coordinator/works/{work}/approve', [CoordinatorController::class, 'approve'])->name('coordinator.approve');
@@ -65,8 +64,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Rutas para Decano/Director (CU10, CU11)
-    // Usamos auth middleware y validación en el controlador para mejor control
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['role:decano_director|super_admin'])->group(function () {
         Route::get('/dean', [DeanDirectorController::class, 'dashboard'])->name('dean.dashboard');
         Route::get('/dean/works/{work}', [DeanDirectorController::class, 'show'])->name('dean.show');
         Route::post('/dean/works/{work}/approve', [DeanDirectorController::class, 'approve'])->name('dean.approve');
@@ -75,8 +73,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Rutas para VIEX Admin (CU12, CU13, CU14, CU15)
-    // Usamos auth middleware y validación en el controlador para mejor control
-    Route::middleware(['auth'])->prefix('viex')->name('viex.')->group(function () {
+    Route::middleware(['role:viex_admin|super_admin'])->prefix('viex')->name('viex.')->group(function () {
         Route::get('/', [ViexAdminController::class, 'index'])->name('index');
         Route::get('/dashboard', [ViexAdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/works/{work}', [ViexAdminController::class, 'show'])->name('show');
@@ -208,11 +205,6 @@ Route::middleware('auth')->group(function () {
             Route::post('/maintenance/optimize-database', [\App\Http\Controllers\Admin\SystemAuditController::class, 'optimizeDatabase'])->name('maintenance.optimize-database');
             Route::post('/maintenance/backup-system', [\App\Http\Controllers\Admin\SystemAuditController::class, 'backupSystem'])->name('maintenance.backup-system');
 
-            // Estadísticas y herramientas del sistema
-            Route::get('/system/statistics', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'userStatistics'])->name('system.statistics');
-            Route::get('/system/health', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'systemHealth'])->name('system.health');
-            Route::post('/system/clear-cache', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'clearCache'])->name('system.clear-cache');
-            Route::post('/system/optimize', [\App\Http\Controllers\Admin\AdvancedUserManagementController::class, 'optimizeSystem'])->name('system.optimize');
             Route::post('/users/{user}/assign-role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
             Route::delete('/users/{user}/remove-role', [UserManagementController::class, 'removeRole'])->name('users.remove-role');
             Route::post('/users/{user}/give-permission', [UserManagementController::class, 'givePermission'])->name('users.give-permission');
